@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Наша история</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Pacifico&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat&family=Pacifico&display=swap" rel="stylesheet">
 
 <style>
 *{box-sizing:border-box}
@@ -16,28 +16,38 @@
   --bgColor:#ffffff;
 }
 
-/* ===== ТЕТРАДЬ ===== */
+/* ===== BODY ===== */
 body{
   margin:0;
   min-height:100vh;
   font-family:Montserrat;
   font-size:var(--fontSize);
-  filter:brightness(var(--brightness));
-
   background-color:var(--bgColor);
   background-image:
     linear-gradient(#e5e5e5 1px, transparent 1px),
-    linear-gradient(90deg, #e5e5e5 1px, transparent 1px);
+    linear-gradient(90deg,#e5e5e5 1px, transparent 1px);
   background-size:24px 24px;
-
   padding:80px 20px 40px 70px;
+}
+
+/* ЯРКОСТЬ — БЕЗ ЛОМА */
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:#000;
+  opacity:calc(1 - var(--brightness));
+  pointer-events:none;
+  z-index:1;
 }
 
 /* красное поле */
 body::before{
   content:"";
   position:fixed;
-  top:0;bottom:0;left:45px;
+  left:45px;
+  top:0;
+  bottom:0;
   width:2px;
   background:#ff8fa3;
   z-index:0;
@@ -51,7 +61,7 @@ body::before{
   display:flex;
   align-items:center;
   justify-content:center;
-  z-index:3000;
+  z-index:5000;
 }
 .lock input{
   padding:15px 20px;
@@ -60,7 +70,7 @@ body::before{
   border:none;
 }
 
-/* ===== КНОПКА ☰ ===== */
+/* ===== ☰ ===== */
 .menu-btn{
   position:fixed;
   top:15px;
@@ -69,31 +79,25 @@ body::before{
   background:none;
   border:none;
   cursor:pointer;
-  z-index:2000;
+  z-index:4000;
 }
 
 /* ===== МЕНЮ ===== */
 .menu{
   position:fixed;
   top:0;
-  left:-260px;
-  width:260px;
+  left:-270px;
+  width:270px;
   height:100%;
   background:#fff;
-  box-shadow:4px 0 20px rgba(0,0,0,.25);
+  box-shadow:4px 0 25px rgba(0,0,0,.3);
   padding:20px;
-  transition:.3s;
-  z-index:1999;
+  transition:left .3s ease;
+  z-index:3999;
 }
 .menu.open{left:0}
 
 .menu h3{margin-top:0}
-
-.menu label{
-  display:block;
-  margin:12px 0 4px;
-  font-size:14px;
-}
 
 /* ===== ОСНОВНОЕ ===== */
 .app{
@@ -104,7 +108,7 @@ body::before{
   padding:30px;
   box-shadow:0 15px 30px rgba(0,0,0,.15);
   position:relative;
-  z-index:1;
+  z-index:2;
 }
 
 .header{
@@ -113,6 +117,7 @@ body::before{
   text-align:center;
 }
 
+/* ===== ГАЛЕРЕЯ ===== */
 .gallery{
   display:grid;
   grid-template-columns:repeat(4,1fr);
@@ -152,12 +157,6 @@ body::before{
   display:flex;
   justify-content:space-between;
 }
-.actions button{
-  border:none;
-  background:none;
-  cursor:pointer;
-  font-size:16px;
-}
 
 /* ===== ПРОСМОТР ===== */
 .overlay{
@@ -167,7 +166,7 @@ body::before{
   display:flex;
   align-items:center;
   justify-content:center;
-  z-index:4000;
+  z-index:6000;
 }
 .overlay img{max-width:90%;max-height:90%}
 </style>
@@ -188,12 +187,12 @@ body::before{
   <h3>⚙️ Настройки</h3>
 
   <label>Яркость</label>
-  <input type="range" min="0.7" max="1.3" step="0.05" oninput="setBrightness(this.value)">
+  <input type="range" min="0.5" max="1" step="0.05" oninput="setBrightness(this.value)">
 
   <label>Размер текста</label>
-  <input type="range" min="14" max="20" step="1" oninput="setFont(this.value)">
+  <input type="range" min="14" max="22" step="1" oninput="setFont(this.value)">
 
-  <label>Цвет фона</label>
+  <label>Цвет листа</label>
   <input type="color" oninput="setBg(this.value)">
 
   <hr>
@@ -204,6 +203,7 @@ body::before{
 <div class="app" id="app" style="display:none">
   <div class="header">Аделаида + Саша = вечность ✍️</div>
   <div id="counter"></div>
+
   <input type="file" multiple accept="image/*" onchange="addPhotos(event)">
   <div class="gallery" id="gallery"></div>
 </div>
@@ -218,7 +218,7 @@ const gallery=document.getElementById("gallery");
 /* ===== ПАРОЛЬ ===== */
 function checkPass(e){
   if(e.key==="Enter" && e.target.value===PASS){
-    lock.remove();            // ❗ полностью убираем
+    lock.remove();
     app.style.display="block";
   }
 }
@@ -231,21 +231,13 @@ function toggleMenu(){
 /* ===== НАСТРОЙКИ ===== */
 function setBrightness(v){
   document.documentElement.style.setProperty("--brightness",v);
-  localStorage.brightness=v;
 }
 function setFont(v){
   document.documentElement.style.setProperty("--fontSize",v+"px");
-  localStorage.fontSize=v;
 }
 function setBg(v){
   document.documentElement.style.setProperty("--bgColor",v);
-  localStorage.bgColor=v;
 }
-
-/* восстановление */
-if(localStorage.brightness) setBrightness(localStorage.brightness);
-if(localStorage.fontSize) setFont(localStorage.fontSize);
-if(localStorage.bgColor) setBg(localStorage.bgColor);
 
 /* ===== СЧЁТЧИК ===== */
 const start=new Date(2024,7,5);
@@ -304,6 +296,8 @@ render();
 
 </body>
 </html>
+
+
 
 
 
