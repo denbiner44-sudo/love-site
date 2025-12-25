@@ -15,7 +15,8 @@
   --fontSize:16px;
   --bgColor:#ffffff;
   --fontFamily:'Montserrat',sans-serif;
-  --textColor:#000;
+  --textColor:#000000;
+  --btnColor:#ff8fa3;
   --photoShadow:0 6px 18px rgba(0,0,0,.25);
   --photoSize:1;
   --photoBgColor:#fff;
@@ -93,11 +94,22 @@ body{
   padding:20px;
   transition:left .3s;
   z-index:3999;
+  overflow-y:auto;
 }
 
 .menu.open{left:0}
 .menu label{display:block;margin-top:10px;font-size:14px}
 .menu input,.menu select{width:100%}
+
+.menu button{
+  margin-top:10px;
+  width:100%;
+  padding:8px;
+  background:var(--btnColor);
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
 
 /* ===== APP ===== */
 .app{
@@ -149,6 +161,11 @@ body{
   background:transparent;
 }
 
+.actions{
+  display:flex;
+  justify-content:space-between;
+}
+
 /* ===== OVERLAY ===== */
 .overlay{
   position:fixed;
@@ -169,14 +186,12 @@ body{
 
 <body>
 
-<!-- LOCK -->
 <div class="lock" id="lock">
   <input type="password" placeholder="Пароль ❤️" onkeydown="checkPass(event)">
 </div>
 
 <button class="menu-btn" onclick="toggleMenu()">☰</button>
 
-<!-- MENU -->
 <div class="menu" id="menu">
   <h3>⚙️ Настройки</h3>
 
@@ -198,9 +213,22 @@ body{
 
   <label>Цвет текста</label>
   <input type="color" oninput="setTextColor(this.value)">
+
+  <label>Цвет кнопок</label>
+  <input type="color" oninput="setBtnColor(this.value)">
+
+  <label>Цвет фона фото</label>
+  <input type="color" oninput="setPhotoBgColor(this.value)">
+
+  <label>Размер фотографий</label>
+  <input type="range" min="0.5" max="1.5" step="0.05" oninput="setPhotoSize(this.value)">
+
+  <label>Тень фотографий</label>
+  <input type="color" oninput="setPhotoShadow(this.value)">
+
+  <button onclick="toggleHidden()">🔐 Скрытые фото</button>
 </div>
 
-<!-- APP -->
 <div class="app" id="app">
   <div class="header">Аделаида + Саша = вечность ❤️</div>
   <div id="counter"></div>
@@ -210,7 +238,6 @@ body{
 </div>
 
 <script>
-/* ===== PASSWORD ===== */
 const PASS="love";
 const lock=document.getElementById("lock");
 const app=document.getElementById("app");
@@ -227,21 +254,28 @@ function checkPass(e){
 
 function toggleMenu(){menu.classList.toggle("open")}
 
-/* ===== SETTINGS ===== */
+/* SETTINGS */
 function setBrightness(v){document.documentElement.style.setProperty("--brightness",v)}
 function setFont(v){document.documentElement.style.setProperty("--fontSize",v+"px")}
 function setBg(v){document.documentElement.style.setProperty("--bgColor",v)}
 function setFontFamily(v){document.documentElement.style.setProperty("--fontFamily",v)}
 function setTextColor(v){document.documentElement.style.setProperty("--textColor",v)}
+function setBtnColor(v){document.documentElement.style.setProperty("--btnColor",v)}
+function setPhotoBgColor(v){document.documentElement.style.setProperty("--photoBgColor",v)}
+function setPhotoSize(v){document.documentElement.style.setProperty("--photoSize",v)}
+function setPhotoShadow(v){
+  document.documentElement.style.setProperty("--photoShadow",`0 6px 18px ${v}80`)
+}
 
-/* ===== COUNTER ===== */
+/* COUNTER */
 const start=new Date(2024,7,5);
 setInterval(()=>{
   counter.innerText=`Мы вместе ${Math.floor((Date.now()-start)/86400000)} дней ❤️`;
 },1000);
 
-/* ===== PHOTOS ===== */
+/* PHOTOS */
 let photos=JSON.parse(localStorage.photos||"[]");
+let showHidden=false;
 
 function save(){localStorage.photos=JSON.stringify(photos)}
 
@@ -249,21 +283,27 @@ function addPhotos(e){
   for(let f of e.target.files){
     const r=new FileReader();
     r.onload=x=>{
-      photos.push({src:x.target.result,text:""});
+      photos.push({src:x.target.result,text:"",hidden:false});
       save();render();
     };
     r.readAsDataURL(f);
   }
 }
 
+function toggleHidden(){showHidden=!showHidden;render()}
+
 function render(){
   gallery.innerHTML="";
-  photos.forEach((p,i)=>{
+  photos.filter(p=>showHidden||!p.hidden).forEach((p,i)=>{
     const d=document.createElement("div");
     d.className="photo";
     d.innerHTML=`
       <img src="${p.src}" onclick="openImg('${p.src}')">
       <textarea oninput="photos[${i}].text=this.value;save()">${p.text}</textarea>
+      <div class="actions">
+        <button onclick="photos[${i}].hidden=!photos[${i}].hidden;save();render()">🙈</button>
+        <button onclick="photos.splice(${i},1);save();render()">✖</button>
+      </div>
     `;
     gallery.appendChild(d);
   });
@@ -279,7 +319,7 @@ function openImg(src){
 
 render();
 
-/* ===== SVG HEARTS ===== */
+/* SVG HEARTS */
 const HEART=`<svg viewBox="0 0 32 29.6" width="100%" height="100%">
 <path fill="#ff4d6d"
 d="M23.6,0c-3.4,0-6.4,2.1-7.6,5.1C14.8,2.1,11.8,0,8.4,0
@@ -307,6 +347,8 @@ setInterval(spawnHeart,400);
 
 </body>
 </html>
+
+
 
 
 
