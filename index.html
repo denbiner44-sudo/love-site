@@ -38,72 +38,49 @@
       position: relative;
     }
 
-    /* ЯРКОСТЬ — БЕЗ ЛОМА */
-    body::after{
-      content:"";
-      position:fixed;
-      inset:0;
-      background:#000;
-      opacity:calc(1 - var(--brightness));
-      pointer-events:none;
-      z-index:1;
-    }
-
-    /* красное поле */
-    body::before{
-      content:"";
-      position:fixed;
-      left:45px;
-      top:0;
-      bottom:0;
-      width:2px;
-      background:#ff8fa3;
-      z-index:0;
-    }
-
-    /* ЭФФЕКТ КЛЯКС НА ЛИСТЕ */
+    /* Эффект Клякс */
     .ink-blot {
       position: absolute;
       width: 100px;
       height: 100px;
       background: radial-gradient(circle, rgba(0, 0, 0, 0.5) 40%, rgba(0, 0, 0, 0) 70%);
       border-radius: 50%;
-      opacity: 0.3;
+      opacity: 0.4;
       pointer-events: none;
       animation: ink-blot-animation 5s infinite;
     }
 
-    /* Анимация клякс */
+    /* Анимация кляксы */
     @keyframes ink-blot-animation {
       0% {
         top: 10%;
         left: 30%;
         transform: scale(0.5);
-        opacity: 0.3;
+        opacity: 0.4;
       }
       25% {
         top: 30%;
         left: 50%;
         transform: scale(1);
-        opacity: 0.5;
+        opacity: 0.6;
       }
       50% {
         top: 50%;
         left: 70%;
         transform: scale(1.5);
-        opacity: 0.7;
+        opacity: 0.8;
       }
       75% {
         top: 70%;
         left: 20%;
         transform: scale(1.3);
-        opacity: 0.5;
+        opacity: 0.6;
       }
       100% {
         top: 90%;
         left: 40%;
         transform: scale(1);
-        opacity: 0.3;
+        opacity: 0.4;
       }
     }
 
@@ -425,6 +402,8 @@
 
 </body>
 </html>
+
+
 
 
 
