@@ -10,35 +10,33 @@
 <style>
 *{box-sizing:border-box}
 
-/* ====== ТЕТРАДЬ В КЛЕТКУ ====== */
+/* ====== НАСТОЯЩАЯ КЛЕТКА ====== */
 body{
   margin:0;
-  font-family:Montserrat;
   min-height:100vh;
+  font-family:Montserrat;
 
   background-color:#fff;
   background-image:
-    linear-gradient(to right, rgba(220,220,220,.6) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(220,220,220,.6) 1px, transparent 1px);
+    linear-gradient(#e5e5e5 1px, transparent 1px),
+    linear-gradient(90deg, #e5e5e5 1px, transparent 1px);
   background-size:24px 24px;
 
-  padding:80px 20px 40px 60px;
-  position:relative;
+  padding:80px 20px 40px 70px;
 }
 
 /* Красное поле */
 body::before{
   content:"";
   position:fixed;
-  left:40px;
   top:0;
   bottom:0;
+  left:45px;
   width:2px;
-  background:#ff9aa2;
-  opacity:.6;
+  background:#ff8fa3;
 }
 
-/* ====== ЭКРАН ПАРОЛЯ ====== */
+/* ====== ПАРОЛЬ ====== */
 .lock{
   position:fixed;
   inset:0;
@@ -49,9 +47,9 @@ body::before{
   z-index:1000;
 }
 .lock input{
-  padding:15px;
+  padding:15px 20px;
   font-size:18px;
-  border-radius:12px;
+  border-radius:14px;
   border:none;
 }
 
@@ -64,7 +62,6 @@ body::before{
   background:none;
   border:none;
   cursor:pointer;
-  z-index:900;
 }
 
 /* ====== КАРТОЧКА ====== */
@@ -72,35 +69,35 @@ body::before{
   max-width:900px;
   margin:auto;
   background:#fff;
-  border-radius:16px;
-  padding:25px;
-  box-shadow:0 10px 25px rgba(0,0,0,.15);
+  border-radius:18px;
+  padding:30px;
+  box-shadow:0 15px 30px rgba(0,0,0,.15);
 }
 
 .header{
   font-family:Pacifico;
-  font-size:28px;
+  font-size:30px;
   text-align:center;
 }
 
 #counter{
-  margin:10px 0 15px;
+  margin:12px 0 18px;
   font-size:16px;
 }
 
 /* ====== ГАЛЕРЕЯ ====== */
 .gallery{
-  margin-top:20px;
   display:grid;
   grid-template-columns:repeat(4,1fr);
-  gap:15px;
+  gap:18px;
+  margin-top:20px;
 }
 
 .photo{
   background:#fff;
   padding:8px;
   border-radius:6px;
-  box-shadow:0 6px 15px rgba(0,0,0,.2);
+  box-shadow:0 6px 18px rgba(0,0,0,.25);
   position:relative;
 }
 
@@ -109,7 +106,7 @@ body::before{
   content:"📎";
   position:absolute;
   top:-18px;
-  left:6px;
+  left:8px;
   font-size:20px;
 }
 
@@ -126,9 +123,10 @@ body::before{
   resize:none;
   font-size:12px;
   background:transparent;
+  margin-top:4px;
 }
 
-/* Кнопки */
+/* ====== КНОПКИ ====== */
 .actions{
   display:flex;
   justify-content:space-between;
@@ -180,15 +178,11 @@ body::before{
 </div>
 
 <script>
-/* ====== ПАРОЛИ ====== */
-const PASS = "love";
+const PASS="love";
+const lock=document.getElementById("lock");
+const app=document.getElementById("app");
+const gallery=document.getElementById("gallery");
 
-/* ====== ЭЛЕМЕНТЫ ====== */
-const lock = document.getElementById("lock");
-const app  = document.getElementById("app");
-const gallery = document.getElementById("gallery");
-
-/* ====== ВХОД ====== */
 function checkPass(e){
   if(e.key==="Enter" && e.target.value===PASS){
     lock.style.display="none";
@@ -196,33 +190,21 @@ function checkPass(e){
   }
 }
 
-/* ====== СЧЁТЧИК ДНЕЙ ====== */
-const start = new Date(2024,7,5);
+const start=new Date(2024,7,5);
 setInterval(()=>{
-  const d = Math.floor((Date.now()-start)/86400000);
-  counter.innerText = `Мы вместе ${d} дней ❤️`;
+  const d=Math.floor((Date.now()-start)/86400000);
+  counter.innerText=`Мы вместе ${d} дней ❤️`;
 },1000);
 
-/* ====== ФОТО ====== */
-let photos = JSON.parse(localStorage.photos || "[]");
-
-function save(){
-  localStorage.photos = JSON.stringify(photos);
-}
+let photos=JSON.parse(localStorage.photos||"[]");
+function save(){localStorage.photos=JSON.stringify(photos);}
 
 function addPhotos(e){
   for(let f of e.target.files){
-    const r = new FileReader();
-    r.onload = x=>{
-      photos.push({
-        src:x.target.result,
-        text:"",
-        fav:false,
-        hidden:false,
-        date:Date.now()
-      });
-      save();
-      render();
+    const r=new FileReader();
+    r.onload=x=>{
+      photos.push({src:x.target.result,text:"",fav:false});
+      save();render();
     };
     r.readAsDataURL(f);
   }
@@ -231,9 +213,7 @@ function addPhotos(e){
 function render(){
   gallery.innerHTML="";
   photos.forEach((p,i)=>{
-    if(p.hidden) return;
-
-    const d = document.createElement("div");
+    const d=document.createElement("div");
     d.className="photo";
     d.innerHTML=`
       <img src="${p.src}" onclick="openImg(${i})">
@@ -242,8 +222,7 @@ function render(){
       <div class="actions">
         <button onclick="toggleFav(${i})">${p.fav?"⭐":"☆"}</button>
         <button onclick="removePhoto(${i})">✖</button>
-      </div>
-    `;
+      </div>`;
     gallery.appendChild(d);
   });
 }
@@ -259,15 +238,13 @@ function openImg(i){
 function removePhoto(i){
   if(confirm("Удалить фото?")){
     photos.splice(i,1);
-    save();
-    render();
+    save();render();
   }
 }
 
 function toggleFav(i){
-  photos[i].fav = !photos[i].fav;
-  save();
-  render();
+  photos[i].fav=!photos[i].fav;
+  save();render();
 }
 
 render();
@@ -275,6 +252,8 @@ render();
 
 </body>
 </html>
+
+
 
 
 
