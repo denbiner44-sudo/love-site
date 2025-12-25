@@ -16,7 +16,7 @@
   --bgColor:#ffffff;
 }
 
-/* ===== ТЕТРАДЬ В КЛЕТКУ ===== */
+/* ===== ТЕТРАДЬ ===== */
 body{
   margin:0;
   min-height:100vh;
@@ -40,16 +40,18 @@ body::before{
   top:0;bottom:0;left:45px;
   width:2px;
   background:#ff8fa3;
+  z-index:0;
 }
 
 /* ===== ПАРОЛЬ ===== */
 .lock{
-  position:fixed;inset:0;
+  position:fixed;
+  inset:0;
   background:#000;
   display:flex;
   align-items:center;
   justify-content:center;
-  z-index:2000;
+  z-index:3000;
 }
 .lock input{
   padding:15px 20px;
@@ -58,29 +60,30 @@ body::before{
   border:none;
 }
 
-/* ===== КНОПКА МЕНЮ ===== */
+/* ===== КНОПКА ☰ ===== */
 .menu-btn{
   position:fixed;
   top:15px;
   left:15px;
-  font-size:26px;
+  font-size:28px;
   background:none;
   border:none;
   cursor:pointer;
-  z-index:1500;
+  z-index:2000;
 }
 
 /* ===== МЕНЮ ===== */
 .menu{
   position:fixed;
-  top:0;left:-260px;
+  top:0;
+  left:-260px;
   width:260px;
   height:100%;
   background:#fff;
   box-shadow:4px 0 20px rgba(0,0,0,.25);
   padding:20px;
   transition:.3s;
-  z-index:1400;
+  z-index:1999;
 }
 .menu.open{left:0}
 
@@ -100,6 +103,8 @@ body::before{
   border-radius:18px;
   padding:30px;
   box-shadow:0 15px 30px rgba(0,0,0,.15);
+  position:relative;
+  z-index:1;
 }
 
 .header{
@@ -154,13 +159,15 @@ body::before{
   font-size:16px;
 }
 
+/* ===== ПРОСМОТР ===== */
 .overlay{
-  position:fixed;inset:0;
+  position:fixed;
+  inset:0;
   background:rgba(0,0,0,.9);
   display:flex;
   align-items:center;
   justify-content:center;
-  z-index:3000;
+  z-index:4000;
 }
 .overlay img{max-width:90%;max-height:90%}
 </style>
@@ -173,7 +180,7 @@ body::before{
   <input type="password" placeholder="Пароль ❤️" onkeydown="checkPass(event)">
 </div>
 
-<!-- КНОПКА -->
+<!-- ☰ -->
 <button class="menu-btn" onclick="toggleMenu()">☰</button>
 
 <!-- МЕНЮ -->
@@ -181,13 +188,13 @@ body::before{
   <h3>⚙️ Настройки</h3>
 
   <label>Яркость</label>
-  <input type="range" min="0.7" max="1.3" step="0.05" onchange="setBrightness(this.value)">
+  <input type="range" min="0.7" max="1.3" step="0.05" oninput="setBrightness(this.value)">
 
   <label>Размер текста</label>
-  <input type="range" min="14" max="20" step="1" onchange="setFont(this.value)">
+  <input type="range" min="14" max="20" step="1" oninput="setFont(this.value)">
 
   <label>Цвет фона</label>
-  <input type="color" onchange="setBg(this.value)">
+  <input type="color" oninput="setBg(this.value)">
 
   <hr>
   <button onclick="toggleHidden()">🔐 Скрытые фото</button>
@@ -208,9 +215,10 @@ const app=document.getElementById("app");
 const menu=document.getElementById("menu");
 const gallery=document.getElementById("gallery");
 
+/* ===== ПАРОЛЬ ===== */
 function checkPass(e){
-  if(e.key==="Enter"&&e.target.value===PASS){
-    lock.style.display="none";
+  if(e.key==="Enter" && e.target.value===PASS){
+    lock.remove();            // ❗ полностью убираем
     app.style.display="block";
   }
 }
@@ -296,6 +304,7 @@ render();
 
 </body>
 </html>
+
 
 
 
