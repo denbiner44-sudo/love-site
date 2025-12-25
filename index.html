@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Наша история</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat&family=Pacifico&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat&family=Pacifico&family=Roboto&display=swap" rel="stylesheet">
 
   <style>
     *{box-sizing:border-box}
@@ -14,15 +14,22 @@
       --brightness:1;
       --fontSize:16px;
       --bgColor:#ffffff;
+      --fontFamily: 'Montserrat', sans-serif;
+      --textColor: #000000;
+      --btnColor: #ff8fa3;
+      --photoShadow: 0 6px 18px rgba(0,0,0,.25);
+      --photoSize: 1; /* коэффициент размера фотографии */
+      --photoBgColor: #fff;
     }
 
     /* ===== BODY ===== */
     body{
       margin:0;
       min-height:100vh;
-      font-family:Montserrat;
-      font-size:var(--fontSize);
-      background-color:var(--bgColor);
+      font-family: var(--fontFamily);
+      font-size: var(--fontSize);
+      color: var(--textColor);
+      background-color: var(--bgColor);
       background-image:
         linear-gradient(#e5e5e5 1px, transparent 1px),
         linear-gradient(90deg,#e5e5e5 1px, transparent 1px);
@@ -86,15 +93,15 @@
     .menu{
       position:fixed;
       top:0;
-      left:-300px; /* Увеличиваем ширину */
-      width:300px; /* Новая ширина */
+      left:-300px;
+      width:300px;
       height:100%;
       background:#fff;
       box-shadow:4px 0 25px rgba(0,0,0,.3);
       padding:20px;
       transition:left .3s ease;
       z-index:3999;
-      overflow-y:auto; /* Добавляем вертикальную прокрутку */
+      overflow-y:auto;
     }
     .menu.open{
       left:0;
@@ -102,6 +109,16 @@
 
     .menu h3{
       margin-top:0;
+    }
+
+    .menu label {
+      display: block;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    .menu input[type="range"], .menu input[type="color"], .menu select {
+      width: 100%;
     }
 
     /* ===== ОСНОВНОЕ ===== */
@@ -131,11 +148,12 @@
     }
 
     .photo{
-      background:#fff;
+      background: var(--photoBgColor);
       padding:8px;
       border-radius:6px;
-      box-shadow:0 6px 18px rgba(0,0,0,.25);
+      box-shadow: var(--photoShadow);
       position:relative;
+      width: calc(100% * var(--photoSize)); /* Устанавливаем размер в зависимости от настройки */
     }
     .photo::before{
       content:"📎";
@@ -177,17 +195,6 @@
       max-width:90%;
       max-height:90%;
     }
-
-    /* МЕНЮ НАСТРОЕК */
-    .menu label {
-      display: block;
-      margin-top: 10px;
-      font-size: 14px;
-    }
-
-    .menu input[type="range"], .menu input[type="color"] {
-      width: 100%;
-    }
   </style>
 </head>
 
@@ -213,6 +220,28 @@
 
     <label>Цвет листа</label>
     <input type="color" oninput="setBg(this.value)">
+
+    <label>Шрифт</label>
+    <select onchange="setFontFamily(this.value)">
+      <option value="'Montserrat', sans-serif">Montserrat</option>
+      <option value="'Roboto', sans-serif">Roboto</option>
+      <option value="'Pacifico', cursive">Pacifico</option>
+    </select>
+
+    <label>Цвет текста</label>
+    <input type="color" oninput="setTextColor(this.value)">
+
+    <label>Цвет кнопок</label>
+    <input type="color" oninput="setBtnColor(this.value)">
+
+    <label>Цвет фона фото</label>
+    <input type="color" oninput="setPhotoBgColor(this.value)">
+
+    <label>Размер фотографий</label>
+    <input type="range" min="0.5" max="1.5" step="0.05" oninput="setPhotoSize(this.value)">
+
+    <label>Тень фотографий</label>
+    <input type="color" oninput="setPhotoShadow(this.value)">
 
     <hr>
     <button onclick="toggleHidden()">🔐 Скрытые фото</button>
@@ -249,49 +278,78 @@
 
     /* ===== НАСТРОЙКИ ===== */
     function setBrightness(v){
-      document.documentElement.style.setProperty("--brightness",v);
+      document.documentElement.style.setProperty("--brightness", v);
     }
+
     function setFont(v){
-      document.documentElement.style.setProperty("--fontSize",v+"px");
+      document.documentElement.style.setProperty("--fontSize", v + "px");
     }
+
     function setBg(v){
-      document.documentElement.style.setProperty("--bgColor",v);
+      document.documentElement.style.setProperty("--bgColor", v);
+    }
+
+    function setFontFamily(v){
+      document.documentElement.style.setProperty("--fontFamily", v);
+    }
+
+    function setTextColor(v){
+      document.documentElement.style.setProperty("--textColor", v);
+    }
+
+    function setBtnColor(v){
+      document.documentElement.style.setProperty("--btnColor", v);
+    }
+
+    function setPhotoBgColor(v){
+      document.documentElement.style.setProperty("--photoBgColor", v);
+    }
+
+    function setPhotoSize(v){
+      document.documentElement.style.setProperty("--photoSize", v);
+    }
+
+    function setPhotoShadow(v){
+      document.documentElement.style.setProperty("--photoShadow", `0 6px 18px ${v}`);
     }
 
     /* ===== СЧЁТЧИК ===== */
-    const start=new Date(2024,7,5);
-    setInterval(()=>{
-      counter.innerText=`Мы вместе ${Math.floor((Date.now()-start)/86400000)} дней ❤️`;
-    },1000);
+    const start = new Date(2024, 7, 5);
+    setInterval(() => {
+      counter.innerText = `Мы вместе ${Math.floor((Date.now() - start) / 86400000)} дней ❤️`;
+    }, 1000);
 
     /* ===== ФОТО ===== */
-    let photos=JSON.parse(localStorage.photos||"[]");
-    let showHidden=false;
+    let photos = JSON.parse(localStorage.photos || "[]");
+    let showHidden = false;
 
-    function save(){localStorage.photos=JSON.stringify(photos);}
+    function save() {
+      localStorage.photos = JSON.stringify(photos);
+    }
 
-    function addPhotos(e){
-      for(let f of e.target.files){
-        const r=new FileReader();
-        r.onload=x=>{
-          photos.push({src:x.target.result,text:"",hidden:false});
-          save();render();
+    function addPhotos(e) {
+      for (let f of e.target.files) {
+        const r = new FileReader();
+        r.onload = x => {
+          photos.push({ src: x.target.result, text: "", hidden: false });
+          save();
+          render();
         };
         r.readAsDataURL(f);
       }
     }
 
-    function toggleHidden(){
-      showHidden=!showHidden;
+    function toggleHidden() {
+      showHidden = !showHidden;
       render();
     }
 
-    function render(){
-      gallery.innerHTML="";
-      photos.filter(p=>showHidden||!p.hidden).forEach((p,i)=>{
-        const d=document.createElement("div");
-        d.className="photo";
-        d.innerHTML=`
+    function render() {
+      gallery.innerHTML = "";
+      photos.filter(p => showHidden || !p.hidden).forEach((p, i) => {
+        const d = document.createElement("div");
+        d.className = "photo";
+        d.innerHTML = `
           <img src="${p.src}" onclick="openImg('${p.src}')">
           <textarea oninput="photos[${i}].text=this.value;save()">${p.text}</textarea>
           <div class="actions">
@@ -302,11 +360,11 @@
       });
     }
 
-    function openImg(src){
-      const o=document.createElement("div");
-      o.className="overlay";
-      o.onclick=()=>o.remove();
-      o.innerHTML=`<img src="${src}">`;
+    function openImg(src) {
+      const o = document.createElement("div");
+      o.className = "overlay";
+      o.onclick = () => o.remove();
+      o.innerHTML = `<img src="${src}">`;
       document.body.appendChild(o);
     }
 
@@ -315,6 +373,8 @@
 
 </body>
 </html>
+
+
 
 
 
