@@ -1,18 +1,15 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Наша история ❤️</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Montserrat&family=Pacifico&family=Roboto&display=swap" rel="stylesheet">
-
 <style>
 *{box-sizing:border-box}
 :root{
   --brightness:1;
   --fontSize:16px;
-  --bgColor:#ff4d4d;
   --fontFamily:'Montserrat',sans-serif;
   --textColor:#000000;
   --btnColor:#ff8fa3;
@@ -28,9 +25,9 @@ body{
   font-family:var(--fontFamily);
   font-size:var(--fontSize);
   color:var(--textColor);
-  background:linear-gradient(135deg,#ff4d4d,#ff9999);
-  background-size:200% 200%;
-  animation:bgAnim 10s linear infinite alternate;
+  background:linear-gradient(135deg,#ff4d4d,#ff9999,#ff1a1a,#ff6666);
+  background-size:400% 400%;
+  animation:bgAnim 20s linear infinite alternate;
   padding:80px 20px 40px 70px;
   overflow:hidden;
   filter:brightness(var(--brightness));
@@ -129,6 +126,7 @@ body{
   font-family:Pacifico;
   font-size:30px;
   text-align:center;
+  cursor:pointer;
 }
 
 /* ===== GALLERY ===== */
@@ -179,10 +177,6 @@ body{
   max-width:90%;
   max-height:90%;
 }
-
-/* ===== BUTTON ANIMATION ===== */
-button{transition:all .2s ease;}
-button:hover{transform:scale(1.05);}
 </style>
 </head>
 
@@ -202,9 +196,6 @@ button:hover{transform:scale(1.05);}
 
   <label>Размер текста</label>
   <input type="range" min="14" max="22" oninput="setFont(this.value)">
-
-  <label>Цвет листа</label>
-  <input type="color" oninput="setBg(this.value)">
 
   <label>Шрифт</label>
   <select onchange="setFontFamily(this.value)">
@@ -232,7 +223,7 @@ button:hover{transform:scale(1.05);}
 </div>
 
 <div class="app" id="app">
-  <div class="header">Аделаида + Саша = вечность ❤️</div>
+  <div class="header" onclick="headerClick(event)">Аделаида + Саша = вечность ❤️</div>
   <div id="counter"></div>
 
   <input type="file" multiple accept="image/*" onchange="addPhotos(event)">
@@ -240,13 +231,10 @@ button:hover{transform:scale(1.05);}
 </div>
 
 <script>
+/* ===== PASSWORD ===== */
 const PASS="love";
 const lock=document.getElementById("lock");
 const app=document.getElementById("app");
-const menu=document.getElementById("menu");
-const gallery=document.getElementById("gallery");
-const counter=document.getElementById("counter");
-
 function checkPass(e){
   if(e.key==="Enter" && e.target.value===PASS){
     lock.remove();
@@ -254,33 +242,30 @@ function checkPass(e){
   }
 }
 
+/* ===== MENU ===== */
+const menu=document.getElementById("menu");
 function toggleMenu(){menu.classList.toggle("open")}
-
-/* SETTINGS */
 function setBrightness(v){document.body.style.filter=`brightness(${v})`}
 function setFont(v){document.documentElement.style.setProperty("--fontSize",v+"px")}
-function setBg(v){document.documentElement.style.setProperty("--bgColor",v)}
 function setFontFamily(v){document.documentElement.style.setProperty("--fontFamily",v)}
 function setTextColor(v){document.documentElement.style.setProperty("--textColor",v)}
 function setBtnColor(v){document.documentElement.style.setProperty("--btnColor",v)}
 function setPhotoBgColor(v){document.documentElement.style.setProperty("--photoBgColor",v)}
 function setPhotoSize(v){document.documentElement.style.setProperty("--photoSize",v)}
-function setPhotoShadow(v){
-  document.documentElement.style.setProperty("--photoShadow",`0 6px 18px ${v}80`)
-}
+function setPhotoShadow(v){document.documentElement.style.setProperty("--photoShadow",`0 6px 18px ${v}80`)}
 
-/* COUNTER */
+/* ===== COUNTER ===== */
+const counter=document.getElementById("counter");
 const start=new Date(2024,7,5);
 setInterval(()=>{
   counter.innerText=`Мы вместе ${Math.floor((Date.now()-start)/86400000)} дней ❤️`;
 },1000);
 
-/* PHOTOS */
+/* ===== PHOTOS ===== */
+const gallery=document.getElementById("gallery");
 let photos=JSON.parse(localStorage.photos||"[]");
 let showHidden=false;
-
 function save(){localStorage.photos=JSON.stringify(photos)}
-
 function addPhotos(e){
   for(let f of e.target.files){
     const r=new FileReader();
@@ -291,26 +276,30 @@ function addPhotos(e){
     r.readAsDataURL(f);
   }
 }
-
 function toggleHidden(){showHidden=!showHidden;render()}
-
 function render(){
   gallery.innerHTML="";
-  photos.filter(p=>showHidden||!p.hidden).forEach((p,i)=>{
-    const d=document.createElement("div");
-    d.className="photo";
-    d.innerHTML=`
-      <img src="${p.src}" onclick="openImg('${p.src}',event)">
-      <textarea oninput="photos[${i}].text=this.value;save()">${p.text}</textarea>
-      <div class="actions">
-        <button onclick="photos[${i}].hidden=!photos[${i}].hidden;save();render()">🙈</button>
-        <button onclick="photos.splice(${i},1);save();render()">✖</button>
-      </div>
-    `;
-    gallery.appendChild(d);
+  photos.forEach((p,i)=>{
+    if(showHidden||!p.hidden){
+      const d=document.createElement("div");
+      d.className="photo";
+      d.innerHTML=`
+        <img src="${p.src}">
+        <textarea>${p.text}</textarea>
+        <div class="actions">
+          <button onclick="photos[${i}].hidden=!photos[${i}].hidden;save();render()">🙈</button>
+          <button onclick="photos.splice(${i},1);save();render()">✖</button>
+        </div>
+      `;
+      gallery.appendChild(d);
+      d.querySelector("img").addEventListener("click", e=>openImg(p.src,e));
+      d.querySelector("textarea").addEventListener("input", e=>{
+        photos[i].text=e.target.value;
+        save();
+      });
+    }
   });
 }
-
 function openImg(src,e){
   const o=document.createElement("div");
   o.className="overlay";
@@ -319,17 +308,15 @@ function openImg(src,e){
   document.body.appendChild(o);
   createHeartExplosion(e.clientX,e.clientY,15);
 }
-
 render();
 
-/* SVG HEARTS */
+/* ===== HEARTS ===== */
 const HEART=`<svg viewBox="0 0 32 29.6" width="100%" height="100%">
 <path fill="#ff4d6d"
 d="M23.6,0c-3.4,0-6.4,2.1-7.6,5.1C14.8,2.1,11.8,0,8.4,0
 C3.8,0,0,3.8,0,8.4c0,9.4,16,21.2,16,21.2s16-11.8,16-21.2
 C32,3.8,28.2,0,23.6,0z"/>
 </svg>`;
-
 function spawnHeartAt(x,y){
   const h=document.createElement("div");
   h.className="heart";
@@ -345,18 +332,19 @@ function spawnHeartAt(x,y){
   document.body.appendChild(h);
   setTimeout(()=>h.remove(),dur*1000);
 }
-
 function createHeartExplosion(x,y,count){
   for(let i=0;i<count;i++){
     spawnHeartAt(x+Math.random()*50-25,y+Math.random()*50-25);
   }
 }
-
-document.addEventListener("mousemove",e=>spawnHeartAt(e.clientX,e.clientY,1));
+document.addEventListener("mousemove",e=>spawnHeartAt(e.clientX,e.clientY));
+function headerClick(e){createHeartExplosion(e.clientX,e.clientY,25);}
 </script>
 
 </body>
 </html>
+
+
 
 
 
