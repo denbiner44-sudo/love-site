@@ -44,13 +44,31 @@
     /* Летающие сердечки */
     .heart {
       position: absolute;
-      width: 40px;
-      height: 40px;
+      width: 50px;
+      height: 50px;
       background-color: red;
-      clip-path: polygon(50% 0%, 0% 100%, 100% 100%, 50% 50%); /* Формируем сердечко */
+      transform: rotate(45deg);
       animation: fly-heart 5s infinite;
       opacity: 0.8;
       pointer-events: none;
+    }
+
+    .heart::before,
+    .heart::after {
+      content: "";
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background-color: red;
+      border-radius: 50%;
+    }
+
+    .heart::before {
+      left: 0;
+    }
+
+    .heart::after {
+      top: 0;
     }
 
     @keyframes fly-heart {
@@ -269,8 +287,7 @@
 
   <!-- ОСНОВНОЕ -->
   <div class="app" id="app" style="display:none">
-    <div class="header">Счастливы вместе
-                         Адушка + Саша✍️</div>
+    <div class="header">Аделаида + Саша = вечность ✍️</div>
     <div id="counter"></div>
 
     <input type="file" multiple accept="image/*" onchange="addPhotos(event)">
@@ -401,6 +418,8 @@
 
 </body>
 </html>
+
+
 
 
 
