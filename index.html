@@ -8,56 +8,27 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&family=Pacifico&display=swap" rel="stylesheet">
 
 <style>
-:root{
-  --brightness:1;
-}
-
-/* ===== ОБЩЕЕ ===== */
 *{box-sizing:border-box}
+
 body{
   margin:0;
-  font-family:Montserrat;
   min-height:100vh;
-  background:linear-gradient(120deg,#ff9a9e,#fad0c4,#fbc2eb);
-  background-size:400% 400%;
-  animation:gradient 10s ease infinite;
   display:flex;
   justify-content:center;
   align-items:flex-start;
   padding:20px;
-  color:#333;
-  filter:brightness(var(--brightness));
+  font-family:Montserrat;
+  background:linear-gradient(120deg,#ff9a9e,#fad0c4,#fbc2eb);
+  background-size:400% 400%;
+  animation:bg 10s ease infinite;
 }
-@keyframes gradient{
+@keyframes bg{
   0%{background-position:0% 50%}
   50%{background-position:100% 50%}
   100%{background-position:0% 50%}
 }
 
-/* ===== МЕНЮ ===== */
-.menu-btn{
-  position:fixed;
-  top:15px;
-  left:15px;
-  font-size:28px;
-  cursor:pointer;
-  z-index:1001;
-}
-.menu{
-  position:fixed;
-  top:0;
-  left:-300px;
-  width:300px;
-  height:100%;
-  background:#000;
-  color:#fff;
-  padding:20px;
-  transition:.3s;
-  z-index:1000;
-}
-.menu.open{left:0}
-
-/* ===== ЭКРАН ПАРОЛЯ ===== */
+/* ЭКРАН ПАРОЛЯ */
 .lock{
   position:fixed;
   inset:0;
@@ -65,49 +36,61 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
-  z-index:2000;
+  z-index:9999;
 }
 .lock input{
-  padding:15px;
+  padding:15px 20px;
   font-size:18px;
-  border-radius:15px;
   border:none;
+  border-radius:15px;
 }
 
-/* ===== КАРТОЧКА (ЛИСТОЧЕК) ===== */
+/* КАРТОЧКА — ЛИСТОК В КЛЕТКУ */
 .card{
   width:100%;
   max-width:900px;
   padding:40px 30px;
   border-radius:12px;
 
-  /* фон тетради */
   background:
-    linear-gradient(#cce0ff 1px, transparent 1px),
-    linear-gradient(90deg, #cce0ff 1px, transparent 1px);
+    linear-gradient(#c9ddff 1px, transparent 1px),
+    linear-gradient(90deg,#c9ddff 1px, transparent 1px);
   background-size:40px 40px;
   background-color:#fff;
 
   box-shadow:0 20px 40px rgba(0,0,0,.25);
+  color:#222;
 }
 
-/* рукописный стиль */
+/* КРАСНАЯ ЛИНИЯ ПОЛЯ */
+.card::before{
+  content:"";
+  position:absolute;
+  margin-left:-15px;
+  width:3px;
+  height:calc(100% - 80px);
+  background:#ff6b6b;
+}
+
+/* РУКОПИСЬ */
 .handwrite{
   font-family:'Pacifico', cursive;
   font-size:36px;
   color:#1a3d7c;
-  margin-bottom:10px;
+  text-align:center;
 }
 
-/* ===== ТЕКСТ ===== */
-.center{text-align:center}
+/* СЧЁТЧИК */
 #counter{
-  font-size:18px;
+  text-align:center;
   margin:10px 0 20px;
-  color:#222;
+  font-size:18px;
 }
 
-/* ===== ГАЛЕРЕЯ ===== */
+/* ГАЛЕРЕЯ */
+input[type=file]{
+  margin:20px 0;
+}
 .gallery{
   display:grid;
   grid-template-columns:repeat(4,1fr);
@@ -121,7 +104,7 @@ body{
   cursor:pointer;
 }
 
-/* ===== OVERLAY ===== */
+/* ПРОСМОТР ФОТО */
 .overlay{
   position:fixed;
   inset:0;
@@ -129,7 +112,7 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
-  z-index:3000;
+  z-index:10000;
 }
 .overlay img{
   max-width:90%;
@@ -141,35 +124,22 @@ body{
 
 <body>
 
-<div class="menu-btn" onclick="menu.classList.toggle('open')">☰</div>
-
-<div class="menu" id="menu">
-  <h3>⚙️ Настройки</h3>
-  <label>Яркость сайта</label>
-  <input type="range" min="0.7" max="1.3" step="0.1" oninput="setBright(this.value)">
-</div>
-
 <div class="lock" id="lock">
   <input type="password" placeholder="Пароль ❤️" onkeydown="check(event)">
 </div>
 
 <div class="card" id="app" style="display:none">
 
-  <div class="center">
-    <div class="handwrite">Аделаида + Саша = ∞</div>
-    <div id="counter"></div>
-  </div>
-
-  <hr>
+  <div class="handwrite">Аделаида + Саша = ∞</div>
+  <div id="counter"></div>
 
   <input type="file" multiple accept="image/*" onchange="addPhotos(event)">
-
   <div class="gallery" id="gallery"></div>
 
 </div>
 
 <script>
-/* ===== ПАРОЛЬ ===== */
+/* ПАРОЛЬ */
 const PASS="love";
 function check(e){
   if(e.key==="Enter" && e.target.value===PASS){
@@ -178,40 +148,38 @@ function check(e){
   }
 }
 
-/* ===== ЯРКОСТЬ ===== */
-function setBright(v){
-  document.documentElement.style.setProperty("--brightness",v);
-}
-
-/* ===== СЧЁТЧИК ДНЕЙ ===== */
+/* СКОЛЬКО ВМЕСТЕ */
 const start=new Date(2024,7,5);
 setInterval(()=>{
   const d=Math.floor((Date.now()-start)/86400000);
   counter.innerText=`Мы вместе уже ${d} дней 💖`;
 },1000);
 
-/* ===== ФОТО ===== */
+/* ФОТО */
 let photos=JSON.parse(localStorage.photos||"[]");
 function save(){localStorage.photos=JSON.stringify(photos)}
+
 function addPhotos(e){
   for(let f of e.target.files){
     const r=new FileReader();
     r.onload=x=>{
-      photos.push({src:x.target.result});
+      photos.push(x.target.result);
       save();render();
     };
     r.readAsDataURL(f);
   }
 }
+
 function render(){
   gallery.innerHTML="";
-  photos.forEach(p=>{
+  photos.forEach(src=>{
     const d=document.createElement("div");
     d.className="photo";
-    d.innerHTML=`<img src="${p.src}" onclick="openImg('${p.src}')">`;
+    d.innerHTML=`<img src="${src}" onclick="openImg('${src}')">`;
     gallery.appendChild(d);
   });
 }
+
 function openImg(src){
   const o=document.createElement("div");
   o.className="overlay";
@@ -219,11 +187,14 @@ function openImg(src){
   o.innerHTML=`<img src="${src}">`;
   document.body.append(o);
 }
+
 render();
 </script>
 
 </body>
 </html>
+
+
 
 
 
