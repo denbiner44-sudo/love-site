@@ -5,101 +5,62 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Наша история 💖</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&family=Pacifico&display=swap" rel="stylesheet">
 
 <style>
 :root{
   --brightness:1;
-  --fontSize:16px;
-  --bg:linear-gradient(120deg,#ff9a9e,#fad0c4,#fbc2eb);
 }
 
+/* ===== ОБЩЕЕ ===== */
 *{box-sizing:border-box}
-
 body{
   margin:0;
   font-family:Montserrat;
   min-height:100vh;
-  background:var(--bg);
+  background:linear-gradient(120deg,#ff9a9e,#fad0c4,#fbc2eb);
   background-size:400% 400%;
   animation:gradient 10s ease infinite;
   display:flex;
   justify-content:center;
-  align-items:center;
+  align-items:flex-start;
   padding:20px;
-  color:#fff;
-  overflow-y:auto;
+  color:#333;
   filter:brightness(var(--brightness));
-  font-size:var(--fontSize);
 }
-
 @keyframes gradient{
   0%{background-position:0% 50%}
   50%{background-position:100% 50%}
   100%{background-position:0% 50%}
 }
 
-.card{
-  width:100%;
-  max-width:900px;
-  background:rgba(255,255,255,.25);
-  backdrop-filter:blur(16px);
-  border-radius:30px;
-  padding:25px;
-  box-shadow:0 20px 40px rgba(0,0,0,.25);
-  text-align:center;
-}
-
-/* ☰ меню */
+/* ===== МЕНЮ ===== */
 .menu-btn{
   position:fixed;
   top:15px;
   left:15px;
-  font-size:26px;
+  font-size:28px;
   cursor:pointer;
   z-index:1001;
 }
-
-.menu-overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.4);
-  opacity:0;
-  pointer-events:none;
-  transition:.3s;
-  z-index:999;
-}
-.menu-overlay.show{
-  opacity:1;
-  pointer-events:auto;
-}
-
 .menu{
   position:fixed;
   top:0;
-  left:-280px;
-  width:280px;
+  left:-300px;
+  width:300px;
   height:100%;
-  background:rgba(0,0,0,.92);
+  background:#000;
+  color:#fff;
   padding:20px;
-  transition:.35s ease;
+  transition:.3s;
   z-index:1000;
-  overflow-y:auto;
 }
 .menu.open{left:0}
-.menu button{
-  width:100%;
-  margin:8px 0;
-  padding:12px;
-  border-radius:15px;
-  border:none;
-  font-size:15px;
-  cursor:pointer;
-}
 
-/* пароль */
+/* ===== ЭКРАН ПАРОЛЯ ===== */
 .lock{
-  position:fixed; inset:0;
+  position:fixed;
+  inset:0;
   background:#000;
   display:flex;
   align-items:center;
@@ -113,9 +74,41 @@ body{
   border:none;
 }
 
-/* галерея */
+/* ===== КАРТОЧКА (ЛИСТОЧЕК) ===== */
+.card{
+  width:100%;
+  max-width:900px;
+  padding:40px 30px;
+  border-radius:12px;
+
+  /* фон тетради */
+  background:
+    linear-gradient(#cce0ff 1px, transparent 1px),
+    linear-gradient(90deg, #cce0ff 1px, transparent 1px);
+  background-size:40px 40px;
+  background-color:#fff;
+
+  box-shadow:0 20px 40px rgba(0,0,0,.25);
+}
+
+/* рукописный стиль */
+.handwrite{
+  font-family:'Pacifico', cursive;
+  font-size:36px;
+  color:#1a3d7c;
+  margin-bottom:10px;
+}
+
+/* ===== ТЕКСТ ===== */
+.center{text-align:center}
+#counter{
+  font-size:18px;
+  margin:10px 0 20px;
+  color:#222;
+}
+
+/* ===== ГАЛЕРЕЯ ===== */
 .gallery{
-  margin-top:20px;
   display:grid;
   grid-template-columns:repeat(4,1fr);
   gap:10px;
@@ -124,11 +117,11 @@ body{
   width:100%;
   aspect-ratio:1/1;
   object-fit:cover;
-  border-radius:12px;
+  border-radius:10px;
   cursor:pointer;
 }
 
-/* просмотр */
+/* ===== OVERLAY ===== */
 .overlay{
   position:fixed;
   inset:0;
@@ -148,12 +141,12 @@ body{
 
 <body>
 
-<div class="menu-btn" onclick="toggleMenu()">☰</div>
-<div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+<div class="menu-btn" onclick="menu.classList.toggle('open')">☰</div>
 
 <div class="menu" id="menu">
-  <button onclick="openImport()">📥 Импорт из Google Photos</button>
-  <button onclick="clearPhotos()">🗑 Очистить галерею</button>
+  <h3>⚙️ Настройки</h3>
+  <label>Яркость сайта</label>
+  <input type="range" min="0.7" max="1.3" step="0.1" oninput="setBright(this.value)">
 </div>
 
 <div class="lock" id="lock">
@@ -161,76 +154,64 @@ body{
 </div>
 
 <div class="card" id="app" style="display:none">
-  <h1>Наша история 💕</h1>
-  <div>Саша ❤️ Адушка</div>
-  <div id="counter"></div>
+
+  <div class="center">
+    <div class="handwrite">Аделаида + Саша = ∞</div>
+    <div id="counter"></div>
+  </div>
+
+  <hr>
+
+  <input type="file" multiple accept="image/*" onchange="addPhotos(event)">
 
   <div class="gallery" id="gallery"></div>
+
 </div>
 
-<!-- скрытый input -->
-<input type="file" id="importInput" multiple accept="image/*" style="display:none">
-
 <script>
-/* пароль */
+/* ===== ПАРОЛЬ ===== */
+const PASS="love";
 function check(e){
-  if(e.key==="Enter" && e.target.value==="love"){
+  if(e.key==="Enter" && e.target.value===PASS){
     lock.style.display="none";
     app.style.display="block";
   }
 }
 
-/* меню */
-function toggleMenu(){
-  menu.classList.toggle("open");
-  menuOverlay.classList.toggle("show");
+/* ===== ЯРКОСТЬ ===== */
+function setBright(v){
+  document.documentElement.style.setProperty("--brightness",v);
 }
 
-/* счётчик */
+/* ===== СЧЁТЧИК ДНЕЙ ===== */
 const start=new Date(2024,7,5);
 setInterval(()=>{
   const d=Math.floor((Date.now()-start)/86400000);
-  counter.innerText=`Мы вместе ${d} дней 💖`;
+  counter.innerText=`Мы вместе уже ${d} дней 💖`;
 },1000);
 
-/* галерея */
+/* ===== ФОТО ===== */
 let photos=JSON.parse(localStorage.photos||"[]");
-
-function save(){
-  localStorage.photos=JSON.stringify(photos);
-}
-
-function render(){
-  gallery.innerHTML="";
-  photos.forEach(src=>{
-    const img=document.createElement("img");
-    img.src=src;
-    img.onclick=()=>openImg(src);
-    gallery.appendChild(img);
-  });
-}
-
-/* импорт */
-const importInput=document.getElementById("importInput");
-
-function openImport(){
-  toggleMenu();
-  importInput.click();
-}
-
-importInput.onchange=e=>{
+function save(){localStorage.photos=JSON.stringify(photos)}
+function addPhotos(e){
   for(let f of e.target.files){
     const r=new FileReader();
     r.onload=x=>{
-      photos.push(x.target.result);
-      save();
-      render();
+      photos.push({src:x.target.result});
+      save();render();
     };
     r.readAsDataURL(f);
   }
-};
-
-/* просмотр */
+}
+function render(){
+  gallery.innerHTML="";
+  photos.forEach(p=>{
+    const d=document.createElement("div");
+    d.className="photo";
+    d.innerHTML=`<img src="${p.src}" onclick="openImg('${p.src}')">`;
+    gallery.appendChild(d);
+  });
+}
 function openImg(src){
   const o=document.createElement("div");
   o.className="overlay";
@@ -238,21 +219,13 @@ function openImg(src){
   o.innerHTML=`<img src="${src}">`;
   document.body.append(o);
 }
-
-/* очистка */
-function clearPhotos(){
-  if(confirm("Удалить все фото?")){
-    photos=[];
-    save();
-    render();
-  }
-}
-
 render();
 </script>
 
 </body>
 </html>
+
+
 
 
 
