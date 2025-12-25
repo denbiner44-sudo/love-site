@@ -8,12 +8,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat&family=Pacifico&family=Roboto&display=swap" rel="stylesheet">
 
   <style>
-    *{box-sizing:border-box}
+    * {
+      box-sizing: border-box;
+    }
 
-    :root{
-      --brightness:1;
-      --fontSize:16px;
-      --bgColor:#ffffff;
+    :root {
+      --brightness: 1;
+      --fontSize: 16px;
+      --bgColor: #ffffff;
       --fontFamily: 'Montserrat', sans-serif;
       --textColor: #000000;
       --btnColor: #ff8fa3;
@@ -23,18 +25,18 @@
     }
 
     /* ===== BODY ===== */
-    body{
-      margin:0;
-      min-height:100vh;
+    body {
+      margin: 0;
+      min-height: 100vh;
       font-family: var(--fontFamily);
       font-size: var(--fontSize);
       color: var(--textColor);
       background-color: var(--bgColor);
       background-image:
         linear-gradient(#e5e5e5 1px, transparent 1px),
-        linear-gradient(90deg,#e5e5e5 1px, transparent 1px);
-      background-size:24px 24px;
-      padding:80px 20px 40px 70px;
+        linear-gradient(90deg, #e5e5e5 1px, transparent 1px);
+      background-size: 24px 24px;
+      padding: 80px 20px 40px 70px;
       position: relative;
       overflow: hidden; /* Обрезаем элементы, выходящие за пределы экрана */
     }
@@ -45,7 +47,7 @@
       width: 40px;
       height: 40px;
       background-color: red;
-      clip-path: polygon(50% 0%, 0% 100%, 100% 100%); /* Формируем сердечко */
+      clip-path: polygon(50% 0%, 0% 100%, 100% 100%, 50% 50%); /* Формируем сердечко */
       animation: fly-heart 5s infinite;
       opacity: 0.8;
       pointer-events: none;
@@ -73,54 +75,56 @@
     }
 
     /* Дополнительные стили */
-    .lock{
-      position:fixed;
-      inset:0;
-      background:#000;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      z-index:5000;
+    .lock {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 5000;
     }
-    .lock input{
-      padding:15px 20px;
-      font-size:18px;
-      border-radius:14px;
-      border:none;
+
+    .lock input {
+      padding: 15px 20px;
+      font-size: 18px;
+      border-radius: 14px;
+      border: none;
     }
 
     /* ===== ☰ ===== */
-    .menu-btn{
-      position:fixed;
-      top:15px;
-      left:15px;
-      font-size:28px;
-      background:none;
-      border:none;
-      cursor:pointer;
-      z-index:4000;
+    .menu-btn {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      font-size: 28px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      z-index: 4000;
     }
 
     /* ===== МЕНЮ ===== */
-    .menu{
-      position:fixed;
-      top:0;
-      left:-300px;
-      width:300px;
-      height:100%;
-      background:#fff;
-      box-shadow:4px 0 25px rgba(0,0,0,.3);
-      padding:20px;
-      transition:left .3s ease;
-      z-index:3999;
-      overflow-y:auto;
-    }
-    .menu.open{
-      left:0;
+    .menu {
+      position: fixed;
+      top: 0;
+      left: -300px;
+      width: 300px;
+      height: 100%;
+      background: #fff;
+      box-shadow: 4px 0 25px rgba(0,0,0,.3);
+      padding: 20px;
+      transition: left .3s ease;
+      z-index: 3999;
+      overflow-y: auto;
     }
 
-    .menu h3{
-      margin-top:0;
+    .menu.open {
+      left: 0;
+    }
+
+    .menu h3 {
+      margin-top: 0;
     }
 
     .menu label {
@@ -134,78 +138,82 @@
     }
 
     /* ===== ОСНОВНОЕ ===== */
-    .app{
-      max-width:900px;
-      margin:auto;
-      background:#fff;
-      border-radius:18px;
-      padding:30px;
-      box-shadow:0 15px 30px rgba(0,0,0,.15);
-      position:relative;
-      z-index:2;
+    .app {
+      max-width: 900px;
+      margin: auto;
+      background: #fff;
+      border-radius: 18px;
+      padding: 30px;
+      box-shadow: 0 15px 30px rgba(0,0,0,.15);
+      position: relative;
+      z-index: 2;
     }
 
-    .header{
-      font-family:Pacifico;
-      font-size:30px;
-      text-align:center;
+    .header {
+      font-family: Pacifico;
+      font-size: 30px;
+      text-align: center;
     }
 
     /* ===== ГАЛЕРЕЯ ===== */
-    .gallery{
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:18px;
-      margin-top:20px;
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-top: 20px;
     }
 
-    .photo{
+    .photo {
       background: var(--photoBgColor);
-      padding:8px;
-      border-radius:6px;
+      padding: 8px;
+      border-radius: 6px;
       box-shadow: var(--photoShadow);
-      position:relative;
+      position: relative;
       width: calc(100% * var(--photoSize)); /* Устанавливаем размер в зависимости от настройки */
     }
-    .photo::before{
-      content:"📎";
-      position:absolute;
-      top:-18px;
-      left:8px;
-      font-size:20px;
-    }
-    .photo img{
-      width:100%;
-      aspect-ratio:1/1;
-      object-fit:cover;
-      cursor:pointer;
-    }
-    .photo textarea{
-      width:100%;
-      border:none;
-      resize:none;
-      font-size:12px;
-      background:transparent;
+
+    .photo::before {
+      content: "📎";
+      position: absolute;
+      top: -18px;
+      left: 8px;
+      font-size: 20px;
     }
 
-    .actions{
-      display:flex;
-      justify-content:space-between;
+    .photo img {
+      width: 100%;
+      aspect-ratio: 1/1;
+      object-fit: cover;
+      cursor: pointer;
+    }
+
+    .photo textarea {
+      width: 100%;
+      border: none;
+      resize: none;
+      font-size: 12px;
+      background: transparent;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: space-between;
     }
 
     /* ===== ПРОСМОТР ===== */
-    .overlay{
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,.9);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      z-index:6000;
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 6000;
     }
-    .overlay img{
-      max-width:90%;
-      max-height:90%;
+
+    .overlay img {
+      max-width: 90%;
+      max-height: 90%;
     }
   </style>
 </head>
@@ -261,7 +269,8 @@
 
   <!-- ОСНОВНОЕ -->
   <div class="app" id="app" style="display:none">
-    <div class="header">Аделаида + Саша = вечность ✍️</div>
+    <div class="header">Счастливы вместе
+                         Адушка + Саша✍️</div>
     <div id="counter"></div>
 
     <input type="file" multiple accept="image/*" onchange="addPhotos(event)">
@@ -392,6 +401,8 @@
 
 </body>
 </html>
+
+
 
 
 
