@@ -2,263 +2,206 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Наша история ❤️</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Montserrat&family=Pacifico&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAX Ultimate Casino Slot</title>
 
 <style>
-*{box-sizing:border-box}
-
-:root{
-  --fontSize:16px;
-  --textColor:#000;
-  --btnColor:#ff6b8a;
-  --photoBg:#fff;
-}
-
-body{
-  margin:0;
-  min-height:100vh;
-  font-family:Montserrat,sans-serif;
-  font-size:var(--fontSize);
-  color:var(--textColor);
-  background:linear-gradient(135deg,#ff4d6d,#ff9aa2);
-  padding:80px 15px 30px;
-}
-
-/* ===== LOCK ===== */
-.lock{
-  position:fixed;
-  inset:0;
-  background:#000;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  z-index:1000;
-}
-.lock input{
-  padding:15px 20px;
-  font-size:18px;
-  border-radius:14px;
-  border:none;
-}
-
-/* ===== APP ===== */
-.app{
-  max-width:900px;
-  margin:auto;
-  background:rgba(255,255,255,.95);
-  border-radius:20px;
-  padding:25px;
-  display:none;
-}
-
-/* ===== HEADER ===== */
-.header{
-  font-family:Pacifico,cursive;
-  text-align:center;
-  font-size:28px;
-  margin-bottom:10px;
-}
-
-/* ===== COUNTER ===== */
-#counter{
-  text-align:center;
-  margin-bottom:15px;
-  font-weight:bold;
-}
-
-/* ===== BUTTON ===== */
-input[type=file]{
-  margin-bottom:15px;
-}
-
-button{
-  background:var(--btnColor);
-  color:#fff;
-  border:none;
-  padding:6px 10px;
-  border-radius:8px;
-  cursor:pointer;
-}
-
-/* ===== GALLERY ===== */
-.gallery{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
-  gap:15px;
-}
-
-.photo{
-  background:var(--photoBg);
-  padding:6px;
-  border-radius:8px;
-  box-shadow:0 6px 15px rgba(0,0,0,.2);
-}
-
-.photo img{
-  width:100%;
-  aspect-ratio:1/1;
-  object-fit:cover;
-  border-radius:6px;
-  cursor:pointer;
-}
-
-.photo textarea{
-  width:100%;
-  border:none;
-  resize:none;
-  font-size:12px;
-  margin-top:5px;
-}
-
-.actions{
-  display:flex;
-  justify-content:space-between;
-  margin-top:5px;
-}
-
-/* ===== OVERLAY ===== */
-.overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.9);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:2000;
-}
-.overlay img{
-  max-width:90%;
-  max-height:90%;
-}
-
-/* ===== HEART ===== */
-.heart{
-  position:fixed;
-  pointer-events:none;
-  animation:fly 1.8s ease-out forwards;
-}
-@keyframes fly{
-  from{opacity:1;transform:translateY(0) scale(1)}
-  to{opacity:0;transform:translateY(-120px) scale(0.5)}
-}
+body{margin:0;background:#0b0b0b;color:#fff;font-family:Arial;text-align:center}
+.container{max-width:420px;margin:auto;padding:10px}
+.top{display:flex;justify-content:space-between;font-size:14px}
+.slots{display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(3,70px);gap:6px;margin:15px 0}
+.slot{background:#1c1c1c;border-radius:14px;font-size:28px;display:flex;align-items:center;justify-content:center;position:relative;transition:.2s}
+.slot.win{box-shadow:0 0 15px #00ff6a inset}
+.controls{display:flex;gap:6px;margin-bottom:10px}
+button,input,select{padding:14px;font-size:16px;border-radius:12px;border:none;width:100%}
+button{background:#ff2f2f;color:#fff}
+button:disabled{opacity:.5}
+.won{color:#00ff6a}
+.lost{color:#ff4d4d}
+.fs{color:#00eaff}
+.jackpot{color:gold}
+.vip{color:#ff9f00}
 </style>
 </head>
 
 <body>
+<div class="container">
 
-<div class="lock" id="lock">
-  <input type="password" placeholder="Пароль ❤️" onkeydown="checkPass(event)">
+<h2>🎰 MAX Ultimate Slot</h2>
+
+<div class="top">
+<div>💰 <span id="balance"></span></div>
+<div>🎁 <span id="fs"></span></div>
+<div class="jackpot">💎 <span id="jackpot"></span></div>
 </div>
 
-<div class="app" id="app">
-  <div class="header" onclick="boom(event)">
-    Аделаида + Саша = ❤️
-  </div>
+<div class="vip">VIP LEVEL: <span id="vip"></span></div>
 
-  <div id="counter"></div>
+<div class="slots" id="slots"></div>
 
-  <input type="file" multiple accept="image/*" onchange="addPhotos(event)">
-  <div class="gallery" id="gallery"></div>
+<div class="controls">
+<input type="number" id="bet" value="20" min="1">
+<select id="lines">
+<option value="1">1 линия</option>
+<option value="3">3 линии</option>
+<option value="5">5 линий</option>
+</select>
+</div>
+
+<button id="spinBtn">SPIN</button>
+<div id="result"></div>
+
 </div>
 
 <script>
-/* ===== PASSWORD ===== */
-const PASS="love";
-const lock=document.getElementById("lock");
-const app=document.getElementById("app");
+/* ====== STATE ====== */
+let state = JSON.parse(localStorage.getItem('casino')) || {
+balance:15000, fs:0, jackpot:5000, vip:1, spins:0
+};
 
-function checkPass(e){
-  if(e.key==="Enter" && e.target.value===PASS){
-    lock.style.display="none";
-    app.style.display="block";
-  }
+const symbols=['🍒','🍋','🍊','🍉','7️⃣'];
+const WILD='⭐';
+
+const paylines=[
+[[1,0],[1,1],[1,2],[1,3],[1,4]],
+[[0,0],[0,1],[0,2],[0,3],[0,4]],
+[[2,0],[2,1],[2,2],[2,3],[2,4]],
+[[0,0],[1,1],[2,2],[1,3],[0,4]],
+[[2,0],[1,1],[0,2],[1,3],[2,4]]
+];
+
+const slotsEl=document.getElementById('slots');
+const spinBtn=document.getElementById('spinBtn');
+const betInput=document.getElementById('bet');
+const linesInput=document.getElementById('lines');
+const resultEl=document.getElementById('result');
+
+let grid=[],matrix=[],spinning=false;
+
+/* ====== UI INIT ====== */
+for(let r=0;r<3;r++){
+grid[r]=[];
+for(let c=0;c<5;c++){
+let d=document.createElement('div');
+d.className='slot';
+slotsEl.appendChild(d);
+grid[r][c]=d;
+}
 }
 
-/* ===== COUNTER ===== */
-const counter=document.getElementById("counter");
-const start=new Date(2024,7,5);
-setInterval(()=>{
-  const days=Math.floor((Date.now()-start)/86400000);
-  counter.innerText=`Мы вместе ${days} дней ❤️`;
-},1000);
+function updateUI(){
+balance.textContent=state.balance;
+fs.textContent=state.fs;
+jackpot.textContent=state.jackpot;
+vip.textContent=state.vip;
+localStorage.setItem('casino',JSON.stringify(state));
+}
+updateUI();
 
-/* ===== PHOTOS ===== */
-const gallery=document.getElementById("gallery");
-let photos=JSON.parse(localStorage.photos||"[]");
-
-function save(){
-  localStorage.photos=JSON.stringify(photos);
+/* ====== AUDIO ====== */
+const ctx=new AudioContext();
+function beep(freq,d=0.08){
+let o=ctx.createOscillator(),g=ctx.createGain();
+o.connect(g);g.connect(ctx.destination);
+o.frequency.value=freq;
+o.start();g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+d);
 }
 
-function addPhotos(e){
-  for(let file of e.target.files){
-    const r=new FileReader();
-    r.onload=ev=>{
-      photos.push({src:ev.target.result,text:""});
-      save();
-      render();
-    }
-    r.readAsDataURL(file);
-  }
+/* ====== LOGIC ====== */
+function randSymbol(){
+return Math.random()<0.12+state.vip*0.002 ? WILD : symbols[Math.random()*symbols.length|0];
+}
+
+function animateSpin(done){
+let t=10;
+let i=setInterval(()=>{
+for(let r=0;r<3;r++)for(let c=0;c<5;c++)
+grid[r][c].textContent=randSymbol();
+beep(300+t*20,0.03);
+if(--t<=0){clearInterval(i);done();}
+},70);
+}
+
+function genMatrix(){
+matrix=[[],[],[]];
+for(let r=0;r<3;r++)for(let c=0;c<5;c++)matrix[r][c]=randSymbol();
 }
 
 function render(){
-  gallery.innerHTML="";
-  photos.forEach((p,i)=>{
-    const d=document.createElement("div");
-    d.className="photo";
-    d.innerHTML=`
-      <img src="${p.src}">
-      <textarea placeholder="Подпись...">${p.text}</textarea>
-      <div class="actions">
-        <button onclick="remove(${i})">✖</button>
-      </div>
-    `;
-    d.querySelector("img").onclick=()=>openImg(p.src);
-    d.querySelector("textarea").oninput=e=>{
-      photos[i].text=e.target.value;
-      save();
-    };
-    gallery.appendChild(d);
-  });
+for(let r=0;r<3;r++)for(let c=0;c<5;c++)
+grid[r][c].textContent=matrix[r][c];
 }
 
-function remove(i){
-  photos.splice(i,1);
-  save();
-  render();
+function calcWin(bet,lines){
+let win=0;
+for(let i=0;i<lines;i++){
+let base=null,count=0,cells=[];
+for(let p of paylines[i]){
+let s=matrix[p[0]][p[1]];
+cells.push(p);
+if(s===WILD){count++;continue;}
+if(!base){base=s;count++}
+else if(s===base)count++;
+}
+if(count>=3){
+win+=bet*count*2;
+cells.forEach(p=>grid[p[0]][p[1]].classList.add('win'));
+}
+}
+return win;
 }
 
-function openImg(src){
-  const o=document.createElement("div");
-  o.className="overlay";
-  o.innerHTML=`<img src="${src}">`;
-  o.onclick=()=>o.remove();
-  document.body.appendChild(o);
+spinBtn.onclick=()=>{
+if(spinning)return;
+let bet=+betInput.value,lines=+linesInput.value;
+let cost=bet*lines;
+
+if(state.fs===0){
+if(cost>state.balance)return;
+state.balance-=cost;
+state.jackpot+=Math.floor(cost*0.05);
+}else state.fs--;
+
+state.spins++;
+if(state.spins%30===0) state.vip++;
+
+updateUI();
+resultEl.innerHTML='';
+spinning=true;spinBtn.disabled=true;
+
+animateSpin(()=>{
+genMatrix();render();
+
+let scat=matrix.flat().filter(x=>x===WILD).length;
+if(scat>=3){state.fs+=10;resultEl.innerHTML+=`🎁 <span class="fs">+10 FS</span><br>`;}
+
+let win=calcWin(bet,lines);
+if(state.fs>0) win*=2;
+
+if(Math.random()<0.002+state.vip*0.0003){
+win+=state.jackpot;
+state.jackpot=5000;
+beep(1200,0.4);
+resultEl.innerHTML+=`💎 JACKPOT!<br>`;
 }
 
-render();
-
-/* ===== HEARTS ===== */
-function boom(e){
-  for(let i=0;i<20;i++){
-    const h=document.createElement("div");
-    h.className="heart";
-    h.innerHTML="❤️";
-    h.style.left=e.clientX+Math.random()*40-20+"px";
-    h.style.top=e.clientY+"px";
-    h.style.fontSize=16+Math.random()*20+"px";
-    document.body.appendChild(h);
-    setTimeout(()=>h.remove(),1800);
-  }
+if(win>0){
+state.balance+=win;
+beep(800,0.2);
+resultEl.innerHTML+=`<span class="won">🎉 +${win}</span>`;
+}else{
+resultEl.innerHTML+=`<span class="lost">😞 Пусто</span>`;
 }
+
+updateUI();
+setTimeout(()=>document.querySelectorAll('.win').forEach(x=>x.classList.remove('win')),600);
+spinning=false;spinBtn.disabled=false;
+});
+};
 </script>
-
 </body>
 </html>
+
 
 
 
