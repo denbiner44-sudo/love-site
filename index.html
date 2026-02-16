@@ -51,6 +51,7 @@ button img{width:24px;height:24px;margin-right:6px;}
 <button onclick="goTo('hospital')">🏥 Больница</button>
 <button onclick="exchangeCurrencyUI()">💱 Обменник</button>
 <button onclick="recycle()">♻️ Сдать бутылки</button>
+<button onclick="resetGame()" style="background:#f87171;">🗑️ Сбросить прогресс</button>
 </div>
 
 <div class="actions" id="actions"></div>
@@ -79,11 +80,34 @@ const jobs = [
 
 // ---------- START ----------
 function startGame(){
-  state={money:50,usd:0,health:100,satiety:100,mood:100,rep:0,xp:0,level:1,str:5,int:5,cha:5,day:1,month:1,inventory:[],inPrison:0};
-  achievements.clear(); renderAchievements(); updateUI();
+  const saved = localStorage.getItem('gameState');
+  if(saved){
+    state = JSON.parse(saved);
+    const savedAchievements = JSON.parse(localStorage.getItem('achievements'));
+    if(savedAchievements) savedAchievements.forEach(a => achievements.add(a));
+  } else {
+    state={money:50,usd:0,health:100,satiety:100,mood:100,rep:0,xp:0,level:1,str:5,int:5,cha:5,day:1,month:1,inventory:[],inPrison:0};
+    achievements.clear();
+  }
+  renderAchievements(); 
+  updateUI();
   showStory("Начинаем новую жизнь! Выберите локацию.");
   document.getElementById("restart").style.display="none";
   randomRate();
+}
+
+// ---------- RESET ----------
+function resetGame(){
+  localStorage.removeItem('gameState');
+  localStorage.removeItem('achievements');
+  achievements.clear();
+  startGame();
+}
+
+// ---------- SAVE ----------
+function saveGame(){
+  localStorage.setItem('gameState', JSON.stringify(state));
+  localStorage.setItem('achievements', JSON.stringify(Array.from(achievements)));
 }
 
 // ---------- UI ----------
@@ -108,7 +132,11 @@ function updateUI(){
   document.getElementById("xpBar").style.width=Math.min(100,(state.xp/(state.level*50))*100)+"%";
 
   const invDiv=document.getElementById("inventory"); invDiv.innerHTML="<h3>🎒 Инвентарь</h3>";
-  state.inventory.forEach(item=>{ const d=document.createElement("div"); d.innerHTML=`<img src='https://img.icons8.com/ios-filled/24/ffffff/box.png'/>${item}`; invDiv.appendChild(d); });
+  state.inventory.forEach(item=>{ 
+    const d=document.createElement("div"); 
+    d.innerHTML=`<img src='https://img.icons8.com/ios-filled/24/ffffff/box.png'/>${item}`; 
+    invDiv.appendChild(d); 
+  });
 
   if(state.health<=0||state.satiety<=0||state.mood<=0){
     showStory("Вы проиграли! Ваше состояние критическое.");
@@ -116,6 +144,8 @@ function updateUI(){
     document.getElementById("actions").innerHTML="";
     document.getElementById("shopItems").innerHTML="";
   }
+
+  saveGame();
 }
 
 // ---------- STORY ----------
@@ -141,9 +171,10 @@ function addAction(text, fn, type="normal"){
 
 // ---------- STATS LOSS ----------
 function loseStats(actionType="normal"){
-    if(actionType !== "heal") state.health = Math.max(0, state.health - 3);
-    if(actionType !== "eat") state.satiety = Math.max(0, state.satiety - 3);
-    if(actionType !== "mood") state.mood = Math.max(0, state.mood - 3);
+    const loss = 2; // теперь 2 за действие
+    if(actionType !== "heal") state.health = Math.max(0, state.health - loss);
+    if(actionType !== "eat") state.satiety = Math.max(0, state.satiety - loss);
+    if(actionType !== "mood") state.mood = Math.max(0, state.mood - loss);
 }
 
 // ---------- MONEY & XP ----------
@@ -176,17 +207,7 @@ function enterPrison(){
     function prisonAction(name,callback){
         const btn=document.createElement("button");
         btn.textContent=name;
-        btn.onclick=()=>{
-            callback();
-            state.inPrison--;
-            if(state.inPrison>0) enterPrison();
-            else{
-                state.inPrison=0;
-                showStory("Вы вышли из тюрьмы!","🎉");
-                document.getElementById("actions").innerHTML="";
-            }
-            updateUI();
-        };
+        btn.onclick=()=>{ callback(); state.inPrison--; if(state.inPrison>0) enterPrison(); else{ state.inPrison=0; showStory("Вы вышли из тюрьмы!","🎉"); document.getElementById("actions").innerHTML=""; } updateUI(); };
         document.getElementById("actions").appendChild(btn);
     }
 
@@ -210,13 +231,7 @@ switch(loc){
       break;
   case "work": showStory("Вы на работе"); 
       jobs.forEach(job=>{ 
-        addAction(job.name+` (+${job.salary} грн)`,()=>{
-          if(state.level<job.level){ showStory("Уровень слишком низкий"); return; } 
-          if(job.property && !state.inventory.includes(job.property)){ showStory(`Нужен ${job.property}`); return; } 
-          if(job.transport && !state.inventory.includes(job.transport)){ showStory(`Нужен ${job.transport}`); return; } 
-          if(job.education && !state.inventory.includes(job.education)){ showStory(`Нужна ${job.education}`); return; } 
-          gainMoney(job.salary); gainXP(Math.floor(job.salary/10)); addAchievement(`Работа: ${job.name}`); 
-        }); 
+        addAction(job.name+` (+${job.salary} грн)`,()=>{ if(state.level<job.level){ showStory("Уровень слишком низкий"); return; } if(job.property && !state.inventory.includes(job.property)){ showStory(`Нужен ${job.property}`); return; } if(job.transport && !state.inventory.includes(job.transport)){ showStory(`Нужен ${job.transport}`); return; } if(job.education && !state.inventory.includes(job.education)){ showStory(`Нужна ${job.education}`); return; } gainMoney(job.salary); gainXP(Math.floor(job.salary/10)); addAchievement(`Работа: ${job.name}`); }); 
       }); 
       break;
   case "shop": showStory("Вы в магазине"); 
@@ -246,6 +261,8 @@ startGame();
 </div>
 </body>
 </html>
+
+
 
 
 
