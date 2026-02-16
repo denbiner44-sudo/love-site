@@ -48,6 +48,7 @@ button img{width:24px;height:24px;margin-right:6px;}
 <button onclick="goTo('prison')">Тюрьма</button>
 <button onclick="goTo('park')">Парк</button>
 <button onclick="goTo('work')">Работа</button>
+<button onclick="recycle()">♻️ Сдать стеклотару</button>
 </div>
 
 <div class="actions" id="actions"></div>
@@ -75,12 +76,12 @@ const education = {
 
 // ---------- Jobs ----------
 const jobs = [
-{name:"Дворник", salary:150, level:1, property:null, transport:null, education:"Азбука"},
-{name:"Почтальон", salary:300, level:1, property:null, transport:null, education:"Букварик"},
-{name:"Таксист", salary:500, level:2, property:null, transport:"Машина", education:"Школа 1-5 клас"},
-{name:"Строитель", salary:800, level:3, property:null, transport:null, education:"Школа 6-9 клас"},
-{name:"Инженер", salary:1000, level:4, property:null, transport:null, education:"Школа 10-12 клас"},
-{name:"Менеджер", salary:1500, level:5, property:"Квартира", transport:null, education:"Колледж"},
+{name:"Дворник", salary:50, level:1, property:null, transport:null, education:"Азбука"},
+{name:"Почтальон", salary:100, level:1, property:null, transport:null, education:"Букварик"},
+{name:"Таксист", salary:200, level:2, property:null, transport:"Машина", education:"Школа 1-5 клас"},
+{name:"Строитель", salary:400, level:3, property:null, transport:null, education:"Школа 6-9 клас"},
+{name:"Инженер", salary:600, level:4, property:null, transport:null, education:"Школа 10-12 клас"},
+{name:"Менеджер", salary:800, level:5, property:"Квартира", transport:null, education:"Колледж"},
 {name:"Банкир", salary:2000, level:5, property:"Квартира", transport:null, education:"Универ"},
 {name:"Продавец", salary:2200, level:5, property:null, transport:null, education:"Колледж"},
 {name:"Программист", salary:2500, level:6, property:null, transport:"Машина", education:"Универ"},
@@ -114,11 +115,9 @@ function updateUI(){
   document.getElementById("money").textContent = state.money;
   document.getElementById("usd").textContent = state.usd.toFixed(2);
   document.getElementById("rate").textContent = rate.toFixed(2);
-
   document.getElementById("health").textContent = state.health;
   document.getElementById("satiety").textContent = state.satiety;
   document.getElementById("mood").textContent = state.mood;
-
   document.getElementById("rep").textContent=state.rep;
   document.getElementById("xp").textContent=state.xp;
   document.getElementById("level").textContent=state.level;
@@ -127,7 +126,6 @@ function updateUI(){
   document.getElementById("cha").textContent=state.cha;
   document.getElementById("day").textContent=state.day;
   document.getElementById("month").textContent=state.month;
-
   document.getElementById("healthBar").style.width = state.health+"%";
   document.getElementById("satietyBar").style.width = state.satiety+"%";
   document.getElementById("moodBar").style.width = state.mood+"%";
@@ -135,11 +133,7 @@ function updateUI(){
 
   const invDiv=document.getElementById("inventory");
   invDiv.innerHTML="<h3>🎒 Инвентарь</h3>";
-  state.inventory.forEach(item=>{
-    const d=document.createElement("div");
-    d.textContent=item;
-    invDiv.appendChild(d);
-  });
+  state.inventory.forEach(item=>{ const d=document.createElement("div"); d.textContent=item; invDiv.appendChild(d); });
 
   if(state.health <=0 || state.satiety <=0 || state.mood <=0){
     showStory("Вы проиграли! Ваше состояние критическое.");
@@ -150,24 +144,11 @@ function updateUI(){
 }
 
 // ---------- Story ----------
-function showStory(text){
-  const story=document.getElementById("story");
-  story.textContent=text;
-  story.classList.add("animated");
-  setTimeout(()=>story.classList.remove("animated"),400);
-}
+function showStory(text){ const story=document.getElementById("story"); story.textContent=text; story.classList.add("animated"); setTimeout(()=>story.classList.remove("animated"),400); }
 
 // ---------- Achievements ----------
-function addAchievement(name){
-  if(achievements.has(name)) return;
-  achievements.add(name); renderAchievements();
-}
-
-function renderAchievements(){
-  const div=document.getElementById("achievements");
-  div.innerHTML="<h3>🏆 Достижения</h3>";
-  achievements.forEach(a=>{ const d=document.createElement("div"); d.textContent=a; div.appendChild(d); });
-}
+function addAchievement(name){ if(achievements.has(name)) return; achievements.add(name); renderAchievements(); }
+function renderAchievements(){ const div=document.getElementById("achievements"); div.innerHTML="<h3>🏆 Достижения</h3>"; achievements.forEach(a=>{ const d=document.createElement("div"); d.textContent=a; div.appendChild(d); }); }
 
 // ---------- Actions ----------
 function addAction(text, fn){
@@ -175,175 +156,83 @@ function addAction(text, fn){
   btn.innerHTML=text;
   btn.onclick=()=>{
     fn();
-    findBottles(); // Рандомно добавляем до 5 бутылок на любое действие
-    loseStats();   // Потеря здоровья и настроения
+    findBottles();
+    loseStats();
   };
   document.getElementById("actions").appendChild(btn);
 }
 
-// ---------- Shop ----------
-function showShopItems(){
-  const shopDiv = document.getElementById("shopItems");
-  shopDiv.innerHTML = "<h3>🛒 Имущество</h3>";
-
-  const propHeader = document.createElement("h4"); propHeader.textContent = "🏠 Недвижимость"; shopDiv.appendChild(propHeader);
-  Object.keys(properties).forEach(p=>{
-    const btn = document.createElement("button"); btn.textContent = `${p} (${properties[p].price} грн)`; btn.onclick = ()=>buyPermanentItem(p); shopDiv.appendChild(btn);
-  });
-
-  const movHeader = document.createElement("h4"); movHeader.textContent = "🚗 Движимое имущество"; shopDiv.appendChild(movHeader);
-  Object.keys(transport).forEach(t=>{
-    const btn = document.createElement("button"); btn.textContent = `${t} (${transport[t]} грн)`; btn.onclick = ()=>buyPermanentItem(t); shopDiv.appendChild(btn);
-  });
-
-  const eduHeader = document.createElement("h4"); eduHeader.textContent = "📚 Образование"; shopDiv.appendChild(eduHeader);
-  Object.keys(education).forEach(e=>{
-    const btn = document.createElement("button"); btn.textContent = `${e} (${education[e]} грн)`; btn.onclick = ()=>buyPermanentItem(e); shopDiv.appendChild(btn);
-  });
-
-  // Кнопка обмена валют
-  const exchangeBtn = document.createElement("button");
-  exchangeBtn.textContent = "💱 Обмен валюты (грн ↔ $)";
-  exchangeBtn.onclick = exchangeCurrency;
-  shopDiv.appendChild(exchangeBtn);
-}
-
-// ---------- Locations ----------
-function goTo(loc){
-  state.day++; if(state.day>30){ state.day=1; state.month++; }
-  document.getElementById("actions").innerHTML="";
-  document.getElementById("shopItems").innerHTML="";
-
-  switch(loc){
-    case "street":
-      showStory("Вы на улице. Можно искать работу или событие.");
-      addAction("👷 Искать случайную работу (+50$)", ()=>{ gainMoney(50); gainXP(10); addAchievement("Первый заработок"); });
-      addAction("🎲 Случайное событие на улице", streetEvent);
-      break;
-    case "shop":
-      showStory("Вы в магазине. Можно купить еду, лекарства или имущество.");
-      addAction("🍎 Купить еду (20$ +10 сытости)", ()=>buyItem("Еда",20,10,"satiety"));
-      addAction("💊 Купить лекарство (50$ +30 здоровья)", ()=>buyItem("Лекарство",50,30,"health"));
-      addAction("💼 Купить инструмент (100$ +1 сила)", ()=>buyItem("Инструмент",100,0,"str"));
-      showShopItems();
-      break;
-    case "home":
-      showStory("Вы дома. Можно отдохнуть или тренироваться.");
-      addAction("🛌 Отдохнуть (+20 здоровья, +15 настроения)", ()=>{ rest(); changeMood(15); });
-      addAction("🏋️ Тренироваться (+1 сила, +5 опыта)", ()=>train("str"));
-      addAction("📚 Учить навыки (+1 интеллект, +5 опыта)", ()=>train("int"));
-      addAction("💬 Общение (+1 харизма, +5 опыта, +5 настроения)", ()=>{ train("cha"); changeMood(5); });
-      break;
-    case "park":
-      showStory("Вы в парке. Можно поднять настроение или найти что-то интересное.");
-      addAction("🍿 Пойти в кино (+15 настроения)", ()=>changeMood(15));
-      addAction("🥤 Взять алкоголь (+20 настроения, -5 здоровья)", ()=>{ changeMood(20); changeHealth(-5); });
-      break;
-    case "work":
-      showStory("Работа приносит деньги и опыт. Выберите работу:");
-      jobs.forEach(job=>{
-        addAction(`${job.name} (+${job.salary} грн)`, ()=>{
-          if(state.level<job.level){ showStory("Уровень слишком низкий"); return; }
-          if(job.property && !state.inventory.includes(job.property)){ showStory(`Нужен ${job.property}`); return; }
-          if(job.transport && !state.inventory.includes(job.transport)){ showStory(`Нужен ${job.transport}`); return; }
-          if(job.education && !state.inventory.includes(job.education)){ showStory(`Нужен ${job.education}`); return; }
-          gainMoney(job.salary); gainXP(Math.floor(job.salary/10));
-          showStory(`Вы поработали на позиции ${job.name} и заработали ${job.salary} грн`);
-          addAchievement(`Работа: ${job.name}`);
-        });
-      });
-      break;
-    default: showStory("Локация пока не реализована"); break;
-  }
-  updateUI();
-}
-
-// ---------- Game Logic ----------
+// ---------- Helpers ----------
 function gainMoney(amount){ state.money+=amount; updateUI(); }
-function gainXP(amount){ 
-  state.xp+=amount; 
-  while(state.xp >= state.level*50){ state.xp -= state.level*50; state.level++; addAchievement("Новый уровень"); }
-  updateUI(); 
-}
-function buyItem(name,cost,heal="",skill=""){ 
-  if(state.money<cost){ showStory("Недостаточно денег"); return; } 
-  state.money-=cost; 
-  if(!state.inventory.includes(name)) state.inventory.push(name); 
-  if(heal) state[skill] = Math.min(100,state[skill]+heal); 
-  if(skill && !heal) state[skill]+=1; 
-  updateUI(); 
-}
+function gainXP(amount){ state.xp+=amount; while(state.xp >= state.level*50){ state.xp -= state.level*50; state.level++; addAchievement("Новый уровень"); } updateUI(); }
+function buyItem(name,cost,heal="",skill=""){ if(state.money<cost){ showStory("Недостаточно денег"); return; } state.money-=cost; if(!state.inventory.includes(name)) state.inventory.push(name); if(heal) state[skill] = Math.min(100,state[skill]+heal); if(skill && !heal) state[skill]+=1; updateUI(); }
 function rest(){ state.health=Math.min(100,state.health+20); state.satiety=Math.min(100,state.satiety+10); updateUI(); }
 function train(skill){ state[skill]+=1; gainXP(5); updateUI(); }
-function buyPermanentItem(itemName){
-  let price = properties[itemName]?.price || transport[itemName] || education[itemName] || 0;
-  if(state.money<price){ showStory("Недостаточно денег"); return; }
-  state.money -= price; if(!state.inventory.includes(itemName)) state.inventory.push(itemName); showStory(`Вы купили ${itemName} на всегда`); updateUI();
-}
+function buyPermanentItem(itemName){ let price = properties[itemName]?.price || transport[itemName] || education[itemName] || 0; if(state.money<price){ showStory("Недостаточно денег"); return; } state.money -= price; if(!state.inventory.includes(itemName)) state.inventory.push(itemName); showStory(`Вы купили ${itemName} на всегда`); updateUI(); }
 
-// ---------- Currency Exchange ----------
+// ---------- Currency ----------
 function exchangeCurrency(){
   const usdAmount = prompt("Сколько $ купить/продать? (положительное — купить $ за грн, отрицательное — продать $)");
   const val = parseFloat(usdAmount);
   if(isNaN(val)) return;
-  if(val>0){
-    const cost = val*rate;
-    if(state.money<cost){ showStory("Недостаточно грн"); return; }
-    state.money -= cost; state.usd += val;
-    showStory(`Вы купили ${val.toFixed(2)}$ за ${cost.toFixed(2)} грн`);
-  } else {
-    const sell = -val;
-    if(state.usd<sell){ showStory("Недостаточно $"); return; }
-    state.usd -= sell; state.money += sell*rate;
-    showStory(`Вы продали ${sell.toFixed(2)}$ и получили ${(sell*rate).toFixed(2)} грн`);
-  }
+  if(val>0){ const cost = val*rate; if(state.money<cost){ showStory("Недостаточно грн"); return; } state.money -= cost; state.usd += val; showStory(`Вы купили ${val.toFixed(2)}$ за ${cost.toFixed(2)} грн`); }
+  else{ const sell = -val; if(state.usd<sell){ showStory("Недостаточно $"); return; } state.usd -= sell; state.money += sell*rate; showStory(`Вы продали ${sell.toFixed(2)}$ и получили ${(sell*rate).toFixed(2)} грн`); }
   updateUI();
 }
 
 // ---------- Random Rate ----------
 function randomRate(){
   setInterval(()=>{
-    rate += (Math.random()-0.5)*2; // колебание ±1
-    if(rate<30) rate=30; if(rate>60) rate=60;
+    rate += (Math.random()-0.5)*40; // ±20 грн
+    if(rate<30) rate=30; if(rate>70) rate=70;
     updateUI();
   },5000);
 }
 
 // ---------- Random Bottles ----------
-function findBottles(){
-  const num = Math.floor(Math.random()*6); // 0–5
-  for(let i=0;i<num;i++){
-    state.inventory.push("Бутылка");
-  }
-}
+function findBottles(){ const num = Math.floor(Math.random()*6); for(let i=0;i<num;i++){ state.inventory.push("Бутылка"); } }
 
 // ---------- Stats Loss ----------
-function loseStats(){
-  state.health = Math.max(0, state.health - Math.floor(Math.random()*3));
-  state.satiety = Math.max(0, state.satiety - Math.floor(Math.random()*4));
-  state.mood = Math.max(0, state.mood - Math.floor(Math.random()*3));
-}
+function loseStats(){ state.health = Math.max(0, state.health - Math.floor(Math.random()*3)); state.satiety = Math.max(0, state.satiety - Math.floor(Math.random()*4)); state.mood = Math.max(0, state.mood - Math.floor(Math.random()*3)); }
+
+// ---------- Recycle ----------
+function recycle(){ const bottles = state.inventory.filter(i => i === "Бутылка").length; if(bottles === 0){ showStory("У вас нет бутылок для сдачи"); return; } const money = bottles * 5; state.money += money; state.inventory = state.inventory.filter(i => i !== "Бутылка"); showStory(`Вы сдали ${bottles} бутылок и получили ${money} грн`); updateUI(); }
 
 // ---------- Street Event ----------
 function streetEvent(){
   const events = [
-    ()=>{ gainMoney(100); showStory("Найдено 100 грн!"); },
-    ()=>{ changeHealth(-10); showStory("Попали под дождь, здоровье -10"); },
-    ()=>{ changeMood(15); showStory("Встретили друзей, настроение +15"); },
+    ()=>{ gainMoney(50); showStory("Найдено 50 грн!"); },
+    ()=>{ state.health = Math.max(0,state.health-10); showStory("Попали под дождь, здоровье -10"); },
+    ()=>{ state.mood = Math.min(100,state.mood+15); showStory("Встретили друзей, настроение +15"); },
     ()=>{ gainXP(10); showStory("Прочитали объявление, опыт +10"); }
   ];
-  const e = events[Math.floor(Math.random()*events.length)];
-  e();
+  const e = events[Math.floor(Math.random()*events.length)]; e();
+  updateUI();
 }
 
-// ---------- Helpers ----------
-function changeHealth(val){ state.health=Math.min(100,Math.max(0,state.health+val)); updateUI(); }
-function changeMood(val){ state.mood=Math.min(100,Math.max(0,state.mood+val)); updateUI(); }
+// ---------- Go To ----------
+function goTo(loc){
+  state.day++; if(state.day>30){ state.day=1; state.month++; }
+  document.getElementById("actions").innerHTML="";
+  document.getElementById("shopItems").innerHTML="";
+
+  switch(loc){
+    case "street": showStory("Вы на улице. Можно искать работу или событие."); addAction("👷 Искать случайную работу (+50$)", ()=>{ gainMoney(50); gainXP(10); addAchievement("Первый заработок"); }); addAction("🎲 Случайное событие на улице", streetEvent); break;
+    case "shop": showStory("Вы в магазине."); addAction("🍎 Купить еду (20$ +10 сытости)", ()=>buyItem("Еда",20,10,"satiety")); addAction("💊 Купить лекарство (50$ +30 здоровья)", ()=>buyItem("Лекарство",50,30,"health")); addAction("💼 Купить инструмент (100$ +1 сила)", ()=>buyItem("Инструмент",100,0,"str")); const shopDiv=document.getElementById("shopItems"); shopDiv.innerHTML="<h3>🛒 Имущество</h3>"; Object.keys(properties).forEach(p=>{ const btn=document.createElement("button"); btn.textContent=`${p} (${properties[p].price} грн)`; btn.onclick=()=>buyPermanentItem(p); shopDiv.appendChild(btn); }); const exBtn=document.createElement("button"); exBtn.textContent="💱 Обмен валюты (грн ↔ $)"; exBtn.onclick=exchangeCurrency; shopDiv.appendChild(exBtn); break;
+    case "home": showStory("Вы дома."); addAction("🛌 Отдохнуть (+20 здоровья, +15 настроения)", ()=>{ rest(); state.mood=Math.min(100,state.mood+15); updateUI(); }); addAction("🏋️ Тренироваться (+1 сила, +5 опыта)", ()=>train("str")); addAction("📚 Учить навыки (+1 интеллект, +5 опыта)", ()=>train("int")); addAction("💬 Общение (+1 харизма, +5 опыта, +5 настроения)", ()=>{ train("cha"); state.mood=Math.min(100,state.mood+5); updateUI(); }); break;
+    case "park": showStory("Вы в парке."); addAction("🍿 Пойти в кино (+15 настроения)", ()=>{ state.mood=Math.min(100,state.mood+15); updateUI(); }); addAction("🥤 Взять алкоголь (+20 настроения, -5 здоровья)", ()=>{ state.mood=Math.min(100,state.mood+20); state.health=Math.max(0,state.health-5); updateUI(); }); break;
+    case "work": showStory("Работа приносит деньги и опыт."); jobs.forEach(job=>{ addAction(`${job.name} (+${job.salary} грн)`, ()=>{ if(state.level<job.level){ showStory("Уровень слишком низкий"); return; } if(job.property && !state.inventory.includes(job.property)){ showStory(`Нужен ${job.property}`); return; } if(job.transport && !state.inventory.includes(job.transport)){ showStory(`Нужен ${job.transport}`); return; } if(job.education && !state.inventory.includes(job.education)){ showStory(`Нужен ${job.education}`); return; } gainMoney(job.salary); gainXP(Math.floor(job.salary/10)); showStory(`Вы поработали на позиции ${job.name} и заработали ${job.salary} грн`); addAchievement(`Работа: ${job.name}`); }); }); break;
+    default: showStory("Локация пока не реализована"); break;
+  }
+  updateUI();
+}
 
 startGame();
 </script>
 </body>
 </html>
+
+
 
 
 
