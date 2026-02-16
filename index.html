@@ -106,6 +106,43 @@ button img { width: 24px; height: 24px; margin-right: 6px; }
 let state;
 const achievements = new Set();
 
+// ---------- Items ----------
+const properties = {
+  "Палатка": {price:500, type:"own"},
+  "Чердак": {price:200, rent:30, type:"rent"},
+  "Квартира": {price:1000, rent:30, type:"rent"},
+  "Дом": {price:40000, type:"own"},
+  "Пентхаус": {price:200000, type:"own"}
+};
+const transport = {
+  "Кроссовки": 0,
+  "Велосипед": 500,
+  "Скутер": 2000,
+  "Машина": 10000,
+  "Спорткар": 50000,
+  "Вертолет": 200000
+};
+const education = {
+  "Таблица умножения": 2000,
+  "Букварик": 5000,
+  "Школа 1-5 клас": 8000,
+  "Школа 6-12 клас": 10000,
+  "Универ": 15000
+};
+
+// ---------- Jobs ----------
+const jobs = [
+  {name:"Дворник", salary:150, level:1, property:null, transport:null, education:"Таблица умножения"},
+  {name:"Почтальон", salary:300, level:1, property:null, transport:null, education:"Букварик"},
+  {name:"Таксист", salary:500, level:2, property:null, transport:"Машина", education:"Школа 1-5 клас"},
+  {name:"Строитель", salary:800, level:3, property:null, transport:null, education:"Школа 6-12 клас"},
+  {name:"Инженер", salary:1000, level:4, property:null, transport:null, education:"Универ"},
+  {name:"Менеджер", salary:1500, level:5, property:"Квартира", transport:null, education:"Универ"},
+  {name:"Банкир", salary:3000, level:6, property:"Дом", transport:null, education:"Универ"},
+  {name:"Депутат", salary:5000, level:7, property:"Дом", transport:null, education:"Универ"},
+  {name:"Президент", salary:10000, level:10, property:"Пентхаус", transport:"Вертолет", education:"Универ"}
+];
+
 // ---------- Save/Load ----------
 function saveGame(){
   localStorage.setItem("gameState", JSON.stringify(state));
@@ -198,17 +235,36 @@ function goTo(loc){
   const actionsDiv=document.getElementById("actions");
   actionsDiv.innerHTML="";
   switch(loc){
-    case "street":
-      showStory("Вы на улице. Можно искать работу, встретить NPC или событие.");
-      addAction("👷 Искать случайную работу (+50$)", ()=>{gainMoney(50); gainXP(10); addAchievement("Первый заработок")});
-      addAction("💬 Поговорить с NPC", ()=>{randomNPC()});
-      randomEvent(); break;
+    case "work":
+      showStory("Работа приносит деньги и опыт. Выберите доступную работу:");
+      jobs.forEach(job=>{
+        addAction(`${job.name} (+${job.salary} грн)`, ()=>{
+          if(state.level<job.level){ showStory("Уровень слишком низкий для этой работы"); return; }
+          if(job.property && !state.inventory.includes(job.property)){ showStory(`Нужен ${job.property}`); return; }
+          if(job.transport && !state.inventory.includes(job.transport)){ showStory(`Нужен ${job.transport}`); return; }
+          if(job.education && !state.inventory.includes(job.education)){ showStory(`Нужен ${job.education}`); return; }
+
+          gainMoney(job.salary);
+          gainXP(Math.floor(job.salary/10));
+          showStory(`Вы поработали на позиции ${job.name} и заработали ${job.salary} грн`);
+          addAchievement(`Работа: ${job.name}`);
+        });
+      });
+      break;
     case "shop":
-      showStory("Вы в магазине. Можно купить еду или лекарства.");
+      showStory("Вы в магазине. Можно купить еду, лекарства или вещи для работы.");
       addAction("🍎 Купить еду (20$ +10 здоровья)", ()=>buyItem("Еда",20,10));
       addAction("💊 Купить лекарство (50$ +30 здоровья)", ()=>buyItem("Лекарство",50,30));
       addAction("💼 Купить инструмент (100$ +1 сила)", ()=>buyItem("Инструмент",100,0,"str"));
+      Object.keys(properties).forEach(p=>addAction(`🏠 Купить ${p} (${properties[p].price} грн)`, ()=>buyPermanentItem(p)));
+      Object.keys(transport).forEach(t=>addAction(`🛵 Купить ${t} (${transport[t]} грн)`, ()=>buyPermanentItem(t)));
+      Object.keys(education).forEach(e=>addAction(`📚 Купить ${e} (${education[e]} грн)`, ()=>buyPermanentItem(e)));
       break;
+    case "street":
+      showStory("Вы на улице. Можно искать случайную работу, встретить NPC или событие.");
+      addAction("👷 Искать случайную работу (+50$)", ()=>{gainMoney(50); gainXP(10); addAchievement("Первый заработок")});
+      addAction("💬 Поговорить с NPC", ()=>{randomNPC()});
+      randomEvent(); break;
     case "home":
       showStory("Вы дома. Можно отдохнуть или тренироваться.");
       addAction("🛌 Отдохнуть (+20 здоровья)", ()=>rest());
@@ -226,10 +282,6 @@ function goTo(loc){
       showStory("Парк — отличное место для случайных событий.");
       addAction("🚶 Прогуляться", ()=>randomEvent());
       addAction("💬 Встретить NPC", ()=>randomNPC()); break;
-    case "work":
-      showStory("Работа приносит деньги и опыт.");
-      addAction("🛠️ Работать (+30$ +10 опыта)", ()=>{gainMoney(30); gainXP(10)});
-      addAction("📈 Инвестировать (50$ шанс +100$)", ()=>invest()); break;
   }
   updateUI();
 }
@@ -300,8 +352,8 @@ function randomNPC(){
   else if(e.includes("+20$")) state.money+=20;
   else if(e.includes("-5 репутации")) state.rep-=5; 
   else if(e.includes("+10 репутации")) state.rep+=10;
-  gainXP(5); 
-  updateUI(); 
+  else showStory(e); 
+  gainXP(5); updateUI(); 
 }
 
 function invest(){ 
@@ -312,20 +364,31 @@ function invest(){
   updateUI(); 
 }
 
-function checkDeath(){
-  if(state.health<=0){
-    state.health=0;
-    showStory("💀 Вы умерли! Конец игры.");
-    document.getElementById("restart").style.display="block";
-  }
+function buyPermanentItem(itemName){
+  let price=0;
+  if(properties[itemName]) price=properties[itemName].price;
+  else if(transport[itemName]) price=transport[itemName];
+  else if(education[itemName]) price=education[itemName];
+  else { showStory("Предмет не найден"); return; }
+
+  if(state.money<price){ showStory("Недостаточно денег"); return; }
+  state.money -= price;
+  if(!state.inventory.includes(itemName)) state.inventory.push(itemName);
+  showStory(`Вы купили ${itemName} на всегда за ${price} грн`);
+  updateUI();
 }
 
-// ---------- Load on start ----------
+function checkDeath(){
+  if(state.health <=0){ showStory("Вы умерли. Конец игры."); document.getElementById("restart").style.display="block"; }
+}
+
+startGame();
 loadGame();
-if(!state) startGame();
 </script>
 </body>
 </html>
+
+
 
 
 
