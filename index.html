@@ -11,30 +11,35 @@ body {
   color: #e5e7eb;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
   padding: 20px;
 }
-
 .container {
   width: 100%;
-  max-width: 900px;
+  max-width: 1000px;
   background: #111827;
   padding: 20px;
   border-radius: 16px;
   box-shadow: 0 15px 40px rgba(0,0,0,0.6);
 }
-
 .stats, .inventory, .map, .actions, #achievements {
   margin-bottom: 15px;
 }
-
 .stats div, .inventory div, #achievements div {
   background: #1f2937;
   padding: 8px;
   border-radius: 10px;
   margin: 4px 0;
+  display: flex;
+  align-items: center;
 }
-
+.stats span.progress {
+  display: inline-block;
+  height: 8px;
+  border-radius: 4px;
+  background: #16a34a;
+  margin-left: 6px;
+  flex-grow: 1;
+}
 button {
   padding: 10px;
   margin: 4px;
@@ -43,225 +48,286 @@ button {
   background: #22c55e;
   color: #052e16;
   cursor: pointer;
+  display: flex;
+  align-items: center;
 }
-
 button:hover { background: #16a34a; }
-
+button img { width: 24px; height: 24px; margin-right: 6px; }
 .map button { background: #3b82f6; color: white; }
-
 #story {
-  min-height: 60px;
+  min-height: 80px;
   margin-bottom: 10px;
+  background: #1f2937;
+  padding: 10px;
+  border-radius: 12px;
+  font-size: 16px;
+  line-height: 1.4;
 }
+.animated { animation: flash 0.4s ease; }
+@keyframes flash { 0% { background-color: #facc15; } 50% { background-color: #1f2937; } 100% { background-color: #facc15; } }
+.inventory img { width: 24px; height: 24px; margin-right: 6px; }
 </style>
 </head>
 <body>
 <div class="container">
-  <h1>🧹 Бомжара — История успеха!</h1>
+<h1>🧹 Бомжара — История успеха!</h1>
 
-  <div class="stats">
-    <h3>Персонаж</h3>
-    <div>💰 Деньги: <span id="money">0</span></div>
-    <div>❤️ Здоровье: <span id="health">100</span></div>
-    <div>⭐ Репутация: <span id="rep">0</span></div>
-    <div>⚡ Опыт: <span id="xp">0</span> | Уровень: <span id="level">1</span></div>
-    <div>💪 Сила: <span id="str">5</span> | 🧠 Интеллект: <span id="int">5</span> | 🤝 Харизма: <span id="cha">5</span></div>
-    <div>🕒 День: <span id="day">1</span> | Месяц: <span id="month">1</span></div>
-  </div>
+<div class="stats">
+  <h3>Персонаж</h3>
+  <div>💰 Деньги: <span id="money">0</span></div>
+  <div>❤️ Здоровье: <span id="health">100</span> <span class="progress" id="healthBar"></span></div>
+  <div>⭐ Репутация: <span id="rep">0</span></div>
+  <div>⚡ Опыт: <span id="xp">0</span> | Уровень: <span id="level">1</span> <span class="progress" id="xpBar"></span></div>
+  <div>💪 Сила: <span id="str">5</span> | 🧠 Интеллект: <span id="int">5</span> | 🤝 Харизма: <span id="cha">5</span></div>
+  <div>🕒 День: <span id="day">1</span> | Месяц: <span id="month">1</span></div>
+</div>
 
-  <div id="story"></div>
+<div id="story"></div>
 
-  <div class="map">
-    <h3>🏘️ Карта города</h3>
-    <button onclick="goTo('street')">🚶 Улица</button>
-    <button onclick="goTo('shop')">🏪 Магазин</button>
-    <button onclick="goTo('home')">🏠 Дом</button>
-    <button onclick="goTo('hospital')">🏥 Больница</button>
-    <button onclick="goTo('prison')">🚨 Тюрьма</button>
-  </div>
+<div class="map">
+  <h3>🏘️ Карта города</h3>
+  <button onclick="goTo('street')"><img src="https://img.icons8.com/ios-filled/50/ffffff/street.png"/>Улица</button>
+  <button onclick="goTo('shop')"><img src="https://img.icons8.com/ios-filled/50/ffffff/shop.png"/>Магазин</button>
+  <button onclick="goTo('home')"><img src="https://img.icons8.com/ios-filled/50/ffffff/home.png"/>Дом</button>
+  <button onclick="goTo('hospital')"><img src="https://img.icons8.com/ios-filled/50/ffffff/hospital-room.png"/>Больница</button>
+  <button onclick="goTo('prison')"><img src="https://img.icons8.com/ios-filled/50/ffffff/prison.png"/>Тюрьма</button>
+  <button onclick="goTo('park')"><img src="https://img.icons8.com/ios-filled/50/ffffff/park.png"/>Парк</button>
+  <button onclick="goTo('work')"><img src="https://img.icons8.com/ios-filled/50/ffffff/briefcase.png"/>Работа</button>
+</div>
 
-  <div class="actions" id="actions"></div>
-  <div class="inventory" id="inventory"><h3>🎒 Инвентарь</h3></div>
-  <div id="achievements"><h3>🏆 Достижения</h3></div>
-  <button id="restart" onclick="startGame()" style="display:none;">Начать заново</button>
+<div class="actions" id="actions"></div>
+<div class="inventory" id="inventory"><h3>🎒 Инвентарь</h3></div>
+<div id="achievements"><h3>🏆 Достижения</h3></div>
+<button id="restart" onclick="startGame()" style="display:none;">Начать заново</button>
 </div>
 
 <script>
+// ---------- State ----------
 let state;
 const achievements = new Set();
 
-function startGame() {
-  state = {
-    money: 50,
-    health: 100,
-    rep: 0,
-    xp: 0,
-    level: 1,
-    str: 5,
-    int: 5,
-    cha: 5,
-    day: 1,
-    month: 1,
-    inventory: []
-  };
-  achievements.clear();
-  document.getElementById("achievements").innerHTML = "<h3>🏆 Достижения</h3>";
-  updateUI();
-  showStory("Вы бомж, но готовы к жизни в городе. Выберите локацию.");
-  document.getElementById("restart").style.display = "none";
+// ---------- Save/Load ----------
+function saveGame(){
+  localStorage.setItem("gameState", JSON.stringify(state));
+  localStorage.setItem("achievements", JSON.stringify([...achievements]));
+}
+function loadGame(){
+  const s = localStorage.getItem("gameState");
+  const a = localStorage.getItem("achievements");
+  if(s){ state = JSON.parse(s); updateUI(); showStory("Прогресс загружен!"); }
+  if(a){ JSON.parse(a).forEach(x=>achievements.add(x)); renderAchievements(); }
 }
 
-function updateUI() {
-  document.getElementById("money").textContent = state.money;
-  document.getElementById("health").textContent = state.health;
-  document.getElementById("rep").textContent = state.rep;
-  document.getElementById("xp").textContent = state.xp;
-  document.getElementById("level").textContent = state.level;
-  document.getElementById("str").textContent = state.str;
-  document.getElementById("int").textContent = state.int;
-  document.getElementById("cha").textContent = state.cha;
-  document.getElementById("day").textContent = state.day;
-  document.getElementById("month").textContent = state.month;
+// ---------- Start ----------
+function startGame(){
+  state = { money:50, health:100, rep:0, xp:0, level:1, str:5, int:5, cha:5, day:1, month:1, inventory:[] };
+  achievements.clear();
+  renderAchievements();
+  updateUI();
+  showStory("Вы бомж, но готовы к жизни в городе. Выберите локацию.");
+  document.getElementById("restart").style.display="none";
+  saveGame();
+}
 
-  const invDiv = document.getElementById("inventory");
-  invDiv.innerHTML = "<h3>🎒 Инвентарь</h3>";
-  state.inventory.forEach(item => {
-    const d = document.createElement("div");
-    d.textContent = item;
+// ---------- UI ----------
+function updateUI(){
+  document.getElementById("money").textContent=state.money;
+  document.getElementById("health").textContent=state.health;
+  document.getElementById("rep").textContent=state.rep;
+  document.getElementById("xp").textContent=state.xp;
+  document.getElementById("level").textContent=state.level;
+  document.getElementById("str").textContent=state.str;
+  document.getElementById("int").textContent=state.int;
+  document.getElementById("cha").textContent=state.cha;
+  document.getElementById("day").textContent=state.day;
+  document.getElementById("month").textContent=state.month;
+  document.getElementById("healthBar").style.width = state.health+"%";
+  document.getElementById("xpBar").style.width = Math.min(100, (state.xp/(state.level*50))*100) + "%";
+
+  const invDiv=document.getElementById("inventory");
+  invDiv.innerHTML="<h3>🎒 Инвентарь</h3>";
+  state.inventory.forEach(item=>{
+    let icon="";
+    if(item==="Еда") icon="https://img.icons8.com/ios-filled/50/ffffff/apple.png";
+    if(item==="Лекарство") icon="https://img.icons8.com/ios-filled/50/ffffff/pill.png";
+    if(item==="Инструмент") icon="https://img.icons8.com/ios-filled/50/ffffff/hammer.png";
+    const d=document.createElement("div");
+    d.innerHTML=icon? `<img src="${icon}"/> ${item}` : item;
     invDiv.appendChild(d);
   });
+
+  saveGame();
 }
 
 function showStory(text){
-  document.getElementById("story").textContent = text;
+  const story=document.getElementById("story");
+  story.textContent=text;
+  story.classList.add("animated");
+  setTimeout(()=>story.classList.remove("animated"),400);
 }
 
 function addAchievement(name){
   if(achievements.has(name)) return;
   achievements.add(name);
-  const div = document.createElement("div");
-  div.textContent = name;
-  document.getElementById("achievements").appendChild(div);
+  renderAchievements();
+  saveGame();
 }
 
-function goTo(location){
-  state.day++;
-  if(state.day>30){ state.day=1; state.month++; }
-
-  const actionsDiv = document.getElementById("actions");
-  actionsDiv.innerHTML = "";
-
-  if(location==="street"){
-    showStory("Вы на улице. Можно искать работу или встречать NPC.");
-    addAction("👷 Искать работу (+50$)", ()=>{gainMoney(50); gainXP(10); addAchievement("Первый заработок")});
-    addAction("💬 Поговорить с NPC", ()=>{randomNPC()});
-    randomEvent();
-  }
-  else if(location==="shop"){
-    showStory("Вы в магазине. Можно купить еду или лекарства.");
-    addAction("🍎 Купить еду (20$)", ()=>buyItem("Еда",20,10));
-    addAction("💊 Купить лекарство (50$)", ()=>buyItem("Лекарство",50,30));
-  }
-  else if(location==="home"){
-    showStory("Вы дома. Можно отдохнуть.");
-    addAction("🛌 Отдохнуть (+20 здоровья)", ()=>rest());
-  }
-  else if(location==="hospital"){
-    showStory("Вы в больнице. Лечение полностью восстанавливает здоровье.");
-    addAction("💉 Лечение (-50$)", ()=>heal(50));
-  }
-  else if(location==="prison"){
-    showStory("Вы в тюрьме! Отсидка снижает здоровье, но идёт время.");
-    addAction("🕒 Отсидеть день (-20 здоровья)", ()=>prisonDay());
-  }
-
-  updateUI();
+function renderAchievements(){
+  const div=document.getElementById("achievements");
+  div.innerHTML="<h3>🏆 Достижения</h3>";
+  achievements.forEach(a=>{
+    const d=document.createElement("div");
+    d.textContent=a;
+    div.appendChild(d);
+  });
 }
 
+// ---------- Actions ----------
 function addAction(text, fn){
-  const btn = document.createElement("button");
-  btn.textContent = text;
-  btn.onclick = fn;
+  const btn=document.createElement("button");
+  btn.innerHTML=text;
+  btn.onclick=fn;
   document.getElementById("actions").appendChild(btn);
 }
 
-function gainMoney(amount){
-  state.money += amount;
-  showStory(`Вы заработали ${amount}$`);
-  updateUI();
-}
-
-function gainXP(amount){
-  state.xp += amount;
-  if(state.xp >= state.level*50){
-    state.level++;
-    state.xp = 0;
-    showStory(`🎉 Поздравляем! Вы достигли уровня ${state.level}`);
-    addAchievement("Новый уровень");
+// ---------- Locations ----------
+function goTo(loc){
+  state.day++;
+  if(state.day>30){ state.day=1; state.month++; }
+  const actionsDiv=document.getElementById("actions");
+  actionsDiv.innerHTML="";
+  switch(loc){
+    case "street":
+      showStory("Вы на улице. Можно искать работу, встретить NPC или событие.");
+      addAction("👷 Искать случайную работу (+50$)", ()=>{gainMoney(50); gainXP(10); addAchievement("Первый заработок")});
+      addAction("💬 Поговорить с NPC", ()=>{randomNPC()});
+      randomEvent(); break;
+    case "shop":
+      showStory("Вы в магазине. Можно купить еду или лекарства.");
+      addAction("🍎 Купить еду (20$ +10 здоровья)", ()=>buyItem("Еда",20,10));
+      addAction("💊 Купить лекарство (50$ +30 здоровья)", ()=>buyItem("Лекарство",50,30));
+      addAction("💼 Купить инструмент (100$ +1 сила)", ()=>buyItem("Инструмент",100,0,"str"));
+      break;
+    case "home":
+      showStory("Вы дома. Можно отдохнуть или тренироваться.");
+      addAction("🛌 Отдохнуть (+20 здоровья)", ()=>rest());
+      addAction("🏋️ Тренироваться (+1 сила, +5 опыта)", ()=>train("str"));
+      addAction("📚 Учить навыки (+1 интеллект, +5 опыта)", ()=>train("int"));
+      addAction("💬 Общение (+1 харизма, +5 опыта)", ()=>train("cha"));
+      break;
+    case "hospital":
+      showStory("Вы в больнице. Лечение полностью восстанавливает здоровье.");
+      addAction("💉 Лечение (-50$)", ()=>heal(50)); break;
+    case "prison":
+      showStory("Вы в тюрьме! Отсидка снижает здоровье, но идёт время.");
+      addAction("🕒 Отсидеть день (-20 здоровья)", ()=>prisonDay()); break;
+    case "park":
+      showStory("Парк — отличное место для случайных событий.");
+      addAction("🚶 Прогуляться", ()=>randomEvent());
+      addAction("💬 Встретить NPC", ()=>randomNPC()); break;
+    case "work":
+      showStory("Работа приносит деньги и опыт.");
+      addAction("🛠️ Работать (+30$ +10 опыта)", ()=>{gainMoney(30); gainXP(10)});
+      addAction("📈 Инвестировать (50$ шанс +100$)", ()=>invest()); break;
   }
   updateUI();
 }
 
-function buyItem(name,cost,heal){
-  if(state.money<cost){ showStory("Недостаточно денег"); return; }
-  state.money-=cost;
-  state.inventory.push(name);
-  state.health=Math.min(100,state.health+heal);
-  showStory(`Вы купили ${name} и восстановили ${heal} здоровья`);
-  updateUI();
+// ---------- Game Logic ----------
+function gainMoney(amount){ state.money+=amount; showStory(`Вы заработали ${amount}$`); updateUI(); }
+function gainXP(amount){ 
+  state.xp+=amount; 
+  while(state.xp >= state.level*50){ 
+    state.xp -= state.level*50; 
+    state.level++; 
+    showStory(`🎉 Поздравляем! Вы достигли уровня ${state.level}`); 
+    addAchievement("Новый уровень"); 
+  } 
+  updateUI(); 
 }
 
-function rest(){
-  state.health=Math.min(100,state.health+20);
-  showStory("Вы отдохнули и восстановили здоровье");
-  updateUI();
+function buyItem(name,cost,heal="",skill=""){ 
+  if(state.money<cost){ showStory("Недостаточно денег"); return; } 
+  state.money-=cost; 
+  state.inventory.push(name); 
+  if(heal) state.health=Math.min(100,state.health+heal); 
+  if(skill) state[skill]+=1; 
+  showStory(`Вы купили ${name}${heal? " и восстановили здоровье":""}${skill? " и прокачали "+skill:""}`); 
+  checkDeath();
+  updateUI(); 
 }
-
-function heal(cost){
-  if(state.money<cost){ showStory("Недостаточно денег"); return; }
-  state.money-=cost;
-  state.health=100;
-  showStory("Вы полностью вылечились!");
-  updateUI();
+function rest(){ state.health=Math.min(100,state.health+20); showStory("Вы отдохнули"); updateUI(); }
+function heal(cost){ 
+  if(state.money<cost){ showStory("Недостаточно денег"); return; } 
+  state.money-=cost; state.health=100; showStory("Вы полностью вылечились!"); updateUI(); 
 }
+function prisonDay(){ state.health-=20; showStory("Вы провели день в тюрьме. Здоровье -20"); checkDeath(); updateUI(); }
+function train(skill){ state[skill]+=1; gainXP(5); showStory(`Вы прокачали ${skill} +1 и получили 5 опыта`); updateUI(); }
 
-function prisonDay(){
-  state.health-=20;
-  showStory("Вы провели день в тюрьме. Здоровье -20");
-  if(state.health<=0){
-    showStory("Вы умерли в тюрьме. Конец игры.");
-    document.getElementById("restart").style.display="block";
+function randomEvent(){ 
+  const r=Math.random(); 
+  if(r<0.25){ 
+    const dmg=Math.floor(Math.random()*15+5); 
+    state.health-=dmg; 
+    showStory(`⚡ Случайное событие! Вы пострадали, -${dmg} здоровья`); 
+    checkDeath(); 
+  } else if(r<0.5){
+    const money=Math.floor(Math.random()*30+10);
+    gainMoney(money);
+    showStory(`🎁 Случайное событие! Вы нашли ${money}$`);
+  } else {
+    showStory("Событие прошло спокойно.");
   }
-  updateUI();
+  updateUI(); 
 }
 
-function randomEvent(){
-  const r=Math.random();
-  if(r<0.2){
-    state.health-=10;
-    showStory("⚡ Случайное событие! Вы пострадали, -10 здоровья");
-  }
-}
-
-function randomNPC(){
+function randomNPC(){ 
   const events=[
     "NPC предлагает работу: +50$",
     "NPC ругает вас: -5 репутации",
-    "Вы встретили друга: +10 репутации"
-  ];
-  const e=events[Math.floor(Math.random()*events.length)];
-  showStory(e);
-  if(e.includes("+50$")) state.money+=50;
-  if(e.includes("-5 репутации")) state.rep-=5;
-  if(e.includes("+10 репутации")) state.rep+=10;
-  gainXP(5);
-  updateUI();
+    "Вы встретили друга: +10 репутации",
+    "NPC обучает вас (+1 навыка случайный)",
+    "NPC даёт подарок: +20$"
+  ]; 
+  const e=events[Math.floor(Math.random()*events.length)]; 
+  if(e.includes("навыка случайный")){
+    const skills=["str","int","cha"];
+    const s=skills[Math.floor(Math.random()*3)];
+    state[s]+=1; 
+    showStory(`NPC обучил вас. Прокачан ${s} +1`); 
+  } else if(e.includes("+50$")) state.money+=50; 
+  else if(e.includes("+20$")) state.money+=20;
+  else if(e.includes("-5 репутации")) state.rep-=5; 
+  else if(e.includes("+10 репутации")) state.rep+=10;
+  gainXP(5); 
+  updateUI(); 
 }
 
-startGame();
+function invest(){ 
+  if(state.money<50){ showStory("Недостаточно денег"); return; } 
+  state.money-=50; 
+  if(Math.random()<0.5){ state.money+=100; showStory("Инвестиция успешна! +100$"); addAchievement("Первый капитал"); } 
+  else showStory("Инвестиция провалилась..."); 
+  updateUI(); 
+}
+
+function checkDeath(){
+  if(state.health<=0){
+    state.health=0;
+    showStory("💀 Вы умерли! Конец игры.");
+    document.getElementById("restart").style.display="block";
+  }
+}
+
+// ---------- Load on start ----------
+loadGame();
+if(!state) startGame();
 </script>
 </body>
 </html>
+
+
 
 
 
