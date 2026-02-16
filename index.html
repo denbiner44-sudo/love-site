@@ -72,11 +72,11 @@ const transport = { "Кроссовки":0, "Велосипед":500, "Скут�
 const education = { "Азбука":1000, "Букварик":5000, "Школа":10000, "Колледж":15000, "Универ":20000, "Магистратура":30000, "Докторантура":50000 };
 
 const jobs = [
-{name:"Дворник", salary:50, level:1, property:null, transport:null, education:"Азбука"},
-{name:"Почтальон", salary:100, level:1, property:null, transport:null, education:"Букварик"},
-{name:"Таксист", salary:200, level:2, property:null, transport:"Машина", education:"Школа"},
-{name:"Программист", salary:1000, level:5, property:null, transport:"Машина", education:"Универ"},
-{name:"Президент", salary:10000, level:10, property:"Пентхаус", transport:"Вертолет", education:"Докторантура"}
+  {name:"Дворник", salary:50, level:1, property:null, transport:null, education:"Азбука"},
+  {name:"Почтальон", salary:100, level:1, property:null, transport:null, education:"Букварик"},
+  {name:"Таксист", salary:200, level:2, property:null, transport:"Машина", education:"Школа"},
+  {name:"Программист", salary:1000, level:5, property:null, transport:"Машина", education:"Универ"},
+  {name:"Президент", salary:10000, level:10, property:"Пентхаус", transport:"Вертолет", education:"Докторантура"}
 ];
 
 // ---------- START ----------
@@ -152,7 +152,7 @@ function updateUI(){
     document.getElementById("shopItems").innerHTML="";
   }
 
-  saveGame(); // сохраняем прогресс
+  saveGame();
 }
 
 // ---------- STORY ----------
@@ -195,7 +195,7 @@ function loseStats(amount=2){
   state.mood=Math.max(0,state.mood-amount);
 }
 
-// ---------- LOCATIONS ----------
+// ---------- LOCATIONS & FULL GAME LOGIC ----------
 function goTo(location){
   loseStats(); // каждый переход снижает показатели
   document.getElementById("actions").innerHTML="";
@@ -218,14 +218,14 @@ function goTo(location){
       showStory("Вы идёте на работу. Получите деньги за день.");
       jobs.forEach(job=>{
         addAction(job.name,()=>{
-          if(state.level>=job.level){
+          if(state.level>=job.level && (job.education==null || state.education==job.education)){
             state.money+=job.salary;
             state.xp+=job.salary/10;
             showStory(`Вы поработали как ${job.name} и заработали ${job.salary} грн.`);
             addAchievement(`Работал ${job.name}`);
             updateUI();
           } else {
-            showStory("Вы недостаточно опытны для этой работы.");
+            showStory("Вы недостаточно опытны или не имеете нужного образования для этой работы.");
           }
         });
       });
@@ -266,16 +266,27 @@ function goTo(location){
 
     case 'crime':
       showStory("Вы пробуете криминальные дела. Высокий риск, большие деньги.");
-      addAction("Украсть кошелек (50% шанс)",()=>{
-        if(Math.random()<0.5){
-          state.money+=100;
-          showStory("Вы украли кошелек! +100 грн");
-        } else {
-          showStory("Поймали! -20 здоровья, -10 настроения");
-          state.health=Math.max(0,state.health-20);
-          state.mood=Math.max(0,state.mood-10);
-        }
-        updateUI();
+      const crimeActions=[
+        {name:"Украсть кошелек (низкий риск)",chance:0.7,money:100,health:10,mood:5,rep:0},
+        {name:"Ограбить магазин (средний риск)",chance:0.5,money:500,health:30,mood:15,rep:5},
+        {name:"Украсть машину (высокий риск)",chance:0.4,money:2000,health:50,mood:25,rep:10},
+        {name:"Шантаж/похищение (очень высокий риск)",chance:0.3,money:5000,health:70,mood:40,rep:20}
+      ];
+      crimeActions.forEach(c=>{
+        addAction(c.name,()=>{
+          if(Math.random()<c.chance){
+            state.money+=c.money;
+            state.rep+=c.rep;
+            showStory(`Успех! +${c.money} грн, +${c.rep} репутации`);
+          } else {
+            state.money = Math.max(0,state.money-Math.floor(c.money/2));
+            state.health=Math.max(0,state.health-c.health);
+            state.mood=Math.max(0,state.mood-c.mood);
+            state.rep=Math.max(0,state.rep-c.rep);
+            showStory(`Провал! Потеря: ${Math.floor(c.money/2)} грн, -${c.health} здоровья, -${c.mood} настроения, -${c.rep} репутации`);
+          }
+          updateUI();
+        });
       });
       break;
 
@@ -286,16 +297,14 @@ function goTo(location){
           state.money-=50;
           state.health=Math.min(100,state.health+50);
           showStory("Вы прошли лечение и восстановили здоровье.");
-        } else {
-          showStory("Недостаточно денег на лечение.");
-        }
+        } else showStory("Недостаточно денег на лечение.");
         updateUI();
       });
       break;
 
     case 'casino':
       showStory("Добро пожаловать в казино! Ставьте деньги и попробуйте удачу.");
-      addAction("Ставка 100 грн (50% шанс удвоить)",()=>{
+      addAction("Рулетка 100 грн (50% шанс удвоить)",()=>{
         if(state.money>=100){
           state.money-=100;
           if(Math.random()<0.5){
@@ -320,57 +329,66 @@ function goTo(location){
 function addShopItem(name,price,type){
   const shopDiv=document.getElementById("shopItems");
   const btn=document.createElement("button");
-  btn.textContent=`${name} — ${price} грн`;
+  btn.textContent=`${name} - ${price} грн`;
   btn.onclick=()=>{
     if(state.money>=price){
       state.money-=price;
-      if(type=="property") state.property=name;
-      if(type=="transport") state.transport=name;
-      if(type=="education") state.education=name;
-      state.inventory.push(name);
+      if(type==="property") state.property=name;
+      if(type==="transport") state.transport=name;
+      if(type==="education") state.education=name;
       showStory(`Вы купили ${name}!`);
       addAchievement(`Купил ${name}`);
-      updateUI();
-    } else showStory("Недостаточно денег для покупки.");
+    } else {
+      showStory("Недостаточно денег.");
+    }
+    updateUI();
   };
   shopDiv.appendChild(btn);
 }
 
-// ---------- OTHER ----------
-function recycle(){
-  const bottles = state.inventory.filter(i=>i.includes("Бутылка")).length;
-  if(bottles>0){
-    state.money += bottles*5;
-    state.inventory = state.inventory.filter(i=>!i.includes("Бутылка"));
-    showStory(`Вы сдали ${bottles} бутылок и получили ${bottles*5} грн.`);
-    updateUI();
-  } else {
-    showStory("У вас нет бутылок для сдачи.");
-  }
-}
-
+// ---------- CURRENCY EXCHANGE ----------
 function exchangeCurrencyUI(){
-  const amount = prompt("Сколько грн обменять на $?");
-  const num = parseFloat(amount);
-  if(!isNaN(num) && num>0 && state.money>=num){
-    const dollars = num/rate;
-    state.money -= num;
-    state.usd += dollars;
-    showStory(`Вы обменяли ${num} грн на ${dollars.toFixed(2)} $`);
-    updateUI();
-  } else showStory("Недостаточно денег или неверная сумма.");
-}
-
-function randomRate(){
-  rate = 40 + Math.random()*5;
+  const usdAmount=prompt("Сколько USD купить/продать?");
+  const val=parseFloat(usdAmount);
+  if(isNaN(val)) return;
+  const action=prompt("buy/sell?");
+  if(action==="buy" && state.money>=val*rate){
+    state.money-=val*rate;
+    state.usd+=val;
+    showStory(`Вы купили ${val} $`);
+  } else if(action==="sell" && state.usd>=val){
+    state.money+=val*rate;
+    state.usd-=val;
+    showStory(`Вы продали ${val} $`);
+  } else showStory("Недостаточно средств.");
   updateUI();
 }
 
+// ---------- RECYCLE ----------
+function recycle(){
+  let bottles = state.inventory.filter(i=>i==="Бутылка").length;
+  if(bottles>0){
+    state.money+=bottles*5;
+    state.inventory=state.inventory.filter(i=>i!=="Бутылка");
+    showStory(`Вы сдали ${bottles} бутылок за ${bottles*5} грн`);
+  } else showStory("Бутылок нет.");
+  updateUI();
+}
+
+// ---------- RANDOM RATE ----------
+function randomRate(){
+  rate=42+Math.random()*3; 
+  updateUI();
+}
+
+// ---------- START GAME ----------
 startGame();
 </script>
 </div>
 </body>
 </html>
+
+
 
 
 
