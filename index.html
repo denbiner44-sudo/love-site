@@ -3,20 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <title>Бомжара — История успеха!</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body { margin:0; font-family:Arial,sans-serif; background:linear-gradient(135deg,#0f172a,#020617); color:#e5e7eb; display:flex; justify-content:center; padding:20px;}
-.container { width:100%; max-width:1000px; background:#111827; padding:20px; border-radius:16px; box-shadow:0 15px 40px rgba(0,0,0,0.6);}
-.stats, .inventory, .map, .actions, #achievements { margin-bottom:15px; }
-.stats div, .inventory div, #achievements div { background:#1f2937; padding:8px; border-radius:10px; margin:4px 0; display:flex; align-items:center;}
-.stats span.progress { display:inline-block; height:8px; border-radius:4px; background:#16a34a; margin-left:6px; flex-grow:1;}
-button { padding:10px; margin:4px; border:none; border-radius:8px; background:#22c55e; color:#052e16; cursor:pointer; display:flex; align-items:center;}
-button:hover { background:#16a34a; }
-button img { width:24px; height:24px; margin-right:6px; }
-.map button { background:#3b82f6; color:white; }
-#story { min-height:80px; margin-bottom:10px; background:#1f2937; padding:10px; border-radius:12px; font-size:16px; line-height:1.4; }
-.animated { animation: flash 0.4s ease; }
-@keyframes flash { 0% { background-color: #facc15; } 50% { background-color: #1f2937; } 100% { background-color: #facc15; } }
-.inventory img { width:24px; height:24px; margin-right:6px; }
+body {margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#0f172a,#020617);color:#e5e7eb;display:flex;justify-content:center;padding:10px;}
+.container {width:100%;max-width:600px;background:#111827;padding:15px;border-radius:16px;box-shadow:0 15px 40px rgba(0,0,0,0.6);}
+h1,h3,h4{margin:5px 0;}
+.stats div,#inventory div,#achievements div{background:#1f2937;padding:8px;border-radius:10px;margin:4px 0;display:flex;align-items:center;}
+.stats span.progress{display:inline-block;height:8px;border-radius:4px;background:#16a34a;margin-left:6px;flex-grow:1;}
+button{padding:10px;margin:4px;border:none;border-radius:8px;background:#22c55e;color:#052e16;cursor:pointer;display:flex;align-items:center;width:100%;justify-content:center;}
+button:hover{background:#16a34a;}
+button img{width:24px;height:24px;margin-right:6px;}
+.map button{background:#3b82f6;color:white;}
+#story{min-height:80px;margin-bottom:10px;background:#1f2937;padding:10px;border-radius:12px;font-size:16px;line-height:1.4;}
+.animated{animation:flash 0.4s ease;}
+@keyframes flash{0%{background-color:#facc15;}50%{background-color:#1f2937;}100%{background-color:#facc15;}}
+.inventory img{width:24px;height:24px;margin-right:6px;}
+.actions,#shopItems{display:flex;flex-direction:column;max-height:300px;overflow-y:auto;margin-bottom:10px;}
 </style>
 </head>
 <body>
@@ -24,30 +26,30 @@ button img { width:24px; height:24px; margin-right:6px; }
 <h1>🧹 Бомжара — История успеха!</h1>
 
 <div class="stats">
-  <h3>Персонаж</h3>
-  <div>💰 Деньги: <span id="money">0</span></div>
-  <div>❤️ Здоровье: <span id="health">100</span> <span class="progress" id="healthBar"></span></div>
-  <div>⭐ Репутация: <span id="rep">0</span></div>
-  <div>⚡ Опыт: <span id="xp">0</span> | Уровень: <span id="level">1</span> <span class="progress" id="xpBar"></span></div>
-  <div>💪 Сила: <span id="str">5</span> | 🧠 Интеллект: <span id="int">5</span> | 🤝 Харизма: <span id="cha">5</span></div>
-  <div>🕒 День: <span id="day">1</span> | Месяц: <span id="month">1</span></div>
+<h3>Персонаж</h3>
+<div>💰 Деньги: <span id="money">0</span></div>
+<div>❤️ Здоровье: <span id="health">100</span> <span class="progress" id="healthBar"></span></div>
+<div>⭐ Репутация: <span id="rep">0</span></div>
+<div>⚡ Опыт: <span id="xp">0</span> | Уровень: <span id="level">1</span> <span class="progress" id="xpBar"></span></div>
+<div>💪 Сила: <span id="str">5</span> | 🧠 Интеллект: <span id="int">5</span> | 🤝 Харизма: <span id="cha">5</span></div>
+<div>🕒 День: <span id="day">1</span> | Месяц: <span id="month">1</span></div>
 </div>
 
 <div id="story"></div>
 
 <div class="map">
-  <h3>🏘️ Карта города</h3>
-  <button onclick="goTo('street')"><img src="https://img.icons8.com/ios-filled/50/ffffff/street.png"/>Улица</button>
-  <button onclick="goTo('shop')"><img src="https://img.icons8.com/ios-filled/50/ffffff/shop.png"/>Магазин</button>
-  <button onclick="goTo('home')"><img src="https://img.icons8.com/ios-filled/50/ffffff/home.png"/>Дом</button>
-  <button onclick="goTo('hospital')"><img src="https://img.icons8.com/ios-filled/50/ffffff/hospital-room.png"/>Больница</button>
-  <button onclick="goTo('prison')"><img src="https://img.icons8.com/ios-filled/50/ffffff/prison.png"/>Тюрьма</button>
-  <button onclick="goTo('park')"><img src="https://img.icons8.com/ios-filled/50/ffffff/park.png"/>Парк</button>
-  <button onclick="goTo('work')"><img src="https://img.icons8.com/ios-filled/50/ffffff/briefcase.png"/>Работа</button>
+<h3>🏘️ Карта города</h3>
+<button onclick="goTo('street')">Улица</button>
+<button onclick="goTo('shop')">Магазин</button>
+<button onclick="goTo('home')">Дом</button>
+<button onclick="goTo('hospital')">Больница</button>
+<button onclick="goTo('prison')">Тюрьма</button>
+<button onclick="goTo('park')">Парк</button>
+<button onclick="goTo('work')">Работа</button>
 </div>
 
 <div class="actions" id="actions"></div>
-<div class="actions" id="shopItems" style="margin-top:10px;"></div>
+<div class="actions" id="shopItems"></div>
 <div class="inventory" id="inventory"><h3>🎒 Инвентарь</h3></div>
 <div id="achievements"><h3>🏆 Достижения</h3></div>
 <button id="restart" onclick="startGame()" style="display:none;">Начать заново</button>
@@ -61,19 +63,37 @@ const achievements = new Set();
 // ---------- Items ----------
 const properties = { "Палатка":{price:500}, "Чердак":{price:200}, "Квартира":{price:1000}, "Дом":{price:40000}, "Пентхаус":{price:200000} };
 const transport = { "Кроссовки":0, "Велосипед":500, "Скутер":2000, "Машина":10000, "Спорткар":50000, "Вертолет":200000 };
-const education = { "Таблица умножения":2000, "Букварик":5000, "Школа 1-5 клас":8000, "Школа 6-12 клас":10000, "Универ":15000 };
+const education = { 
+"Азбука":1000, "Таблица умножения":2000, "Букварик":5000, 
+"Школа 1-5 клас":8000, "Школа 6-9 клас":10000, "Школа 10-12 клас":12000, 
+"Колледж":15000, "Универ":20000, "Магистратура":30000, "Докторантура":50000 
+};
 
-// ---------- Jobs ----------
+// ---------- Jobs (25+) ----------
 const jobs = [
-{name:"Дворник", salary:150, level:1, property:null, transport:null, education:"Таблица умножения"},
+{name:"Дворник", salary:150, level:1, property:null, transport:null, education:"Азбука"},
 {name:"Почтальон", salary:300, level:1, property:null, transport:null, education:"Букварик"},
 {name:"Таксист", salary:500, level:2, property:null, transport:"Машина", education:"Школа 1-5 клас"},
-{name:"Строитель", salary:800, level:3, property:null, transport:null, education:"Школа 6-12 клас"},
-{name:"Инженер", salary:1000, level:4, property:null, transport:null, education:"Универ"},
-{name:"Менеджер", salary:1500, level:5, property:"Квартира", transport:null, education:"Универ"},
-{name:"Банкир", salary:3000, level:6, property:"Дом", transport:null, education:"Универ"},
-{name:"Депутат", salary:5000, level:7, property:"Дом", transport:null, education:"Универ"},
-{name:"Президент", salary:10000, level:10, property:"Пентхаус", transport:"Вертолет", education:"Универ"}
+{name:"Строитель", salary:800, level:3, property:null, transport:null, education:"Школа 6-9 клас"},
+{name:"Инженер", salary:1000, level:4, property:null, transport:null, education:"Школа 10-12 клас"},
+{name:"Менеджер", salary:1500, level:5, property:"Квартира", transport:null, education:"Колледж"},
+{name:"Банкир", salary:2000, level:5, property:"Квартира", transport:null, education:"Универ"},
+{name:"Продавец", salary:2200, level:5, property:null, transport:null, education:"Колледж"},
+{name:"Программист", salary:2500, level:6, property:null, transport:"Машина", education:"Универ"},
+{name:"Дизайнер", salary:2700, level:6, property:null, transport:null, education:"Универ"},
+{name:"Маркетолог", salary:3000, level:6, property:"Квартира", transport:null, education:"Универ"},
+{name:"Блогер", salary:3200, level:6, property:null, transport:null, education:"Колледж"},
+{name:"Юрист", salary:3500, level:7, property:"Дом", transport:null, education:"Универ"},
+{name:"Врач", salary:3700, level:7, property:"Дом", transport:null, education:"Магистратура"},
+{name:"Пилот", salary:4000, level:7, property:"Дом", transport:"Спорткар", education:"Магистратура"},
+{name:"Депутат", salary:5000, level:8, property:"Дом", transport:"Машина", education:"Магистратура"},
+{name:"Министр", salary:7000, level:9, property:"Пентхаус", transport:"Спорткар", education:"Магистратура"},
+{name:"Банкир 2", salary:7500, level:9, property:"Пентхаус", transport:"Машина", education:"Магистратура"},
+{name:"Президент", salary:10000, level:10, property:"Пентхаус", transport:"Вертолет", education:"Докторантура"},
+{name:"Космонавт", salary:12000, level:10, property:"Пентхаус", transport:"Вертолет", education:"Докторантура"},
+{name:"Магнат", salary:15000, level:11, property:"Пентхаус", transport:"Вертолет", education:"Докторантура"},
+{name:"Генерал", salary:18000, level:12, property:"Пентхаус", transport:"Вертолет", education:"Докторантура"},
+{name:"Сенатор", salary:20000, level:12, property:"Пентхаус", transport:"Вертолет", education:"Докторантура"}
 ];
 
 // ---------- Start ----------
@@ -163,7 +183,7 @@ function goTo(loc){
 
   switch(loc){
     case "street":
-      showStory("Вы на улице. Можно искать работу, встретить NPC или событие.");
+      showStory("Вы на улице. Можно искать работу или событие.");
       addAction("👷 Искать случайную работу (+50$)", ()=>{ gainMoney(50); addAchievement("Первый заработок"); });
       break;
     case "shop":
@@ -188,7 +208,6 @@ function goTo(loc){
           if(job.property && !state.inventory.includes(job.property)){ showStory(`Нужен ${job.property}`); return; }
           if(job.transport && !state.inventory.includes(job.transport)){ showStory(`Нужен ${job.transport}`); return; }
           if(job.education && !state.inventory.includes(job.education)){ showStory(`Нужен ${job.education}`); return; }
-
           gainMoney(job.salary); gainXP(Math.floor(job.salary/10));
           showStory(`Вы поработали на позиции ${job.name} и заработали ${job.salary} грн`);
           addAchievement(`Работа: ${job.name}`);
@@ -220,6 +239,8 @@ startGame();
 </script>
 </body>
 </html>
+
+
 
 
 
