@@ -79,7 +79,7 @@ const jobs = [
 
 // ---------- START ----------
 function startGame(){
-  state={money:50,usd:0,health:100,satiety:100,mood:100,rep:0,xp:0,level:1,str:5,int:5,cha:5,day:1,month:1,inventory:[]};
+  state={money:50,usd:0,health:100,satiety:100,mood:100,rep:0,xp:0,level:1,str:5,int:5,cha:5,day:1,month:1,inventory:[],inPrison:0};
   achievements.clear(); renderAchievements(); updateUI();
   showStory("Начинаем новую жизнь! Выберите локацию.");
   document.getElementById("restart").style.display="none";
@@ -132,7 +132,19 @@ function addAchievement(name){ if(achievements.has(name)) return; achievements.a
 function renderAchievements(){ const div=document.getElementById("achievements"); div.innerHTML="<h3>🏆 Достижения</h3>"; achievements.forEach(a=>{ const d=document.createElement("div"); d.textContent=a; div.appendChild(d); }); }
 
 // ---------- ACTIONS ----------
-function addAction(text, fn){ const btn=document.createElement("button"); btn.innerHTML=text; btn.onclick=()=>{ fn(); updateUI(); }; document.getElementById("actions").appendChild(btn); }
+function addAction(text, fn, type="normal"){ 
+  const btn=document.createElement("button"); 
+  btn.innerHTML=text; 
+  btn.onclick=()=>{ fn(); loseStats(type); updateUI(); }; 
+  document.getElementById("actions").appendChild(btn); 
+}
+
+// ---------- STATS LOSS ----------
+function loseStats(actionType="normal"){
+    if(actionType !== "heal") state.health = Math.max(0, state.health - 3);
+    if(actionType !== "eat") state.satiety = Math.max(0, state.satiety - 3);
+    if(actionType !== "mood") state.mood = Math.max(0, state.mood - 3);
+}
 
 // ---------- MONEY & XP ----------
 function gainMoney(amount){ state.money+=amount; showStory(`Вы получили ${amount} грн`,"💰"); updateUI(); }
@@ -155,19 +167,78 @@ function findBottles(){ const num=Math.floor(Math.random()*3); for(let i=0;i<num
 // ---------- RECYCLE ----------
 function recycle(){ const bottles=state.inventory.filter(i=>"Бутылка"===i).length; if(!bottles){ showStory("Бутылок нет"); return; } state.money+=bottles*5; state.inventory=state.inventory.filter(i=>i!=="Бутылка"); showStory(`Сдали ${bottles} бутылок`,"♻️"); updateUI(); }
 
-// ---------- GO TO ----------
-function goTo(loc){ state.day++; if(state.day>30){ state.day=1; state.month++; } document.getElementById("actions").innerHTML=""; document.getElementById("shopItems").innerHTML="";
-switch(loc){
-  case "home": showStory("Вы дома"); addAction("🛌 Отдохнуть",()=>rest()); addAction("🏋️ Тренировка (+сила)",()=>train("str")); addAction("📚 Учёба (+интеллект)",()=>train("int")); addAction("💬 Общение (+харизма)",()=>train("cha")); break;
-  case "work": showStory("Вы на работе"); jobs.forEach(job=>{ addAction(job.name+` (+${job.salary} грн)`,()=>{ if(state.level<job.level){ showStory("Уровень слишком низкий"); return; } if(job.property && !state.inventory.includes(job.property)){ showStory(`Нужен ${job.property}`); return; } if(job.transport && !state.inventory.includes(job.transport)){ showStory(`Нужен ${job.transport}`); return; } if(job.education && !state.inventory.includes(job.education)){ showStory(`Нужна ${job.education}`); return; } gainMoney(job.salary); gainXP(Math.floor(job.salary/10)); addAchievement(`Работа: ${job.name}`); }); }); break;
-  case "shop": showStory("Вы в магазине"); addAction("🍎 Еда (+сытость)",()=>buyItem("Еда",20,10,"satiety")); addAction("💊 Лекарство (+здоровье)",()=>buyItem("Лекарство",50,20,"health")); const shopDiv=document.getElementById("shopItems"); shopDiv.innerHTML="<h3>🛒 Магазин имущества</h3>"; Object.keys(properties).forEach(p=>{ const btn=document.createElement("button"); btn.innerHTML=`🏠 ${p} (${properties[p]} грн)`; btn.onclick=()=>buyItem(p,properties[p]); shopDiv.appendChild(btn); }); break;
-  case "school": showStory("Вы учитесь"); Object.keys(education).forEach(edu=>{ addAction(`📖 ${edu} (${education[edu]} грн)`,()=>buyItem(edu,education[edu])); }); break;
-  case "park": showStory("Вы в парке"); addAction("🍿 Кино (+настроение)",()=>{ state.mood=Math.min(100,state.mood+15); showStory("+15 настроение","🎬"); updateUI(); }); addAction("🥤 Алкоголь (+настроение, -здоровье)",()=>{ state.mood=Math.min(100,state.mood+10); state.health=Math.max(0,state.health-5); showStory("+10 настроение, -5 здоровье","🍺"); updateUI(); }); break;
-  case "crime": showStory("Вы в криминале"); addAction("💰 Ограбление (+100 грн, -репутация)",()=>{ gainMoney(100); state.rep=Math.max(0,state.rep-10); gainXP(10); }); break;
-  case "hospital": showStory("Вы в больнице"); addAction("💊 Лечение (+здоровье)",()=>{ state.health=Math.min(100,state.health+20); showStory("+20 здоровье","💊"); updateUI(); }); break;
-  default: showStory("Локация не готова");
+// ---------- PRISON ----------
+function enterPrison(){
+    document.getElementById("actions").innerHTML="";
+    document.getElementById("shopItems").innerHTML="";
+    showStory(`Вы в тюрьме. Осталось действий: ${state.inPrison}`,"🚓");
+
+    function prisonAction(name,callback){
+        const btn=document.createElement("button");
+        btn.textContent=name;
+        btn.onclick=()=>{
+            callback();
+            state.inPrison--;
+            if(state.inPrison>0) enterPrison();
+            else{
+                state.inPrison=0;
+                showStory("Вы вышли из тюрьмы!","🎉");
+                document.getElementById("actions").innerHTML="";
+            }
+            updateUI();
+        };
+        document.getElementById("actions").appendChild(btn);
+    }
+
+    prisonAction("💩 Срать (1 день)",()=>{ state.day++; if(state.day>30){ state.day=1; state.month++; } });
+    prisonAction("🛌 Спать",()=>{ state.health=Math.min(100,state.health+10); state.mood=Math.min(100,state.mood+5); });
+    prisonAction("🤝 Стать блатным (+репутация)",()=>{ state.rep+=5; });
+    prisonAction("😔 Стать обиженным (-репутация)",()=>{ state.rep=Math.max(0,state.rep-5); });
 }
-findBottles(); updateUI();
+
+// ---------- GO TO ----------
+function goTo(loc){ 
+    if(state.inPrison>0){ enterPrison(); return; } 
+    state.day++; if(state.day>30){ state.day=1; state.month++; } 
+    document.getElementById("actions").innerHTML=""; document.getElementById("shopItems").innerHTML="";
+switch(loc){
+  case "home": showStory("Вы дома"); 
+      addAction("🛌 Отдохнуть",()=>rest(),"rest"); 
+      addAction("🏋️ Тренировка (+сила)",()=>train("str")); 
+      addAction("📚 Учёба (+интеллект)",()=>train("int")); 
+      addAction("💬 Общение (+харизма)",()=>train("cha")); 
+      break;
+  case "work": showStory("Вы на работе"); 
+      jobs.forEach(job=>{ 
+        addAction(job.name+` (+${job.salary} грн)`,()=>{
+          if(state.level<job.level){ showStory("Уровень слишком низкий"); return; } 
+          if(job.property && !state.inventory.includes(job.property)){ showStory(`Нужен ${job.property}`); return; } 
+          if(job.transport && !state.inventory.includes(job.transport)){ showStory(`Нужен ${job.transport}`); return; } 
+          if(job.education && !state.inventory.includes(job.education)){ showStory(`Нужна ${job.education}`); return; } 
+          gainMoney(job.salary); gainXP(Math.floor(job.salary/10)); addAchievement(`Работа: ${job.name}`); 
+        }); 
+      }); 
+      break;
+  case "shop": showStory("Вы в магазине"); 
+      addAction("🍎 Еда (+сытость)",()=>buyItem("Еда",20,10,"satiety"),"eat"); 
+      addAction("💊 Лекарство (+здоровье)",()=>buyItem("Лекарство",50,20,"health"),"heal"); 
+      const shopDiv=document.getElementById("shopItems"); shopDiv.innerHTML="<h3>🛒 Магазин имущества</h3>"; 
+      Object.keys(properties).forEach(p=>{ const btn=document.createElement("button"); btn.innerHTML=`🏠 ${p} (${properties[p]} грн)`; btn.onclick=()=>buyItem(p,properties[p]); shopDiv.appendChild(btn); }); 
+      break;
+  case "school": showStory("Вы учитесь"); Object.keys(education).forEach(edu=>{ addAction(`📖 ${edu} (${education[edu]} грн)`,()=>buyItem(edu,education[edu])); }); break;
+  case "park": showStory("Вы в парке"); 
+      addAction("🍿 Кино (+настроение)",()=>{ state.mood=Math.min(100,state.mood+15); }); 
+      addAction("🥤 Алкоголь (+настроение, -здоровье)",()=>{ state.mood=Math.min(100,state.mood+20); state.health=Math.max(0,state.health-5); }); 
+      break;
+  case "crime": showStory("Вы в криминале"); 
+      addAction("💰 Ограбление (+100 грн, -репутация)",()=>{ gainMoney(100); state.rep=Math.max(0,state.rep-10); gainXP(10); });
+      addAction("🔪 Заказное убийство (+150000 грн, тюрьма 30 действий)",()=>{ gainMoney(150000); state.inPrison=30; enterPrison(); });
+      addAction("💼 Мелкое мошенничество (+5000 грн, +репутация)",()=>{ gainMoney(5000); state.rep+=5; gainXP(20); });
+      addAction("🛠️ Воровство (+2000 грн, +1 репутация)",()=>{ gainMoney(2000); state.rep+=1; gainXP(10); });
+      break;
+  case "hospital": showStory("Вы в больнице"); addAction("💊 Лечение (+50 здоровья)",()=>buyItem("Лечение",50,50,"health"),"heal"); break;
+}
+updateUI();
 }
 
 startGame();
@@ -175,6 +246,8 @@ startGame();
 </div>
 </body>
 </html>
+
+
 
 
 
