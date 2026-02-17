@@ -3,7 +3,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Супер Симулятор Жизни</title>
+<title>RPG Симулятор Жизни</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -19,34 +19,34 @@ padding:10px;
 
 .container{
 width:100%;
-max-width:900px;
+max-width:1000px;
 background:#111827;
 padding:15px;
 border-radius:16px;
 box-shadow:0 20px 50px rgba(0,0,0,0.7);
 }
 
-h1{margin:0 0 10px 0;text-align:center;}
+h1{text-align:center;margin:0 0 10px;}
 
-.stats div{
+.panel{
 background:#1f2937;
 padding:8px;
-margin:4px 0;
 border-radius:10px;
+margin-bottom:8px;
 }
 
 .progress{
 height:8px;
 background:#22c55e;
 border-radius:4px;
-transition:width .5s;
+transition:width .4s;
 }
 
-.map, .actions{
+.grid{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
 gap:6px;
-margin-bottom:10px;
+margin-bottom:8px;
 }
 
 button{
@@ -55,40 +55,32 @@ border:none;
 border-radius:8px;
 cursor:pointer;
 background:#22c55e;
-transition:.2s;
 font-weight:bold;
+transition:.2s;
 }
 
 button:hover{transform:scale(1.05);}
 
-#story{
-min-height:80px;
-background:#1f2937;
-padding:10px;
-border-radius:12px;
-margin-bottom:10px;
-animation:fade .5s;
+#log{
+height:140px;
+overflow-y:auto;
+background:#020617;
+padding:8px;
+border-radius:10px;
+font-size:14px;
+}
+
+.fade{
+animation:fade .4s;
 }
 
 @keyframes fade{
-from{opacity:0;transform:translateY(10px);}
+from{opacity:0;transform:translateY(5px);}
 to{opacity:1;}
 }
 
-.flash{
-animation:flash .6s;
-}
-
-@keyframes flash{
-0%{background:#facc15;}
-100%{background:#1f2937;}
-}
-
-.saveMenu{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:5px;
-margin-bottom:10px;
+.dead{
+background:#7f1d1d !important;
 }
 </style>
 
@@ -97,181 +89,228 @@ margin-bottom:10px;
 <body>
 <div class="container">
 
-<h1>🔥 Супер Симулятор Жизни</h1>
+<h1>🔥 RPG Симулятор Жизни</h1>
 
-<div class="saveMenu">
-<button onclick="loadSlot(1)">Загрузить слот 1</button>
-<button onclick="loadSlot(2)">Загрузить слот 2</button>
-<button onclick="loadSlot(3)">Загрузить слот 3</button>
-<button onclick="saveSlot(1)">Сохранить слот 1</button>
-<button onclick="saveSlot(2)">Сохранить слот 2</button>
-<button onclick="saveSlot(3)">Сохранить слот 3</button>
+<div class="panel">
+💰 Деньги: <span id="money"></span> |
+⭐ Уровень: <span id="level"></span> |
+XP: <span id="xp"></span> |
+🏠 Дом: <span id="house"></span> |
+🚗 Машина: <span id="car"></span>
 </div>
 
-<div class="stats">
-<div>💰 Деньги: <span id="money"></span></div>
-<div>❤️ Здоровье<div class="progress" id="healthBar"></div></div>
-<div>😊 Настроение<div class="progress" id="moodBar"></div></div>
-<div>⭐ Репутация: <span id="rep"></span></div>
-<div>🏢 Бизнес: <span id="business"></span></div>
-<div>🕒 День: <span id="day"></span></div>
+<div class="panel">
+❤️ Здоровье<div class="progress" id="hp"></div>
+😊 Настроение<div class="progress" id="mood"></div>
 </div>
 
-<div id="story"></div>
+<div class="panel">
+Навыки:
+Сила <span id="str"></span> |
+Интеллект <span id="int"></span> |
+Харизма <span id="cha"></span>
+</div>
 
-<div class="map">
-<button onclick="goWork()">Работа</button>
-<button onclick="goCrime()">Криминал</button>
-<button onclick="goBusiness()">Бизнес</button>
+<div class="grid">
+<button onclick="work()">Работа</button>
+<button onclick="crime()">Криминал</button>
+<button onclick="study()">Учиться</button>
 <button onclick="rest()">Отдых</button>
+<button onclick="buyMenu()">Покупки</button>
+<button onclick="bankMenu()">Банк</button>
+<button onclick="nextDay()">Следующий день</button>
 </div>
 
-<div class="actions" id="actions"></div>
+<div class="grid" id="actions"></div>
+
+<div id="log"></div>
 
 <script>
-
-let state;
+let game;
 
 function newGame(){
-state={
-money:100,
-health:100,
+game={
+money:200,
+hp:100,
 mood:100,
-rep:0,
-day:1,
-business:0,
-businessLevel:0,
-prison:0
+xp:0,
+level:1,
+str:1,
+int:1,
+cha:1,
+house:"Нет",
+car:"Нет",
+loan:0,
+day:1
 };
+log("🆕 Новая игра!");
 }
 
-function saveSlot(n){
-localStorage.setItem("save"+n,JSON.stringify(state));
-story("💾 Сохранено в слот "+n);
+function log(text){
+let el=document.getElementById("log");
+let div=document.createElement("div");
+div.textContent="День "+game.day+": "+text;
+div.className="fade";
+el.appendChild(div);
+el.scrollTop=el.scrollHeight;
 }
 
-function loadSlot(n){
-let s=localStorage.getItem("save"+n);
-if(s){state=JSON.parse(s);story("Загружен слот "+n);}
-else{newGame();story("Новая игра");}
-updateUI();
+function save(){
+localStorage.setItem("lifeRPG",JSON.stringify(game));
 }
 
-function story(text){
-let el=document.getElementById("story");
-el.textContent=text;
-el.classList.remove("flash");
-void el.offsetWidth;
-el.classList.add("flash");
+function load(){
+let s=localStorage.getItem("lifeRPG");
+if(s) game=JSON.parse(s);
+else newGame();
 }
 
-function updateUI(){
-money.textContent=state.money;
-rep.textContent=state.rep;
-business.textContent=state.businessLevel>0?
-"Уровень "+state.businessLevel:"Нет";
-day.textContent=state.day;
-healthBar.style.width=state.health+"%";
-moodBar.style.width=state.mood+"%";
-autoDay();
+function update(){
+money.textContent=game.money;
+level.textContent=game.level;
+xp.textContent=game.xp+"/100";
+house.textContent=game.house;
+car.textContent=game.car;
+str.textContent=game.str;
+int.textContent=game.int;
+cha.textContent=game.cha;
+
+hp.style.width=game.hp+"%";
+mood.style.width=game.mood+"%";
+
+checkLevel();
+checkDeath();
+save();
 }
 
-function autoDay(){
-
-if(state.prison>0){
-state.prison--;
-story("⛓ Вы в тюрьме. Осталось дней: "+state.prison);
+function checkLevel(){
+if(game.xp>=100){
+game.xp-=100;
+game.level++;
+game.str++;
+game.int++;
+game.cha++;
+log("⬆ Новый уровень!");
+}
 }
 
-if(state.businessLevel>0){
-let income=state.businessLevel*50;
-state.money+=income;
-story("💼 Бизнес принес "+income);
+function checkDeath(){
+if(game.hp<=0 || game.mood<=0){
+document.body.classList.add("dead");
+log("💀 Вы умерли. Перезапуск...");
+setTimeout(()=>{
+localStorage.removeItem("lifeRPG");
+location.reload();
+},2000);
+}
 }
 
-state.money-=10;
-state.health-=1;
-state.mood-=1;
-
-randomEvent();
-
-state.day++;
-autoSave();
+function work(){
+let earn=50+game.int*10;
+game.money+=earn;
+game.xp+=20;
+game.mood-=5;
+log("💼 Работа +"+earn);
+update();
 }
 
-function autoSave(){
-localStorage.setItem("autosave",JSON.stringify(state));
-}
-
-function goWork(){
-let earn=50+state.rep*5;
-state.money+=earn;
-state.mood-=5;
-story("Вы заработали "+earn);
-updateUI();
-}
-
-function goCrime(){
-
+function crime(){
 if(Math.random()<0.3){
-state.prison=3+Math.floor(Math.random()*3);
-story("🚔 Вас посадили!");
+game.hp-=20;
+game.money=Math.max(0,game.money-100);
+log("🚔 Поймали! Штраф и урон");
 }else{
-let earn=200;
-state.money+=earn;
-state.rep+=1;
-story("Успешное дело +"+earn);
+let earn=150+game.str*20;
+game.money+=earn;
+game.xp+=30;
+log("😈 Успешное дело +"+earn);
+}
+update();
 }
 
-updateUI();
-}
-
-function goBusiness(){
-
-document.getElementById("actions").innerHTML="";
-
-addAction("Купить бизнес (500)",()=>{
-if(state.money>=500){
-state.money-=500;
-state.businessLevel=1;
-story("Вы купили бизнес!");
-updateUI();
-}
-});
-
-addAction("Улучшить бизнес (300)",()=>{
-if(state.money>=300 && state.businessLevel>0){
-state.money-=300;
-state.businessLevel++;
-story("Бизнес улучшен!");
-updateUI();
-}
-});
+function study(){
+game.int++;
+game.xp+=15;
+game.mood-=5;
+log("📚 Вы учились");
+update();
 }
 
 function rest(){
-state.mood+=10;
-state.health+=5;
-story("Вы отдохнули");
-updateUI();
+game.hp+=10;
+game.mood+=10;
+log("🛌 Отдых");
+update();
+}
+
+function buyMenu(){
+actions.innerHTML="";
+addAction("Квартира (500)",()=>{
+if(game.money>=500){
+game.money-=500;
+game.house="Квартира";
+log("🏠 Куплена квартира");
+update();
+}
+});
+addAction("Дом (1500)",()=>{
+if(game.money>=1500){
+game.money-=1500;
+game.house="Дом";
+log("🏡 Куплен дом");
+update();
+}
+});
+addAction("Машина (800)",()=>{
+if(game.money>=800){
+game.money-=800;
+game.car="Машина";
+log("🚗 Куплена машина");
+update();
+}
+});
+}
+
+function bankMenu(){
+actions.innerHTML="";
+addAction("Взять кредит 500",()=>{
+game.money+=500;
+game.loan+=600;
+log("🏦 Взяли кредит");
+update();
+});
+addAction("Погасить кредит",()=>{
+if(game.money>=game.loan){
+game.money-=game.loan;
+log("✅ Кредит погашен");
+game.loan=0;
+update();
+}
+});
 }
 
 function randomEvent(){
-
 let r=Math.random();
-
-if(r<0.2){
-let loss=50;
-state.money=Math.max(0,state.money-loss);
-story("💸 Непредвиденные расходы -"+loss);
+if(r<0.25){
+game.money+=100;
+log("🎁 Случайная находка +100");
+}
+else if(r<0.5){
+game.hp-=10;
+log("🤕 Несчастный случай");
+}
 }
 
-else if(r<0.4){
-let gain=100;
-state.money+=gain;
-story("🎁 Вам повезло! +"+gain);
+function nextDay(){
+game.day++;
+game.hp-=2;
+game.mood-=2;
+if(game.loan>0){
+game.money-=20;
+log("💸 Платеж по кредиту");
 }
-
+randomEvent();
+update();
 }
 
 function addAction(name,fn){
@@ -281,14 +320,14 @@ b.onclick=fn;
 actions.appendChild(b);
 }
 
-newGame();
-updateUI();
-
+load();
+update();
 </script>
 
 </div>
 </body>
 </html>
+
 
 
 
