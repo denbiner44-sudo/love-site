@@ -2,15 +2,25 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Город</title>
+<title>Супер Кликер PRO</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body{
   font-family:Arial;
-  background:linear-gradient(135deg,#0f2027,#2c5364);
+  margin:0;
+  background:linear-gradient(135deg,#1f1c2c,#928dab);
   color:#fff;
+}
+
+.screen{
+  display:none;
   padding:20px;
+  text-align:center;
+}
+
+.active{
+  display:block;
 }
 
 .container{
@@ -19,9 +29,26 @@ body{
   background:rgba(0,0,0,0.6);
   border-radius:15px;
   padding:20px;
-  text-align:center;
 }
 
+/* кнопки */
+button{
+  padding:12px;
+  margin:5px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  background:#4caf50;
+  color:#fff;
+}
+
+#click-btn{
+  font-size:28px;
+  padding:25px;
+  background:#ff5722;
+}
+
+/* карта города */
 #map{
   display:grid;
   grid-template-columns:repeat(5,80px);
@@ -41,29 +68,45 @@ body{
   justify-content:center;
   cursor:pointer;
 }
-
-button{
-  padding:10px;
-  margin:5px;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-}
-
-.back{
-  margin-top:20px;
-  font-size:18px;
-  color:#ffd700;
-  cursor:pointer;
-}
 </style>
 </head>
 
 <body>
+
+<!-- ================= КЛИКЕР ================= -->
+
+<div id="clicker" class="screen active">
+<div class="container">
+
+<h1>Супер Кликер PRO</h1>
+
+<p>Монеты: <span id="coins">0</span></p>
+<p>За клик: <span id="cpc">1</span></p>
+<p>Доход города: <span id="cityIncome">0</span>/сек</p>
+
+<button id="click-btn">КЛИК!</button>
+
+<button id="upgrade" data-cost="10">
+Усилить клик — 10
+</button>
+
+<br><br>
+
+<button onclick="openCity()">
+🏙 Перейти в город
+</button>
+
+</div>
+</div>
+
+<!-- ================= ГОРОД ================= -->
+
+<div id="city" class="screen">
 <div class="container">
 
 <h1>🏙 Город</h1>
-<p>Монеты: <span id="coins">0</span></p>
+
+<p>Монеты: <span id="coinsCity">0</span></p>
 
 <div id="map"></div>
 
@@ -74,15 +117,21 @@ button{
 <button onclick="select('factory')">🏭 Фабрика (2000)</button>
 <button onclick="select('park')">🌳 Парк (800)</button>
 
-<div class="back" onclick="goBack()">
-⬅ Вернуться в кликер
-</div>
+<br><br>
 
+<button onclick="openClicker()">
+⬅ Вернуться в кликер
+</button>
+
+</div>
 </div>
 
 <script>
+/* ===== ОБЩИЕ ДАННЫЕ ===== */
+
 let coins = +localStorage.getItem("coins") || 0;
-const coinsEl = document.getElementById("coins");
+let cpc = +localStorage.getItem("cpc") || 1;
+let city = JSON.parse(localStorage.getItem("city")) || {};
 
 const prices = {
   house:100,
@@ -98,10 +147,56 @@ const icons = {
   park:"🌳"
 };
 
+/* ===== ПЕРЕКЛЮЧЕНИЕ ЭКРАНОВ ===== */
+
+function openCity(){
+  document.getElementById("clicker").classList.remove("active");
+  document.getElementById("city").classList.add("active");
+  update();
+}
+
+function openClicker(){
+  document.getElementById("city").classList.remove("active");
+  document.getElementById("clicker").classList.add("active");
+  update();
+}
+
+/* ===== ДОХОД ГОРОДА ===== */
+
+function getCityIncome(){
+  let income = 0;
+
+  if(city.house) income += city.house.level * 1;
+  if(city.shop) income += city.shop.level * 5;
+  if(city.factory) income += city.factory.level * 15;
+  if(city.park) income += city.park.level * 2;
+
+  return income;
+}
+
+/* ===== КЛИКЕР ===== */
+
+document.getElementById("click-btn").onclick = ()=>{
+  coins += cpc;
+  update();
+};
+
+document.getElementById("upgrade").onclick = e=>{
+  let cost = +e.target.dataset.cost;
+
+  if(coins>=cost){
+    coins -= cost;
+    cpc++;
+    e.target.dataset.cost = Math.floor(cost*1.5);
+    e.target.textContent = `Усилить клик — ${e.target.dataset.cost}`;
+    update();
+  }
+};
+
+/* ===== КАРТА ГОРОДА ===== */
+
 let selected = null;
 function select(type){ selected = type; }
-
-let city = JSON.parse(localStorage.getItem("city")) || {};
 
 const map = document.getElementById("map");
 
@@ -124,31 +219,40 @@ for(let i=0;i<25;i++){
       city[selected].level++;
 
       cell.textContent = icons[selected];
-      save();
+      update();
     }
   };
 
   map.appendChild(cell);
 }
 
-function save(){
-  localStorage.setItem("coins", coins);
-  localStorage.setItem("city", JSON.stringify(city));
-  update();
-}
+/* ===== ОБНОВЛЕНИЕ ===== */
 
 function update(){
-  coinsEl.textContent = Math.floor(coins);
+  document.getElementById("coins").textContent = Math.floor(coins);
+  document.getElementById("coinsCity").textContent = Math.floor(coins);
+  document.getElementById("cpc").textContent = cpc;
+  document.getElementById("cityIncome").textContent = getCityIncome();
+
+  localStorage.setItem("coins", coins);
+  localStorage.setItem("cpc", cpc);
+  localStorage.setItem("city", JSON.stringify(city));
 }
 
-function goBack(){
-  window.location.href = "./index.html";
-}
+/* ===== ПАССИВНЫЙ ДОХОД ===== */
+
+setInterval(()=>{
+  coins += getCityIncome();
+  update();
+},1000);
 
 update();
 </script>
+
 </body>
 </html>
+
+
 
 
 
