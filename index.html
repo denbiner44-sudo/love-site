@@ -1,257 +1,300 @@
 <!DOCTYPE html>
-
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Экономический Симулятор</title>
+<title>Супер Кликер PRO</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
-body{
-margin:0;
-font-family:Arial;
-background:#020617;
-color:#e5e7eb;
-display:flex;
-justify-content:center;
-padding:10px;
+body {
+  font-family: Arial,sans-serif;
+  background: linear-gradient(135deg,#1f1c2c,#928dab);
+  color: #fff;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  padding:20px;
 }
-
 .container{
-width:100%;
-max-width:1100px;
-background:#111827;
-padding:12px;
-border-radius:14px;
+  max-width:700px;
+  width:100%;
+  text-align:center;
+  background: rgba(0,0,0,0.6);
+  border-radius:15px;
+  padding:20px;
 }
-
-.panel{
-background:#1f2937;
-padding:8px;
-border-radius:10px;
-margin-bottom:6px;
+#click-btn{
+  font-size:28px;
+  padding:25px 50px;
+  margin:20px;
+  border:none;
+  border-radius:12px;
+  background:#ff5722;
+  color:#fff;
+  cursor:pointer;
+  transition: transform 0.1s;
 }
-
-.grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-gap:6px;
+#click-btn:active{
+  transform:scale(0.95);
 }
-
-button{
-padding:8px;
-border:none;
-border-radius:8px;
-background:#22c55e;
-font-weight:bold;
-cursor:pointer;
+.stats, .upgrades, .achievements{
+  margin-top:20px;
 }
-
-canvas{
-background:#020617;
-border-radius:10px;
-width:100%;
-height:200px;
+button.upgrade-btn{
+  display:block;
+  width:100%;
+  padding:12px;
+  margin:5px 0;
+  border-radius:10px;
+  border:none;
+  cursor:pointer;
+  background:#4caf50;
+  color:#fff;
+  transition: background 0.2s;
 }
-
-#log{
-height:120px;
-overflow:auto;
-background:#020617;
-padding:6px;
-border-radius:10px;
-margin-top:6px;
-font-size:14px;
+button.upgrade-btn:disabled{
+  background:#888;
+  cursor:not-allowed;
+}
+.bonus{
+  font-size:18px;
+  color:#ffd700;
+  margin-top:10px;
+}
+.achievement{
+  font-size:14px;
+  color:#00ffff;
+  margin-top:5px;
+}
+@keyframes pop {
+  0% {transform: scale(1);}
+  50% {transform: scale(1.5);}
+  100% {transform: scale(1);}
+}
+#coins {
+  display:inline-block;
+  transition: transform 0.2s;
 }
 </style>
-
 </head>
-
 <body>
 <div class="container">
+<h1>Супер Кликер PRO</h1>
+<p>Монеты: <span id="coins">0</span></p>
+<p>Монет за клик: <span id="coinsPerClick">1</span></p>
+<p class="bonus" id="bonus-msg"></p>
+<button id="click-btn">Кликни меня!</button>
 
-<h2>💰 Экономический Симулятор</h2>
-
-<div class="panel">
-💵 Наличные: <span id="cash"></span> |
-🏦 Банк: <span id="bank"></span> |
-📈 Акции: <span id="stocks"></span>
+<div class="stats">
+<h2>Статистика</h2>
+<p>Всего кликов: <span id="totalClicks">0</span></p>
+<p>Монет в секунду: <span id="coinsPerSec">0</span></p>
 </div>
 
-<canvas id="chart"></canvas>
-
-<div class="grid">
-<button onclick="work()">Работа</button>
-<button onclick="business()">Бизнес</button>
-<button onclick="deposit()">В банк 100</button>
-<button onclick="withdraw()">Из банка 100</button>
-<button onclick="buyStock()">Купить акцию</button>
-<button onclick="sellStock()">Продать акцию</button>
-<button onclick="nextDay()">Следующий день</button>
+<div class="upgrades">
+<h2>Улучшения</h2>
+<button class="upgrade-btn" id="upgrade-click" data-cost="10" data-power="1" data-level="0">Усилить клик (+1) — 10 монет</button>
+<button class="upgrade-btn" id="auto-clicker" data-cost="50" data-power="1" data-level="0">Автокликер (+1 монета/сек) — 50 монет</button>
+<button class="upgrade-btn" id="mega-click" data-cost="200" data-power="5" data-level="0">Мега клик (+5 к монете за клик) — 200 монет</button>
+<button class="upgrade-btn" id="super-auto" data-cost="500" data-power="5" data-level="0">Супер автокликер (+5 монет/сек) — 500 монет</button>
 </div>
 
-<div id="log"></div>
-
+<div class="achievements">
+<h2>Достижения</h2>
+<div id="achievements-list"></div>
+</div>
 </div>
 
 <script>
-let g;
+let coins = 0;
+let coinsPerClick = 1;
+let totalClicks = 0;
+let coinsPerSec = 0;
+let activeBonus = null;
 
-function newGame(){
-g={
-cash:500,
-bank:0,
-stocks:0,
-business:0,
-price:100,
-history:[100],
-day:1
-};
-log("Новая игра");
+// Элементы
+const coinsDisplay = document.getElementById('coins');
+const coinsPerClickDisplay = document.getElementById('coinsPerClick');
+const totalClicksDisplay = document.getElementById('totalClicks');
+const coinsPerSecDisplay = document.getElementById('coinsPerSec');
+const clickBtn = document.getElementById('click-btn');
+const bonusMsg = document.getElementById('bonus-msg');
+const achievementsList = document.getElementById('achievements-list');
+const upgrades = document.querySelectorAll('.upgrade-btn');
+
+// Критический клик
+function getCriticalMultiplier(){
+  let rand = Math.random();
+  if(rand < 0.05) return 5; // 5% шанс ×5
+  if(rand < 0.2) return 2;  // 15% шанс ×2
+  return 1;
 }
 
-function log(t){
-let el=document.getElementById("log");
-el.innerHTML+="<div>День "+g.day+": "+t+"</div>";
-el.scrollTop=el.scrollHeight;
+// Клик
+clickBtn.addEventListener('click', () => {
+  let mult = getCriticalMultiplier();
+  coins += coinsPerClick * mult;
+  totalClicks++;
+  if(mult>1){
+    bonusMsg.textContent = `Критический клик! ×${mult}`;
+    setTimeout(()=>{bonusMsg.textContent=''},1000);
+  }
+  coinsDisplay.style.animation = 'pop 0.3s';
+  setTimeout(()=>{coinsDisplay.style.animation=''},300);
+  checkAchievements();
+  updateDisplay();
+});
+
+// Обновление дисплея
+function updateDisplay(){
+  coinsDisplay.textContent = coins;
+  coinsPerClickDisplay.textContent = coinsPerClick;
+  totalClicksDisplay.textContent = totalClicks;
+  coinsPerSecDisplay.textContent = coinsPerSec;
+  checkUpgrades();
 }
 
-function update(){
-cash.textContent=Math.floor(g.cash);
-bank.textContent=Math.floor(g.bank);
-stocks.textContent=g.stocks;
-drawChart();
-save();
+// Улучшения
+upgrades.forEach(upg => {
+  upg.addEventListener('click', () => {
+    let cost = parseInt(upg.dataset.cost);
+    let power = parseInt(upg.dataset.power);
+    let level = parseInt(upg.dataset.level);
+    if(coins >= cost){
+      coins -= cost;
+      if(upg.id === 'upgrade-click' || upg.id === 'mega-click'){
+        coinsPerClick += power + level*0.5;
+      } else {
+        coinsPerSec += power + level*0.5;
+      }
+      upg.dataset.level = level + 1;
+      upg.dataset.cost = Math.floor(cost * 1.5);
+      upg.textContent = generateUpgradeText(upg);
+      updateDisplay();
+    }
+  });
+});
+
+// Текст кнопки
+function generateUpgradeText(btn){
+  let name = btn.textContent.split('—')[0].trim();
+  let cost = btn.dataset.cost;
+  return `${name} — ${cost} монет`;
 }
 
-/* ГРАФИК */
+// Автоклик кажду секунду
+setInterval(()=>{
+  coins += coinsPerSec;
+  updateDisplay();
+},1000);
 
-function drawChart(){
-let c=document.getElementById("chart");
-let ctx=c.getContext("2d");
-ctx.clearRect(0,0,c.width,c.height);
+// Случайные бонусы
+setInterval(()=>{
+  if(Math.random()<0.05 && !activeBonus){ // бонус 5% шанс
+    let bonusType = Math.random() < 0.5 ? 'coinsPerClick' : 'coinsPerSec';
+    let bonusAmount = bonusType==='coinsPerClick'? 5 : 2;
+    if(bonusType==='coinsPerClick'){
+      coinsPerClick += bonusAmount;
+    } else {
+      coinsPerSec += bonusAmount;
+    }
+    bonusMsg.textContent = `Бонус! +${bonusAmount} ${bonusType==='coinsPerClick'?'к монете за клик':'к монетам/сек'}`;
+    activeBonus = bonusType;
+    setTimeout(()=>{
+      if(bonusType==='coinsPerClick') coinsPerClick -= bonusAmount;
+      else coinsPerSec -= bonusAmount;
+      bonusMsg.textContent='';
+      activeBonus = null;
+      updateDisplay();
+    },10000);
+    updateDisplay();
+  }
+},5000);
 
-let h=g.history;
-let max=Math.max(...h);
-let min=Math.min(...h);
-
-ctx.beginPath();
-
-for(let i=0;i<h.length;i++){
-let x=i*(c.width/(h.length-1));
-let y=c.height-((h[i]-min)/(max-min+1))*c.height;
-if(i===0) ctx.moveTo(x,y);
-else ctx.lineTo(x,y);
+// Проверка апгрейдов
+function checkUpgrades(){
+  upgrades.forEach(upg=>{
+    if(coins>=upg.dataset.cost){
+      upg.disabled=false;
+    } else {
+      upg.disabled=true;
+    }
+  });
 }
 
-ctx.strokeStyle="#22c55e";
-ctx.stroke();
+// Достижения
+let achievements = [
+  {id:'clicks100', text:'Сделать 100 кликов', done:false, condition:()=>totalClicks>=100},
+  {id:'coins1000', text:'Накопить 1000 монет', done:false, condition:()=>coins>=1000},
+  {id:'autoclicker5', text:'Иметь 5 монет в секунду', done:false, condition:()=>coinsPerSec>=5},
+  {id:'megaClick', text:'Кликать более 10 монет за клик', done:false, condition:()=>coinsPerClick>=10}
+];
+
+function checkAchievements(){
+  achievements.forEach(a=>{
+    if(!a.done && a.condition()){
+      a.done = true;
+      let div = document.createElement('div');
+      div.className='achievement';
+      div.textContent='🎉 Достижение: '+a.text;
+      achievementsList.appendChild(div);
+    }
+  });
 }
 
-/* ЗАРАБОТОК */
-
-function work(){
-g.cash+=100;
-log("Работа +100");
-update();
+// localStorage
+function loadProgress(){
+  let saved = JSON.parse(localStorage.getItem('clickerSavePRO'));
+  if(saved){
+    coins = saved.coins;
+    coinsPerClick = saved.coinsPerClick;
+    totalClicks = saved.totalClicks;
+    coinsPerSec = saved.coinsPerSec;
+    upgrades.forEach(upg=>{
+      if(saved.upgrades[upg.id]){
+        upg.dataset.cost = saved.upgrades[upg.id].cost;
+        upg.dataset.level = saved.upgrades[upg.id].level || 0;
+        upg.textContent = generateUpgradeText(upg);
+      }
+    });
+    achievements.forEach(a=>{
+      if(saved.achievements[a.id]){
+        a.done = true;
+        let div = document.createElement('div');
+        div.className='achievement';
+        div.textContent='🎉 Достижение: '+a.text;
+        achievementsList.appendChild(div);
+      }
+    });
+    updateDisplay();
+  }
 }
 
-function business(){
-if(g.cash>=300){
-g.cash-=300;
-g.business++;
-log("Открыт бизнес");
-update();
-}
-}
+// Автосохранение каждые 5 секунд
+setInterval(saveProgress,5000);
+// Сохранение при закрытии вкладки
+window.addEventListener('beforeunload', saveProgress);
 
-/* БАНК */
-
-function deposit(){
-if(g.cash>=100){
-g.cash-=100;
-g.bank+=100;
-log("Вклад в банк");
-update();
-}
+function saveProgress(){
+  let saveData = {
+    coins, coinsPerClick, totalClicks, coinsPerSec,
+    upgrades: {},
+    achievements: {}
+  };
+  upgrades.forEach(upg=>{
+    saveData.upgrades[upg.id]={cost:upg.dataset.cost, level:upg.dataset.level};
+  });
+  achievements.forEach(a=>{saveData.achievements[a.id]=a.done;});
+  localStorage.setItem('clickerSavePRO', JSON.stringify(saveData));
 }
 
-function withdraw(){
-if(g.bank>=100){
-g.bank-=100;
-g.cash+=100;
-log("Снятие из банка");
-update();
-}
-}
-
-/* БИРЖА */
-
-function market(){
-let change=Math.random()*20-10;
-g.price=Math.max(5,g.price+change);
-g.history.push(g.price);
-if(g.history.length>50) g.history.shift();
-}
-
-function buyStock(){
-if(g.cash>=g.price){
-g.cash-=g.price;
-g.stocks++;
-log("Куплена акция");
-update();
-}
-}
-
-function sellStock(){
-if(g.stocks>0){
-g.cash+=g.price;
-g.stocks--;
-log("Продана акция");
-update();
-}
-}
-
-/* ДЕНЬ */
-
-function nextDay(){
-g.day++;
-
-market();
-
-if(g.business>0){
-let income=g.business*80;
-g.cash+=income;
-log("Доход бизнеса +"+income);
-}
-
-if(g.bank>0){
-let interest=g.bank*0.02;
-g.bank+=interest;
-log("Проценты банка +"+Math.floor(interest));
-}
-
-update();
-}
-
-/* SAVE */
-
-function save(){
-localStorage.setItem("ecoSim",JSON.stringify(g));
-}
-
-function load(){
-let s=localStorage.getItem("ecoSim");
-if(s) g=JSON.parse(s);
-else newGame();
-}
-
-load();
-update();
+// Инициализация
+loadProgress();
+updateDisplay();
 </script>
-
 </body>
 </html>
+
+
 
 
 
