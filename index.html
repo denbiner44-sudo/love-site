@@ -2,70 +2,62 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Супер Кликер PRO</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Супер Кликер PRO v3</title>
 
 <style>
 body{
-  font-family:Arial;
   margin:0;
-  background:linear-gradient(135deg,#1f1c2c,#928dab);
-  color:#fff;
-}
-
-.screen{
-  display:none;
-  padding:20px;
+  font-family:Arial;
+  background:#0f172a;
+  color:#e5e7eb;
   text-align:center;
-}
-
-.active{
-  display:block;
 }
 
 .container{
   max-width:900px;
   margin:auto;
-  background:rgba(0,0,0,0.6);
-  border-radius:15px;
   padding:20px;
+  background:#111827;
+  border-radius:12px;
 }
 
-/* кнопки */
 button{
-  padding:12px;
+  padding:10px;
   margin:5px;
   border:none;
-  border-radius:10px;
+  border-radius:8px;
   cursor:pointer;
-  background:#4caf50;
-  color:#fff;
+  background:#22c55e;
+  color:white;
 }
 
-#click-btn{
-  font-size:28px;
-  padding:25px;
-  background:#ff5722;
+.big{font-size:26px;background:#f97316}
+
+.stat{
+  background:#1f2937;
+  padding:8px;
+  margin:5px;
+  border-radius:8px;
 }
 
-/* карта города */
+.screen{display:none}
+.active{display:block}
+
 #map{
   display:grid;
   grid-template-columns:repeat(5,80px);
   gap:6px;
   justify-content:center;
-  margin:20px 0;
 }
 
 .cell{
-  width:80px;
-  height:80px;
-  background:#1e8449;
-  border-radius:8px;
-  font-size:40px;
+  width:80px;height:80px;
+  background:#064e3b;
+  font-size:36px;
   display:flex;
   align-items:center;
   justify-content:center;
+  border-radius:6px;
   cursor:pointer;
 }
 </style>
@@ -73,184 +65,236 @@ button{
 
 <body>
 
-<!-- ================= КЛИКЕР ================= -->
+<!-- КЛИКЕР -->
 
 <div id="clicker" class="screen active">
 <div class="container">
 
-<h1>Супер Кликер PRO</h1>
+<h1>🔥 Супер Кликер</h1>
 
-<p>Монеты: <span id="coins">0</span></p>
-<p>За клик: <span id="cpc">1</span></p>
-<p>Доход города: <span id="cityIncome">0</span>/сек</p>
+<div class="stat">💰 Монеты: <span id="coins"></span></div>
+<div class="stat">👆 За клик: <span id="cpc"></span></div>
+<div class="stat">🏙 Доход: <span id="inc"></span>/сек</div>
+<div class="stat">⭐ Уровень: <span id="lvl"></span></div>
 
-<button id="click-btn">КЛИК!</button>
+<button id="clickBtn" class="big">КЛИК</button>
 
-<button id="upgrade" data-cost="10">
-Усилить клик — 10
-</button>
+<h3>Магазин</h3>
+<button onclick="upgradeClick()">Клик +1 (50)</button>
+<button onclick="buyAuto()">Авто +1/сек (100)</button>
 
-<br><br>
+<h3>Квест</h3>
+<div id="questText"></div>
 
-<button onclick="openCity()">
-🏙 Перейти в город
-</button>
+<h3>Достижения</h3>
+<div id="achievements"></div>
+
+<h3>Статистика</h3>
+<div id="stats"></div>
+
+<br>
+<button onclick="dailyBonus()">🎁 Бонус</button>
+<button onclick="openCity()">🏙 Город</button>
 
 </div>
 </div>
 
-<!-- ================= ГОРОД ================= -->
+<!-- ГОРОД -->
 
 <div id="city" class="screen">
 <div class="container">
 
 <h1>🏙 Город</h1>
-
-<p>Монеты: <span id="coinsCity">0</span></p>
+<div class="stat">💰 Монеты: <span id="coinsCity"></span></div>
 
 <div id="map"></div>
 
-<p>Выбери здание:</p>
-
-<button onclick="select('house')">🏠 Дом (100)</button>
+<button onclick="select('house')">🏠 Дом (200)</button>
 <button onclick="select('shop')">🏪 Магазин (500)</button>
-<button onclick="select('factory')">🏭 Фабрика (2000)</button>
-<button onclick="select('park')">🌳 Парк (800)</button>
+<button onclick="select('factory')">🏭 Фабрика (1500)</button>
 
-<br><br>
-
-<button onclick="openClicker()">
-⬅ Вернуться в кликер
-</button>
+<br>
+<button onclick="openClicker()">⬅ Назад</button>
 
 </div>
 </div>
 
 <script>
-/* ===== ОБЩИЕ ДАННЫЕ ===== */
 
-let coins = +localStorage.getItem("coins") || 0;
-let cpc = +localStorage.getItem("cpc") || 1;
-let city = JSON.parse(localStorage.getItem("city")) || {};
+/* ===== СОХРАНЕНИЕ ===== */
 
-const prices = {
-  house:100,
-  shop:500,
-  factory:2000,
-  park:800
+let data=JSON.parse(localStorage.getItem("save"))||{
+  coins:0,cpc:1,auto:0,level:1,xp:0,
+  city:{},
+  stats:{clicks:0,earned:0},
+  quest:500,
+  achievements:[],
+  lastBonus:0
 };
 
-const icons = {
-  house:"🏠",
-  shop:"🏪",
-  factory:"🏭",
-  park:"🌳"
+function save(){
+  localStorage.setItem("save",JSON.stringify(data));
+}
+
+/* ===== ДОХОД ===== */
+
+function income(){
+  let i=data.auto;
+  for(let k in data.city){
+    let t=data.city[k];
+    if(t=="house")i+=1;
+    if(t=="shop")i+=5;
+    if(t=="factory")i+=12;
+  }
+  return i;
+}
+
+/* ===== КЛИК ===== */
+
+clickBtn.onclick=()=>{
+  data.coins+=data.cpc;
+  data.stats.clicks++;
+  data.stats.earned+=data.cpc;
+  data.xp++;
+
+  if(data.xp>=data.level*50){
+    data.xp=0;
+    data.level++;
+  }
+
+  checkQuest();
+  checkAchievements();
+  update();
 };
 
-/* ===== ПЕРЕКЛЮЧЕНИЕ ЭКРАНОВ ===== */
+/* ===== МАГАЗИН ===== */
+
+function upgradeClick(){
+  if(data.coins>=50){
+    data.coins-=50;
+    data.cpc++;
+  }
+}
+
+function buyAuto(){
+  if(data.coins>=100){
+    data.coins-=100;
+    data.auto++;
+  }
+}
+
+/* ===== КВЕСТ ===== */
+
+function checkQuest(){
+  if(data.stats.earned>=data.quest){
+    data.coins+=100;
+    data.quest+=500;
+  }
+}
+
+/* ===== ДОСТИЖЕНИЯ ===== */
+
+function addAch(name){
+  if(!data.achievements.includes(name)){
+    data.achievements.push(name);
+  }
+}
+
+function checkAchievements(){
+  if(data.stats.earned>=1000)addAch("💰 1000 монет");
+  if(data.level>=5)addAch("⭐ Уровень 5");
+}
+
+/* ===== БОНУС ===== */
+
+function dailyBonus(){
+  let now=Date.now();
+  if(now-data.lastBonus>86400000){
+    data.coins+=200;
+    data.lastBonus=now;
+  }
+}
+
+/* ===== ГОРОД ===== */
+
+let selected=null;
+function select(t){selected=t;}
+
+const prices={house:200,shop:500,factory:1500};
+const icons={house:"🏠",shop:"🏪",factory:"🏭"};
+
+const map=document.getElementById("map");
+
+for(let i=0;i<25;i++){
+  let c=document.createElement("div");
+  c.className="cell";
+
+  if(data.city[i])c.textContent=icons[data.city[i]];
+
+  c.onclick=()=>{
+    if(!selected)return;
+    if(data.coins>=prices[selected]&&!data.city[i]){
+      data.coins-=prices[selected];
+      data.city[i]=selected;
+      c.textContent=icons[selected];
+    }
+  };
+
+  map.appendChild(c);
+}
+
+/* ===== ЭКРАНЫ ===== */
 
 function openCity(){
-  document.getElementById("clicker").classList.remove("active");
-  document.getElementById("city").classList.add("active");
+  clicker.classList.remove("active");
+  city.classList.add("active");
   update();
 }
 
 function openClicker(){
-  document.getElementById("city").classList.remove("active");
-  document.getElementById("clicker").classList.add("active");
+  city.classList.remove("active");
+  clicker.classList.add("active");
   update();
 }
 
-/* ===== ДОХОД ГОРОДА ===== */
-
-function getCityIncome(){
-  let income = 0;
-
-  if(city.house) income += city.house.level * 1;
-  if(city.shop) income += city.shop.level * 5;
-  if(city.factory) income += city.factory.level * 15;
-  if(city.park) income += city.park.level * 2;
-
-  return income;
-}
-
-/* ===== КЛИКЕР ===== */
-
-document.getElementById("click-btn").onclick = ()=>{
-  coins += cpc;
-  update();
-};
-
-document.getElementById("upgrade").onclick = e=>{
-  let cost = +e.target.dataset.cost;
-
-  if(coins>=cost){
-    coins -= cost;
-    cpc++;
-    e.target.dataset.cost = Math.floor(cost*1.5);
-    e.target.textContent = `Усилить клик — ${e.target.dataset.cost}`;
-    update();
-  }
-};
-
-/* ===== КАРТА ГОРОДА ===== */
-
-let selected = null;
-function select(type){ selected = type; }
-
-const map = document.getElementById("map");
-
-for(let i=0;i<25;i++){
-  let cell = document.createElement("div");
-  cell.className="cell";
-
-  if(city[i]) cell.textContent = icons[city[i]];
-
-  cell.onclick = ()=>{
-    if(!selected) return;
-
-    let price = prices[selected];
-
-    if(coins>=price && !city[i]){
-      coins -= price;
-      city[i] = selected;
-
-      if(!city[selected]) city[selected] = {level:0};
-      city[selected].level++;
-
-      cell.textContent = icons[selected];
-      update();
-    }
-  };
-
-  map.appendChild(cell);
-}
-
-/* ===== ОБНОВЛЕНИЕ ===== */
-
-function update(){
-  document.getElementById("coins").textContent = Math.floor(coins);
-  document.getElementById("coinsCity").textContent = Math.floor(coins);
-  document.getElementById("cpc").textContent = cpc;
-  document.getElementById("cityIncome").textContent = getCityIncome();
-
-  localStorage.setItem("coins", coins);
-  localStorage.setItem("cpc", cpc);
-  localStorage.setItem("city", JSON.stringify(city));
-}
-
-/* ===== ПАССИВНЫЙ ДОХОД ===== */
+/* ===== ПАССИВ ===== */
 
 setInterval(()=>{
-  coins += getCityIncome();
+  data.coins+=income();
+  data.stats.earned+=income();
+  checkQuest();
   update();
 },1000);
 
-update();
-</script>
+/* ===== UI ===== */
 
+function update(){
+
+  coins.textContent=Math.floor(data.coins);
+  coinsCity.textContent=Math.floor(data.coins);
+  cpc.textContent=data.cpc;
+  inc.textContent=income();
+  lvl.textContent=data.level;
+
+  questText.textContent=
+  `Заработай ${data.quest} (награда 100)`;
+
+  achievements.textContent=
+  data.achievements.join(" | ");
+
+  stats.textContent=
+  `Клики: ${data.stats.clicks}
+   | Заработано: ${data.stats.earned}`;
+
+  save();
+}
+
+update();
+
+</script>
 </body>
 </html>
+
 
 
 
