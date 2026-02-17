@@ -3,14 +3,14 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>RPG Симулятор Жизни</title>
+<title>Глобальная Биржа RPG</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body{
 margin:0;
 font-family:Arial;
-background:linear-gradient(135deg,#020617,#0f172a);
+background:#020617;
 color:#e5e7eb;
 display:flex;
 justify-content:center;
@@ -19,68 +19,49 @@ padding:10px;
 
 .container{
 width:100%;
-max-width:1000px;
+max-width:1100px;
 background:#111827;
-padding:15px;
-border-radius:16px;
-box-shadow:0 20px 50px rgba(0,0,0,0.7);
+padding:12px;
+border-radius:14px;
 }
-
-h1{text-align:center;margin:0 0 10px;}
 
 .panel{
 background:#1f2937;
 padding:8px;
 border-radius:10px;
-margin-bottom:8px;
-}
-
-.progress{
-height:8px;
-background:#22c55e;
-border-radius:4px;
-transition:width .4s;
+margin-bottom:6px;
 }
 
 .grid{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
 gap:6px;
-margin-bottom:8px;
 }
 
 button{
-padding:10px;
+padding:8px;
 border:none;
 border-radius:8px;
-cursor:pointer;
 background:#22c55e;
 font-weight:bold;
-transition:.2s;
+cursor:pointer;
 }
 
-button:hover{transform:scale(1.05);}
+canvas{
+background:#020617;
+border-radius:10px;
+width:100%;
+height:200px;
+}
 
 #log{
-height:140px;
-overflow-y:auto;
+height:120px;
+overflow:auto;
 background:#020617;
-padding:8px;
+padding:6px;
 border-radius:10px;
+margin-top:6px;
 font-size:14px;
-}
-
-.fade{
-animation:fade .4s;
-}
-
-@keyframes fade{
-from{opacity:0;transform:translateY(5px);}
-to{opacity:1;}
-}
-
-.dead{
-background:#7f1d1d !important;
 }
 </style>
 
@@ -89,244 +70,110 @@ background:#7f1d1d !important;
 <body>
 <div class="container">
 
-<h1>🔥 RPG Симулятор Жизни</h1>
+<h2>🌍 Глобальная Биржа RPG</h2>
 
 <div class="panel">
 💰 Деньги: <span id="money"></span> |
-⭐ Уровень: <span id="level"></span> |
-XP: <span id="xp"></span> |
-🏠 Дом: <span id="house"></span> |
-🚗 Машина: <span id="car"></span>
+📈 Акции: <span id="stocks"></span> |
+🖼 NFT: <span id="nfts"></span>
 </div>
 
-<div class="panel">
-❤️ Здоровье<div class="progress" id="hp"></div>
-😊 Настроение<div class="progress" id="mood"></div>
-</div>
-
-<div class="panel">
-Навыки:
-Сила <span id="str"></span> |
-Интеллект <span id="int"></span> |
-Харизма <span id="cha"></span>
-</div>
+<canvas id="chart"></canvas>
 
 <div class="grid">
-<button onclick="work()">Работа</button>
-<button onclick="crime()">Криминал</button>
-<button onclick="study()">Учиться</button>
-<button onclick="rest()">Отдых</button>
-<button onclick="buyMenu()">Покупки</button>
-<button onclick="bankMenu()">Банк</button>
+<button onclick="buyStock()">Купить акцию</button>
+<button onclick="sellStock()">Продать акцию</button>
+<button onclick="buyNFT()">Купить NFT</button>
+<button onclick="sellNFT()">Продать NFT</button>
 <button onclick="nextDay()">Следующий день</button>
 </div>
 
-<div class="grid" id="actions"></div>
+<div class="panel">
+🏆 Рейтинг богатейших:
+<div id="leaderboard"></div>
+</div>
 
 <div id="log"></div>
 
+</div>
+
 <script>
-let game;
+let g;
 
 function newGame(){
-game={
-money:200,
-hp:100,
-mood:100,
-xp:0,
-level:1,
-str:1,
-int:1,
-cha:1,
-house:"Нет",
-car:"Нет",
-loan:0,
-day:1
+g={
+money:1000,
+stocks:0,
+nfts:0,
+price:100,
+history:[100],
+day:1,
+crisis:false,
+bots:generateBots()
 };
-log("🆕 Новая игра!");
+log("Новая игра");
 }
 
-function log(text){
+function generateBots(){
+let arr=[];
+for(let i=0;i<5;i++){
+arr.push({
+name:"Трейдер "+(i+1),
+money:1000+Math.random()*2000
+});
+}
+return arr;
+}
+
+function log(t){
 let el=document.getElementById("log");
-let div=document.createElement("div");
-div.textContent="День "+game.day+": "+text;
-div.className="fade";
-el.appendChild(div);
+el.innerHTML+="<div>День "+g.day+": "+t+"</div>";
 el.scrollTop=el.scrollHeight;
 }
 
-function save(){
-localStorage.setItem("lifeRPG",JSON.stringify(game));
-}
-
-function load(){
-let s=localStorage.getItem("lifeRPG");
-if(s) game=JSON.parse(s);
-else newGame();
-}
-
 function update(){
-money.textContent=game.money;
-level.textContent=game.level;
-xp.textContent=game.xp+"/100";
-house.textContent=game.house;
-car.textContent=game.car;
-str.textContent=game.str;
-int.textContent=game.int;
-cha.textContent=game.cha;
-
-hp.style.width=game.hp+"%";
-mood.style.width=game.mood+"%";
-
-checkLevel();
-checkDeath();
+money.textContent=Math.floor(g.money);
+stocks.textContent=g.stocks;
+nfts.textContent=g.nfts;
+drawChart();
+updateLeaderboard();
 save();
 }
 
-function checkLevel(){
-if(game.xp>=100){
-game.xp-=100;
-game.level++;
-game.str++;
-game.int++;
-game.cha++;
-log("⬆ Новый уровень!");
-}
+/* ГРАФИК */
+
+function drawChart(){
+let c=document.getElementById("chart");
+let ctx=c.getContext("2d");
+ctx.clearRect(0,0,c.width,c.height);
+
+let h=g.history;
+let max=Math.max(...h);
+let min=Math.min(...h);
+
+ctx.beginPath();
+
+for(let i=0;i<h.length;i++){
+let x=i*(c.width/(h.length-1));
+let y=c.height-((h[i]-min)/(max-min+1))*c.height;
+if(i===0) ctx.moveTo(x,y);
+else ctx.lineTo(x,y);
 }
 
-function checkDeath(){
-if(game.hp<=0 || game.mood<=0){
-document.body.classList.add("dead");
-log("💀 Вы умерли. Перезапуск...");
-setTimeout(()=>{
-localStorage.removeItem("lifeRPG");
-location.reload();
-},2000);
-}
+ctx.strokeStyle="#22c55e";
+ctx.stroke();
 }
 
-function work(){
-let earn=50+game.int*10;
-game.money+=earn;
-game.xp+=20;
-game.mood-=5;
-log("💼 Работа +"+earn);
-update();
-}
+/* РЫНОК */
 
-function crime(){
-if(Math.random()<0.3){
-game.hp-=20;
-game.money=Math.max(0,game.money-100);
-log("🚔 Поймали! Штраф и урон");
-}else{
-let earn=150+game.str*20;
-game.money+=earn;
-game.xp+=30;
-log("😈 Успешное дело +"+earn);
-}
-update();
-}
+function market(){
 
-function study(){
-game.int++;
-game.xp+=15;
-game.mood-=5;
-log("📚 Вы учились");
-update();
-}
+let change=(Math.random()*20-10);
 
-function rest(){
-game.hp+=10;
-game.mood+=10;
-log("🛌 Отдых");
-update();
-}
+if(Math.random()<0.1){
+g.crisis=true;
+log("📉 Э
 
-function buyMenu(){
-actions.innerHTML="";
-addAction("Квартира (500)",()=>{
-if(game.money>=500){
-game.money-=500;
-game.house="Квартира";
-log("🏠 Куплена квартира");
-update();
-}
-});
-addAction("Дом (1500)",()=>{
-if(game.money>=1500){
-game.money-=1500;
-game.house="Дом";
-log("🏡 Куплен дом");
-update();
-}
-});
-addAction("Машина (800)",()=>{
-if(game.money>=800){
-game.money-=800;
-game.car="Машина";
-log("🚗 Куплена машина");
-update();
-}
-});
-}
-
-function bankMenu(){
-actions.innerHTML="";
-addAction("Взять кредит 500",()=>{
-game.money+=500;
-game.loan+=600;
-log("🏦 Взяли кредит");
-update();
-});
-addAction("Погасить кредит",()=>{
-if(game.money>=game.loan){
-game.money-=game.loan;
-log("✅ Кредит погашен");
-game.loan=0;
-update();
-}
-});
-}
-
-function randomEvent(){
-let r=Math.random();
-if(r<0.25){
-game.money+=100;
-log("🎁 Случайная находка +100");
-}
-else if(r<0.5){
-game.hp-=10;
-log("🤕 Несчастный случай");
-}
-}
-
-function nextDay(){
-game.day++;
-game.hp-=2;
-game.mood-=2;
-if(game.loan>0){
-game.money-=20;
-log("💸 Платеж по кредиту");
-}
-randomEvent();
-update();
-}
-
-function addAction(name,fn){
-let b=document.createElement("button");
-b.textContent=name;
-b.onclick=fn;
-actions.appendChild(b);
-}
-
-load();
-update();
-</script>
-
-</div>
-</body>
-</html>
 
 
 
