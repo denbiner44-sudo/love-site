@@ -1,165 +1,91 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
+
 <head>
-<meta charset="UTF-8">
-<title>Супер Кликер PRO</title>
-<style>
-body {margin:0;font-family:Arial;background:#0b1220;color:#e5e7eb;text-align:center;}
-.container{max-width:1000px;margin:auto;padding:20px;}
-.stat{background:#1f2937;padding:10px;margin:5px;border-radius:10px;}
-.big{font-size:30px;padding:25px 40px;background:#f97316;border:none;border-radius:12px;color:white;cursor:pointer;}
-button{padding:10px;margin:5px;border:none;border-radius:8px;background:#22c55e;color:white;cursor:pointer;}
-.grid{display:grid;grid-template-columns:1fr 1fr;}
-.screen{display:none;}
-.active{display:block;}
-#map{display:grid;grid-template-columns:repeat(5,80px);gap:6px;justify-content:center;}
-.cell{width:80px;height:80px;background:#064e3b;font-size:36px;display:flex;align-items:center;justify-content:center;border-radius:6px;cursor:pointer;}
-</style>
+    <title>Raw Ascii Web Shooter</title>
+    <meta charset="utf-8">
+
+    <!-- https://developers.google.com/web/fundamentals/design-and-ux/browser-customization/ -->
+    <meta name="theme-color" content="#ADD8E6">
+    <meta property="og:url" content="https://fdadeau.github.io/GameDevJSJam2022">
+    <meta property="twitter:image" content="https://fdadeau.github.io/GameDevJSJam2022/">
+    <meta property="twitter:card" content="summary">
+    <meta property="og:description" content="A Raw Ascii Web Shooter made for the Gamedev.js Jam 2022">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Raw Ascii Web Shooter">
+    <meta property="og:image" content="screenshot.png">
+    <link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico">
+
+    <meta name="author" content="FredDD,SRW">    
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimal-ui,shrink-to-fit=no" />
+
+    <link rel="stylesheet" href="./styles/main.css" type="text/css">
+
+    <script type="module" src="./js/main.js"></script>
+
 </head>
-<body>
 
-<!-- КЛИКЕР -->
-<div id="clicker" class="screen active">
-<div class="container">
-<h1>🔥 Супер Кликер PRO</h1>
-<div class="stat">💰 Монеты: <span id="coins">0</span></div>
-<div class="stat">👆 За клик: <span id="cpc">1</span></div>
-<div class="stat">⚙️ Пассив: <span id="auto">0</span>/сек</div>
-<div class="stat">🏙 Город: <span id="cityInc">0</span>/сек</div>
-<button id="clickBtn" class="big">КЛИК</button>
+<body class="title">
 
-<h2>Улучшения</h2>
-<div class="grid">
-<div>
-<h3>👆 Клик</h3>
-<div id="clickUpgrades"></div>
-</div>
-<div>
-<h3>⚙️ Пассив</h3>
-<div id="autoUpgrades"></div>
-</div>
-</div>
+    <header id="title">
+    <h1><pre>
+______                  ___           _ _   _    _      _       _____ _                 _            
+| ___ \                / _ \         (_|_) | |  | |    | |     /  ___| |               | |           
+| |_/ /__ ___      __ / /_\ \___  ___ _ _  | |  | | ___| |__   \ `--.| |__   ___   ___ | |_ ___ _ __ 
+|    // _` \ \ /\ / / |  _  / __|/ __| | | | |/\| |/ _ \ '_ \   `--. \ '_ \ / _ \ / _ \| __/ _ \ '__|
+| |\ \ (_| |\ V  V /  | | | \__ \ (__| | | \  /\  /  __/ |_) | /\__/ / | | | (_) | (_) | ||  __/ |   
+\_| \_\__,_| \_/\_/   \_| |_/___/\___|_|_|  \/  \/ \___|_.__/  \____/|_| |_|\___/ \___/ \__\___|_|   </pre>
+    </h1>
 
-<br>
-<button onclick="openCity()">🏙 Город</button>
-</div>
-</div>
+    <h2>RAWS: A web-based shooter made for the Gamedev.js Jam'2022</h2>
+    
+    <h3>Designed with <span style="color: red;">&hearts;</span> using raw javascript, sounds and ascii graphics</h2>
 
-<!-- ГОРОД -->
-<div id="city" class="screen">
-<div class="container">
-<h1>🏙 Город</h1>
-<div class="stat">💰 Монеты: <span id="coinsCity">0</span></div>
-<div id="map"></div>
-<button onclick="select('house')">🏠 Дом (200)</button>
-<button onclick="select('shop')">🏪 Магазин (500)</button>
-<button onclick="select('factory')">🏭 Фабрика (1500)</button>
-<br>
-<button onclick="openClicker()">⬅ Назад</button>
-</div>
-</div>
+    <h3>Visit each day to play a different level</h3>
 
-<script>
-window.onload = function(){
+    <h4 data-score="N/A">Today's score: </h4>
 
-let data = JSON.parse(localStorage.getItem("save")) || {
-  coins:0, cpc:1, auto:0, city:{}, 
-  clickCosts:[10,50,150,400,1000],
-  autoCosts:[25,100,300,800,2000]
-};
+    <div class="flex"><button id="btnPlay">Play</button> <button id="btnHowTo">How to play</button></div>
 
-const coins = document.getElementById("coins");
-const coinsCity = document.getElementById("coinsCity");
-const cpc = document.getElementById("cpc");
-const auto = document.getElementById("auto");
-const cityInc = document.getElementById("cityInc");
-const clickBtn = document.getElementById("clickBtn");
-const clickDiv = document.getElementById("clickUpgrades");
-const autoDiv = document.getElementById("autoUpgrades");
-const map = document.getElementById("map");
+    </header>
 
-let selected = null;
+    <aside id="howto">
 
-// Клик по кнопке
-clickBtn.onclick = ()=>{ data.coins += data.cpc; update(); };
+        <h1><pre>
+______                  ___           _ _   _    _      _       _____ _                 _            
+| ___ \                / _ \         (_|_) | |  | |    | |     /  ___| |               | |           
+| |_/ /__ ___      __ / /_\ \___  ___ _ _  | |  | | ___| |__   \ `--.| |__   ___   ___ | |_ ___ _ __ 
+|    // _` \ \ /\ / / |  _  / __|/ __| | | | |/\| |/ _ \ '_ \   `--. \ '_ \ / _ \ / _ \| __/ _ \ '__|
+| |\ \ (_| |\ V  V /  | | | \__ \ (__| | | \  /\  /  __/ |_) | /\__/ / | | | (_) | (_) | ||  __/ |   
+\_| \_\__,_| \_/\_/   \_| |_/___/\___|_|_|  \/  \/ \___|_.__/  \____/|_| |_|\___/ \___/ \__\___|_|   </pre>
+                </h1>
+            
+        <p>Move using arrow keys <kbd>UP</kbd> / <kbd>DOWN</kbd> / <kbd>LEFT</kbd> / <kbd>RIGHT</kbd></p>
 
-// Апгрейды
-const clickPower=[1,5,10,25,50];
-const autoPower=[1,5,10,25,50];
+        <p>Shoot using <kbd>SPACE</kbd> key</p>
 
-function drawUpgrades(){
-  clickDiv.innerHTML=""; autoDiv.innerHTML="";
-  for(let i=0;i<5;i++){
-    let b = document.createElement("button");
-    b.textContent=`+${clickPower[i]} (${data.clickCosts[i]})`;
-    b.onclick = ()=>{ if(data.coins>=data.clickCosts[i]){ data.coins-=data.clickCosts[i]; data.cpc+=clickPower[i]; data.clickCosts[i]=Math.floor(data.clickCosts[i]*1.6); update(); } };
-    clickDiv.appendChild(b);
+        <p>Press <kbd>P</kbd> to pause/resume the game</p>
 
-    let a = document.createElement("button");
-    a.textContent=`+${autoPower[i]}/сек (${data.autoCosts[i]})`;
-    a.onclick = ()=>{ if(data.coins>=data.autoCosts[i]){ data.coins-=data.autoCosts[i]; data.auto+=autoPower[i]; data.autoCosts[i]=Math.floor(data.autoCosts[i]*1.6); update(); } };
-    autoDiv.appendChild(a);
-  }
-}
+        <p>Bonus <code class="bonus">[0]</code>, <code class="bonus">[1]</code>, <code class="bonus">[2]</code> change shooting type</p>
+     
+        <p>Bonus <code class="bonus">[x2]</code> increases shooting frequency</p>
 
-// Город
-const prices={house:200, shop:500, factory:1500};
-const icons={house:"🏠", shop:"🏪", factory:"🏭"};
+        <h3>Avoid collisions, destroy all enemies and reach the end of the level!</h3>
 
-function select(t){ selected = t; }
+        <div class="flex"><button id="btnBack">Back</button></div>
 
-function cityIncomeCalc(){
-  let inc=0;
-  for(let k in data.city){
-    let t = data.city[k];
-    if(t=="house") inc+=1;
-    if(t=="shop") inc+=5;
-    if(t=="factory") inc+=12;
-  }
-  return inc;
-}
+    </aside>
 
-// Создаем клетки города
-map.innerHTML = "";
-for(let i=0;i<25;i++){
-  let c = document.createElement("div");
-  c.className="cell";
-  if(data.city[i]) c.textContent = icons[data.city[i]];
-  c.onclick = ()=>{
-    if(!selected) return;
-    if(!data.city[i] && data.coins>=prices[selected]){
-      data.coins -= prices[selected];
-      data.city[i]=selected;
-      c.textContent = icons[selected];
-      update();
-    }
-  };
-  map.appendChild(c);
-}
+    <main id="game">
+        <div id="score" data-value="0" data-percentage="0"></div>
+        <canvas id="cvs" width="480" height="480"></canvas>
+    </main>
 
-// Экраны
-window.openCity = ()=>{ clicker.classList.remove("active"); city.classList.add("active"); };
-window.openClicker = ()=>{ city.classList.remove("active"); clicker.classList.add("active"); };
 
-// Пассив
-setInterval(()=>{ data.coins += data.auto + cityIncomeCalc(); update(); },1000);
-
-// UI обновление
-function update(){
-  coins.textContent=Math.floor(data.coins);
-  coinsCity.textContent=Math.floor(data.coins);
-  cpc.textContent=data.cpc;
-  auto.textContent=data.auto;
-  cityInc.textContent=cityIncomeCalc();
-  drawUpgrades();
-  localStorage.setItem("save", JSON.stringify(data));
-}
-
-update();
-};
-</script>
 </body>
-</html>
+
+
+
 
 
 
