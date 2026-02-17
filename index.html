@@ -1,88 +1,132 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <title>Raw Ascii Web Shooter</title>
-    <meta charset="utf-8">
-
-    <!-- https://developers.google.com/web/fundamentals/design-and-ux/browser-customization/ -->
-    <meta name="theme-color" content="#ADD8E6">
-    <meta property="og:url" content="https://fdadeau.github.io/GameDevJSJam2022">
-    <meta property="twitter:image" content="https://fdadeau.github.io/GameDevJSJam2022/">
-    <meta property="twitter:card" content="summary">
-    <meta property="og:description" content="A Raw Ascii Web Shooter made for the Gamedev.js Jam 2022">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Raw Ascii Web Shooter">
-    <meta property="og:image" content="screenshot.png">
-    <link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico">
-
-    <meta name="author" content="FredDD,SRW">    
-    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimal-ui,shrink-to-fit=no" />
-
-    <link rel="stylesheet" href="./styles/main.css" type="text/css">
-
-    <script type="module" src="./js/main.js"></script>
-
+<meta charset="UTF-8">
+<title>Mini ASCII Shooter</title>
+<style>
+  body {
+    background-color: black;
+    color: white;
+    font-family: monospace;
+    text-align: center;
+    user-select: none;
+  }
+  pre {
+    font-size: 16px;
+    line-height: 1.1;
+  }
+  button {
+    margin: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+</style>
 </head>
+<body>
 
-<body class="title">
+<h1>
+  ____  _   _    _    ____  ____  
+ |  _ \| | | |  / \  |  _ \|  _ \ 
+ | |_) | | | | / _ \ | |_) | | | |
+ |  _ <| |_| |/ ___ \|  _ <| |_| |
+ |_| \_\\___//_/   \_\_| \_\____/ 
+</h1>
 
-    <header id="title">
-    <h1><pre>
-______                  ___           _ _   _    _      _       _____ _                 _            
-| ___ \                / _ \         (_|_) | |  | |    | |     /  ___| |               | |           
-| |_/ /__ ___      __ / /_\ \___  ___ _ _  | |  | | ___| |__   \ `--.| |__   ___   ___ | |_ ___ _ __ 
-|    // _` \ \ /\ / / |  _  / __|/ __| | | | |/\| |/ _ \ '_ \   `--. \ '_ \ / _ \ / _ \| __/ _ \ '__|
-| |\ \ (_| |\ V  V /  | | | \__ \ (__| | | \  /\  /  __/ |_) | /\__/ / | | | (_) | (_) | ||  __/ |   
-\_| \_\__,_| \_/\_/   \_| |_/___/\___|_|_|  \/  \/ \___|_.__/  \____/|_| |_|\___/ \___/ \__\___|_|   </pre>
-    </h1>
+<p>Mini ASCII Shooter - press <b>Space</b> to shoot!</p>
+<p>Score: <span id="score">0</span></p>
 
-    <h2>RAWS: A web-based shooter made for the Gamedev.js Jam'2022</h2>
-    
-    <h3>Designed with <span style="color: red;">&hearts;</span> using raw javascript, sounds and ascii graphics</h2>
+<button id="playBtn">Play</button>
+<button id="howBtn">How to play</button>
 
-    <h3>Visit each day to play a different level</h3>
+<pre id="gameArea"></pre>
 
-    <h4 data-score="N/A">Today's score: </h4>
+<script>
+const gameArea = document.getElementById("gameArea");
+const scoreEl = document.getElementById("score");
+const playBtn = document.getElementById("playBtn");
+const howBtn = document.getElementById("howBtn");
 
-    <div class="flex"><button id="btnPlay">Play</button> <button id="btnHowTo">How to play</button></div>
+let playerX = 5;
+let bullets = [];
+let enemies = [];
+let score = 0;
+let gameInterval;
+let width = 20;
+let height = 10;
 
-    </header>
+function draw() {
+  let grid = Array.from({length: height}, () => Array(width).fill(' '));
 
-    <aside id="howto">
+  // Player
+  grid[height-1][playerX] = 'A';
 
-        <h1><pre>
-______                  ___           _ _   _    _      _       _____ _                 _            
-| ___ \                / _ \         (_|_) | |  | |    | |     /  ___| |               | |           
-| |_/ /__ ___      __ / /_\ \___  ___ _ _  | |  | | ___| |__   \ `--.| |__   ___   ___ | |_ ___ _ __ 
-|    // _` \ \ /\ / / |  _  / __|/ __| | | | |/\| |/ _ \ '_ \   `--. \ '_ \ / _ \ / _ \| __/ _ \ '__|
-| |\ \ (_| |\ V  V /  | | | \__ \ (__| | | \  /\  /  __/ |_) | /\__/ / | | | (_) | (_) | ||  __/ |   
-\_| \_\__,_| \_/\_/   \_| |_/___/\___|_|_|  \/  \/ \___|_.__/  \____/|_| |_|\___/ \___/ \__\___|_|   </pre>
-                </h1>
-            
-        <p>Move using arrow keys <kbd>UP</kbd> / <kbd>DOWN</kbd> / <kbd>LEFT</kbd> / <kbd>RIGHT</kbd></p>
+  // Bullets
+  bullets.forEach(b => {
+    if(b.y >= 0) grid[b.y][b.x] = '|';
+  });
 
-        <p>Shoot using <kbd>SPACE</kbd> key</p>
+  // Enemies
+  enemies.forEach(e => {
+    if(e.y >=0 && e.y < height) grid[e.y][e.x] = 'V';
+  });
 
-        <p>Press <kbd>P</kbd> to pause/resume the game</p>
+  // Collision check
+  bullets.forEach(b => {
+    enemies.forEach((e, i) => {
+      if(b.x === e.x && b.y === e.y) {
+        score += 10;
+        scoreEl.textContent = score;
+        e.y = -1;
+        b.y = -1;
+      }
+    });
+  });
 
-        <p>Bonus <code class="bonus">[0]</code>, <code class="bonus">[1]</code>, <code class="bonus">[2]</code> change shooting type</p>
-     
-        <p>Bonus <code class="bonus">[x2]</code> increases shooting frequency</p>
+  // Render
+  gameArea.textContent = grid.map(row => row.join('')).join('\n');
+}
 
-        <h3>Avoid collisions, destroy all enemies and reach the end of the level!</h3>
+function update() {
+  // Move bullets
+  bullets.forEach(b => b.y--);
+  bullets = bullets.filter(b => b.y >= 0);
 
-        <div class="flex"><button id="btnBack">Back</button></div>
+  // Move enemies
+  enemies.forEach(e => e.y++);
+  enemies = enemies.filter(e => e.y < height);
 
-    </aside>
+  // Randomly spawn enemies
+  if(Math.random() < 0.1) {
+    enemies.push({x: Math.floor(Math.random()*width), y: 0});
+  }
 
-    <main id="game">
-        <div id="score" data-value="0" data-percentage="0"></div>
-        <canvas id="cvs" width="480" height="480"></canvas>
-    </main>
+  draw();
+}
 
+function startGame() {
+  bullets = [];
+  enemies = [];
+  score = 0;
+  scoreEl.textContent = score;
+  playerX = Math.floor(width/2);
+  clearInterval(gameInterval);
+  gameInterval = setInterval(update, 200);
+}
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'ArrowLeft') playerX = Math.max(0, playerX-1);
+  if(e.key === 'ArrowRight') playerX = Math.min(width-1, playerX+1);
+  if(e.key === ' ') bullets.push({x: playerX, y: height-2});
+});
+
+playBtn.addEventListener('click', startGame);
+howBtn.addEventListener('click', () => alert("Use arrow keys to move, Space to shoot."));
+</script>
 
 </body>
+</html>
+
 
 
 
