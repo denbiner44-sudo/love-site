@@ -8,7 +8,7 @@
 body{
   margin:0;
   font-family:Arial;
-  background:#0f172a;
+  background:#0b1220;
   color:#e5e7eb;
   text-align:center;
 }
@@ -17,8 +17,23 @@ body{
   max-width:1000px;
   margin:auto;
   padding:20px;
-  background:#111827;
+}
+
+.stat{
+  background:#1f2937;
+  padding:10px;
+  margin:5px;
+  border-radius:10px;
+}
+
+.big{
+  font-size:30px;
+  padding:25px 40px;
+  background:#f97316;
+  border:none;
   border-radius:12px;
+  color:white;
+  cursor:pointer;
 }
 
 button{
@@ -26,27 +41,19 @@ button{
   margin:5px;
   border:none;
   border-radius:8px;
-  cursor:pointer;
   background:#22c55e;
   color:white;
+  cursor:pointer;
 }
 
-.big{
-  font-size:28px;
-  padding:25px;
-  background:#f97316;
+button:disabled{
+  background:#555;
+  cursor: not-allowed;
 }
 
 .grid{
   display:grid;
   grid-template-columns:1fr 1fr;
-}
-
-.stat{
-  background:#1f2937;
-  padding:8px;
-  margin:5px;
-  border-radius:8px;
 }
 
 .screen{display:none}
@@ -68,30 +75,30 @@ button{
   justify-content:center;
   border-radius:6px;
   cursor:pointer;
+  transition:0.2s;
 }
+.cell:hover{background:#065f47;}
 </style>
 </head>
 
 <body>
 
-<!-- ================= КЛИКЕР ================= -->
-
+<!-- КЛИКЕР -->
 <div id="clicker" class="screen active">
 <div class="container">
 
 <h1>🔥 Супер Кликер PRO</h1>
 
-<div class="stat">💰 Монеты: <span id="coins"></span></div>
-<div class="stat">👆 За клик: <span id="cpc"></span></div>
-<div class="stat">⚙️ Пассив: <span id="auto"></span>/сек</div>
-<div class="stat">🏙 Город: <span id="cityInc"></span>/сек</div>
+<div class="stat">💰 Монеты: <span id="coins">0</span></div>
+<div class="stat">👆 За клик: <span id="cpc">1</span></div>
+<div class="stat">⚙️ Пассив: <span id="auto">0</span>/сек</div>
+<div class="stat">🏙 Город: <span id="cityInc">0</span>/сек</div>
 
 <button id="clickBtn" class="big">КЛИК</button>
 
 <h2>Улучшения</h2>
 
 <div class="grid">
-
 <div>
 <h3>👆 Клик</h3>
 <div id="clickUpgrades"></div>
@@ -101,7 +108,6 @@ button{
 <h3>⚙️ Пассив</h3>
 <div id="autoUpgrades"></div>
 </div>
-
 </div>
 
 <br>
@@ -110,13 +116,12 @@ button{
 </div>
 </div>
 
-<!-- ================= ГОРОД ================= -->
-
+<!-- ГОРОД -->
 <div id="city" class="screen">
 <div class="container">
 
 <h1>🏙 Город</h1>
-<div class="stat">💰 Монеты: <span id="coinsCity"></span></div>
+<div class="stat">💰 Монеты: <span id="coinsCity">0</span></div>
 
 <div id="map"></div>
 
@@ -131,10 +136,10 @@ button{
 </div>
 
 <script>
+window.onload = function(){
 
-/* ===== СОХРАНЕНИЕ ===== */
-
-let data=JSON.parse(localStorage.getItem("save"))||{
+/* ===== ДАННЫЕ ===== */
+let data = JSON.parse(localStorage.getItem("save")) || {
   coins:0,
   cpc:1,
   auto:0,
@@ -143,34 +148,33 @@ let data=JSON.parse(localStorage.getItem("save"))||{
   autoCosts:[25,100,300,800,2000]
 };
 
-function save(){
-  localStorage.setItem("save",JSON.stringify(data));
-}
+function save(){ localStorage.setItem("save", JSON.stringify(data)); }
+
+/* ===== ЭЛЕМЕНТЫ ===== */
+const coins = document.getElementById("coins");
+const coinsCity = document.getElementById("coinsCity");
+const cpc = document.getElementById("cpc");
+const auto = document.getElementById("auto");
+const cityInc = document.getElementById("cityInc");
+
+const clickBtn = document.getElementById("clickBtn");
+const clickDiv = document.getElementById("clickUpgrades");
+const autoDiv = document.getElementById("autoUpgrades");
 
 /* ===== КЛИК ===== */
-
-clickBtn.onclick=()=>{
-  data.coins+=data.cpc;
-  update();
-};
+clickBtn.onclick = ()=>{ data.coins += data.cpc; update(); };
 
 /* ===== АПГРЕЙДЫ ===== */
-
 const clickPower=[1,5,10,25,50];
 const autoPower=[1,5,10,25,50];
 
-const clickDiv=document.getElementById("clickUpgrades");
-const autoDiv=document.getElementById("autoUpgrades");
-
-function createButtons(){
-
+function drawUpgrades(){
   clickDiv.innerHTML="";
   autoDiv.innerHTML="";
-
   for(let i=0;i<5;i++){
-
     let b=document.createElement("button");
     b.textContent=`+${clickPower[i]} (${data.clickCosts[i]})`;
+    b.disabled = data.coins < data.clickCosts[i];
     b.onclick=()=>{
       if(data.coins>=data.clickCosts[i]){
         data.coins-=data.clickCosts[i];
@@ -183,6 +187,7 @@ function createButtons(){
 
     let a=document.createElement("button");
     a.textContent=`+${autoPower[i]}/сек (${data.autoCosts[i]})`;
+    a.disabled = data.coins < data.autoCosts[i];
     a.onclick=()=>{
       if(data.coins>=data.autoCosts[i]){
         data.coins-=data.autoCosts[i];
@@ -196,85 +201,89 @@ function createButtons(){
 }
 
 /* ===== ГОРОД ===== */
-
 let selected=null;
-function select(t){selected=t;}
+window.select=(t)=>{
+  selected = t;
+  document.querySelectorAll('#city button').forEach(b=>{
+    b.style.border='';
+  });
+  event.target.style.border='2px solid #f97316';
+};
 
 const prices={house:200,shop:500,factory:1500};
 const icons={house:"🏠",shop:"🏪",factory:"🏭"};
 
-function cityIncome(){
+function cityIncomeCalc(){
   let i=0;
   for(let k in data.city){
     let t=data.city[k];
-    if(t=="house")i+=1;
-    if(t=="shop")i+=5;
-    if(t=="factory")i+=12;
+    if(t=="house") i+=1;
+    if(t=="shop") i+=5;
+    if(t=="factory") i+=12;
   }
   return i;
 }
 
 const map=document.getElementById("map");
-
 for(let i=0;i<25;i++){
   let c=document.createElement("div");
   c.className="cell";
-
-  if(data.city[i])c.textContent=icons[data.city[i]];
+  if(data.city[i]) c.textContent=icons[data.city[i]];
 
   c.onclick=()=>{
-    if(!selected)return;
-    if(data.coins>=prices[selected]&&!data.city[i]){
-      data.coins-=prices[selected];
-      data.city[i]=selected;
-      c.textContent=icons[selected];
-      update();
+    if(!selected) return;
+    if(data.city[i]){
+      alert("Эта клетка занята!");
+      return;
     }
+    if(data.coins>=prices[selected]){
+      data.coins -= prices[selected];
+      data.city[i] = selected;
+      c.textContent = icons[selected];
+      selected=null;
+      document.querySelectorAll('#city button').forEach(b=>b.style.border='');
+      update();
+    } else { alert("Недостаточно монет!"); }
   };
-
   map.appendChild(c);
 }
 
 /* ===== ЭКРАНЫ ===== */
-
-function openCity(){
+window.openCity=()=>{
   clicker.classList.remove("active");
   city.classList.add("active");
-  update();
-}
-
-function openClicker(){
+};
+window.openClicker=()=>{
   city.classList.remove("active");
   clicker.classList.add("active");
-  update();
-}
+};
 
 /* ===== ПАССИВ ===== */
-
 setInterval(()=>{
-  data.coins+=data.auto+cityIncome();
+  let income = data.auto + cityIncomeCalc();
+  data.coins += income/10; // плавное добавление
   update();
-},1000);
+},100);
 
 /* ===== UI ===== */
-
 function update(){
-
-  coins.textContent=Math.floor(data.coins);
-  coinsCity.textContent=Math.floor(data.coins);
-  cpc.textContent=data.cpc;
-  auto.textContent=data.auto;
-  cityInc.textContent=cityIncome();
-
-  createButtons();
+  coins.textContent = Math.floor(data.coins);
+  coinsCity.textContent = Math.floor(data.coins);
+  cpc.textContent = data.cpc;
+  auto.textContent = data.auto;
+  cityInc.textContent = cityIncomeCalc();
+  drawUpgrades();
   save();
 }
 
 update();
-
+};
 </script>
+
 </body>
 </html>
+
+
 
 
 
