@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Супер Кликер PRO v3</title>
+<title>Супер Кликер PRO</title>
 
 <style>
 body{
@@ -14,7 +14,7 @@ body{
 }
 
 .container{
-  max-width:900px;
+  max-width:1000px;
   margin:auto;
   padding:20px;
   background:#111827;
@@ -31,7 +31,16 @@ button{
   color:white;
 }
 
-.big{font-size:26px;background:#f97316}
+.big{
+  font-size:28px;
+  padding:25px;
+  background:#f97316;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+}
 
 .stat{
   background:#1f2937;
@@ -65,41 +74,43 @@ button{
 
 <body>
 
-<!-- КЛИКЕР -->
+<!-- ================= КЛИКЕР ================= -->
 
 <div id="clicker" class="screen active">
 <div class="container">
 
-<h1>🔥 Супер Кликер</h1>
+<h1>🔥 Супер Кликер PRO</h1>
 
 <div class="stat">💰 Монеты: <span id="coins"></span></div>
 <div class="stat">👆 За клик: <span id="cpc"></span></div>
-<div class="stat">🏙 Доход: <span id="inc"></span>/сек</div>
-<div class="stat">⭐ Уровень: <span id="lvl"></span></div>
+<div class="stat">⚙️ Пассив: <span id="auto"></span>/сек</div>
+<div class="stat">🏙 Город: <span id="cityInc"></span>/сек</div>
 
 <button id="clickBtn" class="big">КЛИК</button>
 
-<h3>Магазин</h3>
-<button onclick="upgradeClick()">Клик +1 (50)</button>
-<button onclick="buyAuto()">Авто +1/сек (100)</button>
+<h2>Улучшения</h2>
 
-<h3>Квест</h3>
-<div id="questText"></div>
+<div class="grid">
 
-<h3>Достижения</h3>
-<div id="achievements"></div>
+<div>
+<h3>👆 Клик</h3>
+<div id="clickUpgrades"></div>
+</div>
 
-<h3>Статистика</h3>
-<div id="stats"></div>
+<div>
+<h3>⚙️ Пассив</h3>
+<div id="autoUpgrades"></div>
+</div>
+
+</div>
 
 <br>
-<button onclick="dailyBonus()">🎁 Бонус</button>
 <button onclick="openCity()">🏙 Город</button>
 
 </div>
 </div>
 
-<!-- ГОРОД -->
+<!-- ================= ГОРОД ================= -->
 
 <div id="city" class="screen">
 <div class="container">
@@ -124,94 +135,63 @@ button{
 /* ===== СОХРАНЕНИЕ ===== */
 
 let data=JSON.parse(localStorage.getItem("save"))||{
-  coins:0,cpc:1,auto:0,level:1,xp:0,
+  coins:0,
+  cpc:1,
+  auto:0,
   city:{},
-  stats:{clicks:0,earned:0},
-  quest:500,
-  achievements:[],
-  lastBonus:0
+  clickCosts:[10,50,150,400,1000],
+  autoCosts:[25,100,300,800,2000]
 };
 
 function save(){
   localStorage.setItem("save",JSON.stringify(data));
 }
 
-/* ===== ДОХОД ===== */
-
-function income(){
-  let i=data.auto;
-  for(let k in data.city){
-    let t=data.city[k];
-    if(t=="house")i+=1;
-    if(t=="shop")i+=5;
-    if(t=="factory")i+=12;
-  }
-  return i;
-}
-
 /* ===== КЛИК ===== */
 
 clickBtn.onclick=()=>{
   data.coins+=data.cpc;
-  data.stats.clicks++;
-  data.stats.earned+=data.cpc;
-  data.xp++;
-
-  if(data.xp>=data.level*50){
-    data.xp=0;
-    data.level++;
-  }
-
-  checkQuest();
-  checkAchievements();
   update();
 };
 
-/* ===== МАГАЗИН ===== */
+/* ===== АПГРЕЙДЫ ===== */
 
-function upgradeClick(){
-  if(data.coins>=50){
-    data.coins-=50;
-    data.cpc++;
-  }
-}
+const clickPower=[1,5,10,25,50];
+const autoPower=[1,5,10,25,50];
 
-function buyAuto(){
-  if(data.coins>=100){
-    data.coins-=100;
-    data.auto++;
-  }
-}
+const clickDiv=document.getElementById("clickUpgrades");
+const autoDiv=document.getElementById("autoUpgrades");
 
-/* ===== КВЕСТ ===== */
+function createButtons(){
 
-function checkQuest(){
-  if(data.stats.earned>=data.quest){
-    data.coins+=100;
-    data.quest+=500;
-  }
-}
+  clickDiv.innerHTML="";
+  autoDiv.innerHTML="";
 
-/* ===== ДОСТИЖЕНИЯ ===== */
+  for(let i=0;i<5;i++){
 
-function addAch(name){
-  if(!data.achievements.includes(name)){
-    data.achievements.push(name);
-  }
-}
+    let b=document.createElement("button");
+    b.textContent=`+${clickPower[i]} (${data.clickCosts[i]})`;
+    b.onclick=()=>{
+      if(data.coins>=data.clickCosts[i]){
+        data.coins-=data.clickCosts[i];
+        data.cpc+=clickPower[i];
+        data.clickCosts[i]=Math.floor(data.clickCosts[i]*1.6);
+        update();
+      }
+    };
+    clickDiv.appendChild(b);
 
-function checkAchievements(){
-  if(data.stats.earned>=1000)addAch("💰 1000 монет");
-  if(data.level>=5)addAch("⭐ Уровень 5");
-}
-
-/* ===== БОНУС ===== */
-
-function dailyBonus(){
-  let now=Date.now();
-  if(now-data.lastBonus>86400000){
-    data.coins+=200;
-    data.lastBonus=now;
+    let a=document.createElement("button");
+    a.textContent=`+${autoPower[i]}/сек (${data.autoCosts[i]})`;
+    a.onclick=()=>{
+      if(data.coins>=data.autoCosts[i]){
+        data.coins-=data.autoCosts[i];
+        data.auto+=autoPower[i];
+        data.autoCosts[i]=Math.floor(data.autoCosts[i]*1.6);
+        update();
+      }
+    };
+    autoDiv.appendChild(a);
   }
 }
 
@@ -222,6 +202,17 @@ function select(t){selected=t;}
 
 const prices={house:200,shop:500,factory:1500};
 const icons={house:"🏠",shop:"🏪",factory:"🏭"};
+
+function cityIncome(){
+  let i=0;
+  for(let k in data.city){
+    let t=data.city[k];
+    if(t=="house")i+=1;
+    if(t=="shop")i+=5;
+    if(t=="factory")i+=12;
+  }
+  return i;
+}
 
 const map=document.getElementById("map");
 
@@ -237,6 +228,7 @@ for(let i=0;i<25;i++){
       data.coins-=prices[selected];
       data.city[i]=selected;
       c.textContent=icons[selected];
+      update();
     }
   };
 
@@ -260,9 +252,7 @@ function openClicker(){
 /* ===== ПАССИВ ===== */
 
 setInterval(()=>{
-  data.coins+=income();
-  data.stats.earned+=income();
-  checkQuest();
+  data.coins+=data.auto+cityIncome();
   update();
 },1000);
 
@@ -273,19 +263,10 @@ function update(){
   coins.textContent=Math.floor(data.coins);
   coinsCity.textContent=Math.floor(data.coins);
   cpc.textContent=data.cpc;
-  inc.textContent=income();
-  lvl.textContent=data.level;
+  auto.textContent=data.auto;
+  cityInc.textContent=cityIncome();
 
-  questText.textContent=
-  `Заработай ${data.quest} (награда 100)`;
-
-  achievements.textContent=
-  data.achievements.join(" | ");
-
-  stats.textContent=
-  `Клики: ${data.stats.clicks}
-   | Заработано: ${data.stats.earned}`;
-
+  createButtons();
   save();
 }
 
@@ -294,6 +275,8 @@ update();
 </script>
 </body>
 </html>
+
+
 
 
 
