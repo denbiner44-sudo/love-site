@@ -3,7 +3,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Глобальная Биржа RPG</title>
+<title>Экономический Симулятор</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -70,27 +70,24 @@ font-size:14px;
 <body>
 <div class="container">
 
-<h2>🌍 Глобальная Биржа RPG</h2>
+<h2>💰 Экономический Симулятор</h2>
 
 <div class="panel">
-💰 Деньги: <span id="money"></span> |
-📈 Акции: <span id="stocks"></span> |
-🖼 NFT: <span id="nfts"></span>
+💵 Наличные: <span id="cash"></span> |
+🏦 Банк: <span id="bank"></span> |
+📈 Акции: <span id="stocks"></span>
 </div>
 
 <canvas id="chart"></canvas>
 
 <div class="grid">
+<button onclick="work()">Работа</button>
+<button onclick="business()">Бизнес</button>
+<button onclick="deposit()">В банк 100</button>
+<button onclick="withdraw()">Из банка 100</button>
 <button onclick="buyStock()">Купить акцию</button>
 <button onclick="sellStock()">Продать акцию</button>
-<button onclick="buyNFT()">Купить NFT</button>
-<button onclick="sellNFT()">Продать NFT</button>
 <button onclick="nextDay()">Следующий день</button>
-</div>
-
-<div class="panel">
-🏆 Рейтинг богатейших:
-<div id="leaderboard"></div>
 </div>
 
 <div id="log"></div>
@@ -102,27 +99,15 @@ let g;
 
 function newGame(){
 g={
-money:1000,
+cash:500,
+bank:0,
 stocks:0,
-nfts:0,
+business:0,
 price:100,
 history:[100],
-day:1,
-crisis:false,
-bots:generateBots()
+day:1
 };
 log("Новая игра");
-}
-
-function generateBots(){
-let arr=[];
-for(let i=0;i<5;i++){
-arr.push({
-name:"Трейдер "+(i+1),
-money:1000+Math.random()*2000
-});
-}
-return arr;
 }
 
 function log(t){
@@ -132,11 +117,10 @@ el.scrollTop=el.scrollHeight;
 }
 
 function update(){
-money.textContent=Math.floor(g.money);
+cash.textContent=Math.floor(g.cash);
+bank.textContent=Math.floor(g.bank);
 stocks.textContent=g.stocks;
-nfts.textContent=g.nfts;
 drawChart();
-updateLeaderboard();
 save();
 }
 
@@ -164,15 +148,112 @@ ctx.strokeStyle="#22c55e";
 ctx.stroke();
 }
 
-/* РЫНОК */
+/* ЗАРАБОТОК */
+
+function work(){
+g.cash+=100;
+log("Работа +100");
+update();
+}
+
+function business(){
+if(g.cash>=300){
+g.cash-=300;
+g.business++;
+log("Открыт бизнес");
+update();
+}
+}
+
+/* БАНК */
+
+function deposit(){
+if(g.cash>=100){
+g.cash-=100;
+g.bank+=100;
+log("Вклад в банк");
+update();
+}
+}
+
+function withdraw(){
+if(g.bank>=100){
+g.bank-=100;
+g.cash+=100;
+log("Снятие из банка");
+update();
+}
+}
+
+/* БИРЖА */
 
 function market(){
+let change=Math.random()*20-10;
+g.price=Math.max(5,g.price+change);
+g.history.push(g.price);
+if(g.history.length>50) g.history.shift();
+}
 
-let change=(Math.random()*20-10);
+function buyStock(){
+if(g.cash>=g.price){
+g.cash-=g.price;
+g.stocks++;
+log("Куплена акция");
+update();
+}
+}
 
-if(Math.random()<0.1){
-g.crisis=true;
-log("📉 Э
+function sellStock(){
+if(g.stocks>0){
+g.cash+=g.price;
+g.stocks--;
+log("Продана акция");
+update();
+}
+}
+
+/* ДЕНЬ */
+
+function nextDay(){
+g.day++;
+
+market();
+
+if(g.business>0){
+let income=g.business*80;
+g.cash+=income;
+log("Доход бизнеса +"+income);
+}
+
+if(g.bank>0){
+let interest=g.bank*0.02;
+g.bank+=interest;
+log("Проценты банка +"+Math.floor(interest));
+}
+
+update();
+}
+
+/* SAVE */
+
+function save(){
+localStorage.setItem("ecoSim",JSON.stringify(g));
+}
+
+function load(){
+let s=localStorage.getItem("ecoSim");
+if(s) g=JSON.parse(s);
+else newGame();
+}
+
+load();
+update();
+</script>
+
+</body>
+</html>
+
+
 
 
 
