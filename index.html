@@ -25,7 +25,7 @@ body{
 #map{
   display:grid;
   grid-template-columns:repeat(5,80px);
-  gap:5px;
+  gap:6px;
   justify-content:center;
   margin:20px 0;
 }
@@ -42,10 +42,6 @@ body{
   cursor:pointer;
 }
 
-.shop{
-  margin-top:10px;
-}
-
 button{
   padding:10px;
   margin:5px;
@@ -54,16 +50,11 @@ button{
   cursor:pointer;
 }
 
-.selected{
-  background:#f39c12;
-}
-
-a{
-  display:block;
+.back{
   margin-top:20px;
-  color:#ffd700;
-  text-decoration:none;
   font-size:18px;
+  color:#ffd700;
+  cursor:pointer;
 }
 </style>
 </head>
@@ -71,21 +62,21 @@ a{
 <body>
 <div class="container">
 
-<h1>🏙 Ваш город</h1>
+<h1>🏙 Город</h1>
 <p>Монеты: <span id="coins">0</span></p>
 
 <div id="map"></div>
 
-<div class="shop">
 <p>Выбери здание:</p>
 
 <button onclick="select('house')">🏠 Дом (100)</button>
 <button onclick="select('shop')">🏪 Магазин (500)</button>
 <button onclick="select('factory')">🏭 Фабрика (2000)</button>
 <button onclick="select('park')">🌳 Парк (800)</button>
-</div>
 
-<a href="index.html">⬅ Вернуться в кликер</a>
+<div class="back" onclick="goBack()">
+⬅ Вернуться в кликер
+</div>
 
 </div>
 
@@ -108,10 +99,7 @@ const icons = {
 };
 
 let selected = null;
-
-function select(type){
-  selected = type;
-}
+function select(type){ selected = type; }
 
 let city = JSON.parse(localStorage.getItem("city")) || {};
 
@@ -120,11 +108,8 @@ const map = document.getElementById("map");
 for(let i=0;i<25;i++){
   let cell = document.createElement("div");
   cell.className="cell";
-  cell.dataset.id=i;
 
-  if(city[i]){
-    cell.textContent = icons[city[i]];
-  }
+  if(city[i]) cell.textContent = icons[city[i]];
 
   cell.onclick = ()=>{
     if(!selected) return;
@@ -135,14 +120,10 @@ for(let i=0;i<25;i++){
       coins -= price;
       city[i] = selected;
 
-      if(!city[selected]){
-        city[selected] = {level:0};
-      }
-
+      if(!city[selected]) city[selected] = {level:0};
       city[selected].level++;
 
       cell.textContent = icons[selected];
-
       save();
     }
   };
@@ -160,10 +141,16 @@ function update(){
   coinsEl.textContent = Math.floor(coins);
 }
 
+function goBack(){
+  window.location.href = "./index.html";
+}
+
 update();
 </script>
 </body>
 </html>
+
+
 
 
 
