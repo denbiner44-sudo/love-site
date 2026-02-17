@@ -46,11 +46,6 @@ button{
   cursor:pointer;
 }
 
-button:disabled{
-  background:#555;
-  cursor: not-allowed;
-}
-
 .grid{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -75,9 +70,7 @@ button:disabled{
   justify-content:center;
   border-radius:6px;
   cursor:pointer;
-  transition:0.2s;
 }
-.cell:hover{background:#065f47;}
 </style>
 </head>
 
@@ -138,7 +131,6 @@ button:disabled{
 <script>
 window.onload = function(){
 
-/* ===== ДАННЫЕ ===== */
 let data = JSON.parse(localStorage.getItem("save")) || {
   coins:0,
   cpc:1,
@@ -150,7 +142,6 @@ let data = JSON.parse(localStorage.getItem("save")) || {
 
 function save(){ localStorage.setItem("save", JSON.stringify(data)); }
 
-/* ===== ЭЛЕМЕНТЫ ===== */
 const coins = document.getElementById("coins");
 const coinsCity = document.getElementById("coinsCity");
 const cpc = document.getElementById("cpc");
@@ -161,10 +152,8 @@ const clickBtn = document.getElementById("clickBtn");
 const clickDiv = document.getElementById("clickUpgrades");
 const autoDiv = document.getElementById("autoUpgrades");
 
-/* ===== КЛИК ===== */
 clickBtn.onclick = ()=>{ data.coins += data.cpc; update(); };
 
-/* ===== АПГРЕЙДЫ ===== */
 const clickPower=[1,5,10,25,50];
 const autoPower=[1,5,10,25,50];
 
@@ -174,7 +163,6 @@ function drawUpgrades(){
   for(let i=0;i<5;i++){
     let b=document.createElement("button");
     b.textContent=`+${clickPower[i]} (${data.clickCosts[i]})`;
-    b.disabled = data.coins < data.clickCosts[i];
     b.onclick=()=>{
       if(data.coins>=data.clickCosts[i]){
         data.coins-=data.clickCosts[i];
@@ -187,7 +175,6 @@ function drawUpgrades(){
 
     let a=document.createElement("button");
     a.textContent=`+${autoPower[i]}/сек (${data.autoCosts[i]})`;
-    a.disabled = data.coins < data.autoCosts[i];
     a.onclick=()=>{
       if(data.coins>=data.autoCosts[i]){
         data.coins-=data.autoCosts[i];
@@ -200,15 +187,8 @@ function drawUpgrades(){
   }
 }
 
-/* ===== ГОРОД ===== */
 let selected=null;
-window.select=(t)=>{
-  selected = t;
-  document.querySelectorAll('#city button').forEach(b=>{
-    b.style.border='';
-  });
-  event.target.style.border='2px solid #f97316';
-};
+window.select=(t)=>selected=t;
 
 const prices={house:200,shop:500,factory:1500};
 const icons={house:"🏠",shop:"🏪",factory:"🏭"};
@@ -229,59 +209,45 @@ for(let i=0;i<25;i++){
   let c=document.createElement("div");
   c.className="cell";
   if(data.city[i]) c.textContent=icons[data.city[i]];
-
   c.onclick=()=>{
     if(!selected) return;
-    if(data.city[i]){
-      alert("Эта клетка занята!");
-      return;
-    }
-    if(data.coins>=prices[selected]){
+    if(data.coins>=prices[selected] && !data.city[i]){
       data.coins -= prices[selected];
       data.city[i] = selected;
       c.textContent = icons[selected];
-      selected=null;
-      document.querySelectorAll('#city button').forEach(b=>b.style.border='');
       update();
-    } else { alert("Недостаточно монет!"); }
+    }
   };
   map.appendChild(c);
 }
 
-/* ===== ЭКРАНЫ ===== */
-window.openCity=()=>{
-  clicker.classList.remove("active");
-  city.classList.add("active");
-};
-window.openClicker=()=>{
-  city.classList.remove("active");
-  clicker.classList.add("active");
-};
+window.openCity=()=>{ clicker.classList.remove("active"); city.classList.add("active"); };
+window.openClicker=()=>{ city.classList.remove("active"); clicker.classList.add("active"); };
 
-/* ===== ПАССИВ ===== */
 setInterval(()=>{
-  let income = data.auto + cityIncomeCalc();
-  data.coins += income/10; // плавное добавление
+  data.coins += data.auto + cityIncomeCalc();
   update();
-},100);
+},1000);
 
-/* ===== UI ===== */
 function update(){
-  coins.textContent = Math.floor(data.coins);
-  coinsCity.textContent = Math.floor(data.coins);
-  cpc.textContent = data.cpc;
-  auto.textContent = data.auto;
-  cityInc.textContent = cityIncomeCalc();
+  coins.textContent=Math.floor(data.coins);
+  coinsCity.textContent=Math.floor(data.coins);
+  cpc.textContent=data.cpc;
+  auto.textContent=data.auto;
+  cityInc.textContent=cityIncomeCalc();
   drawUpgrades();
   save();
 }
 
 update();
+
 };
 </script>
 
 </body>
 </html>
+
+
 
 
 
