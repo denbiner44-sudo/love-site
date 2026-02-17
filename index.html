@@ -4,64 +4,16 @@
 <meta charset="UTF-8">
 <title>Супер Кликер PRO</title>
 <style>
-body{
-  margin:0;
-  font-family:Arial;
-  background:#0b1220;
-  color:#e5e7eb;
-  text-align:center;
-}
-.container{
-  max-width:1000px;
-  margin:auto;
-  padding:20px;
-}
-.stat{
-  background:#1f2937;
-  padding:10px;
-  margin:5px;
-  border-radius:10px;
-}
-.big{
-  font-size:30px;
-  padding:25px 40px;
-  background:#f97316;
-  border:none;
-  border-radius:12px;
-  color:white;
-  cursor:pointer;
-}
-button{
-  padding:10px;
-  margin:5px;
-  border:none;
-  border-radius:8px;
-  background:#22c55e;
-  color:white;
-  cursor:pointer;
-}
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-}
-.screen{display:none}
-.active{display:block}
-#map{
-  display:grid;
-  grid-template-columns:repeat(5,80px);
-  gap:6px;
-  justify-content:center;
-}
-.cell{
-  width:80px;height:80px;
-  background:#064e3b;
-  font-size:36px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:6px;
-  cursor:pointer;
-}
+body {margin:0;font-family:Arial;background:#0b1220;color:#e5e7eb;text-align:center;}
+.container{max-width:1000px;margin:auto;padding:20px;}
+.stat{background:#1f2937;padding:10px;margin:5px;border-radius:10px;}
+.big{font-size:30px;padding:25px 40px;background:#f97316;border:none;border-radius:12px;color:white;cursor:pointer;}
+button{padding:10px;margin:5px;border:none;border-radius:8px;background:#22c55e;color:white;cursor:pointer;}
+.grid{display:grid;grid-template-columns:1fr 1fr;}
+.screen{display:none;}
+.active{display:block;}
+#map{display:grid;grid-template-columns:repeat(5,80px);gap:6px;justify-content:center;}
+.cell{width:80px;height:80px;background:#064e3b;font-size:36px;display:flex;align-items:center;justify-content:center;border-radius:6px;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -110,16 +62,12 @@ button{
 <script>
 window.onload = function(){
 
-// ===== ДАННЫЕ =====
 let data = JSON.parse(localStorage.getItem("save")) || {
-  coins:0, cpc:1, auto:0, city:{},
+  coins:0, cpc:1, auto:0, city:{}, 
   clickCosts:[10,50,150,400,1000],
   autoCosts:[25,100,300,800,2000]
 };
 
-function save(){ localStorage.setItem("save", JSON.stringify(data)); }
-
-// ===== ЭЛЕМЕНТЫ =====
 const coins = document.getElementById("coins");
 const coinsCity = document.getElementById("coinsCity");
 const cpc = document.getElementById("cpc");
@@ -128,74 +76,60 @@ const cityInc = document.getElementById("cityInc");
 const clickBtn = document.getElementById("clickBtn");
 const clickDiv = document.getElementById("clickUpgrades");
 const autoDiv = document.getElementById("autoUpgrades");
+const map = document.getElementById("map");
 
-// ===== КЛИК =====
+let selected = null;
+
+// Клик по кнопке
 clickBtn.onclick = ()=>{ data.coins += data.cpc; update(); };
 
-// ===== АПГРЕЙДЫ =====
+// Апгрейды
 const clickPower=[1,5,10,25,50];
 const autoPower=[1,5,10,25,50];
 
 function drawUpgrades(){
-  clickDiv.innerHTML = "";
-  autoDiv.innerHTML = "";
-
+  clickDiv.innerHTML=""; autoDiv.innerHTML="";
   for(let i=0;i<5;i++){
     let b = document.createElement("button");
-    b.textContent = `+${clickPower[i]} (${data.clickCosts[i]})`;
-    b.onclick = ()=>{
-      if(data.coins >= data.clickCosts[i]){
-        data.coins -= data.clickCosts[i];
-        data.cpc += clickPower[i];
-        data.clickCosts[i] = Math.floor(data.clickCosts[i]*1.6);
-        update();
-      }
-    };
+    b.textContent=`+${clickPower[i]} (${data.clickCosts[i]})`;
+    b.onclick = ()=>{ if(data.coins>=data.clickCosts[i]){ data.coins-=data.clickCosts[i]; data.cpc+=clickPower[i]; data.clickCosts[i]=Math.floor(data.clickCosts[i]*1.6); update(); } };
     clickDiv.appendChild(b);
 
     let a = document.createElement("button");
-    a.textContent = `+${autoPower[i]}/сек (${data.autoCosts[i]})`;
-    a.onclick = ()=>{
-      if(data.coins >= data.autoCosts[i]){
-        data.coins -= data.autoCosts[i];
-        data.auto += autoPower[i];
-        data.autoCosts[i] = Math.floor(data.autoCosts[i]*1.6);
-        update();
-      }
-    };
+    a.textContent=`+${autoPower[i]}/сек (${data.autoCosts[i]})`;
+    a.onclick = ()=>{ if(data.coins>=data.autoCosts[i]){ data.coins-=data.autoCosts[i]; data.auto+=autoPower[i]; data.autoCosts[i]=Math.floor(data.autoCosts[i]*1.6); update(); } };
     autoDiv.appendChild(a);
   }
 }
 
-// ===== ГОРОД =====
-let selected=null;
-window.select=(t)=>selected=t;
-
+// Город
 const prices={house:200, shop:500, factory:1500};
 const icons={house:"🏠", shop:"🏪", factory:"🏭"};
 
+function select(t){ selected = t; }
+
 function cityIncomeCalc(){
-  let i=0;
+  let inc=0;
   for(let k in data.city){
-    let t=data.city[k];
-    if(t=="house") i+=1;
-    if(t=="shop") i+=5;
-    if(t=="factory") i+=12;
+    let t = data.city[k];
+    if(t=="house") inc+=1;
+    if(t=="shop") inc+=5;
+    if(t=="factory") inc+=12;
   }
-  return i;
+  return inc;
 }
 
-const map=document.getElementById("map");
+// Создаем клетки города
+map.innerHTML = "";
 for(let i=0;i<25;i++){
-  let c=document.createElement("div");
+  let c = document.createElement("div");
   c.className="cell";
-  if(data.city[i]) c.textContent=icons[data.city[i]];
-
-  c.onclick=()=>{
+  if(data.city[i]) c.textContent = icons[data.city[i]];
+  c.onclick = ()=>{
     if(!selected) return;
-    if(data.coins >= prices[selected] && !data.city[i]){
+    if(!data.city[i] && data.coins>=prices[selected]){
       data.coins -= prices[selected];
-      data.city[i] = selected;
+      data.city[i]=selected;
       c.textContent = icons[selected];
       update();
     }
@@ -203,33 +137,31 @@ for(let i=0;i<25;i++){
   map.appendChild(c);
 }
 
-// ===== ЭКРАНЫ =====
+// Экраны
 window.openCity = ()=>{ clicker.classList.remove("active"); city.classList.add("active"); };
 window.openClicker = ()=>{ city.classList.remove("active"); clicker.classList.add("active"); };
 
-// ===== ПАССИВ =====
-setInterval(()=>{
-  data.coins += data.auto + cityIncomeCalc();
-  update();
-},1000);
+// Пассив
+setInterval(()=>{ data.coins += data.auto + cityIncomeCalc(); update(); },1000);
 
-// ===== ОБНОВЛЕНИЕ UI =====
+// UI обновление
 function update(){
-  coins.textContent = Math.floor(data.coins);
-  coinsCity.textContent = Math.floor(data.coins);
-  cpc.textContent = data.cpc;
-  auto.textContent = data.auto;
-  cityInc.textContent = cityIncomeCalc();
+  coins.textContent=Math.floor(data.coins);
+  coinsCity.textContent=Math.floor(data.coins);
+  cpc.textContent=data.cpc;
+  auto.textContent=data.auto;
+  cityInc.textContent=cityIncomeCalc();
   drawUpgrades();
-  save();
+  localStorage.setItem("save", JSON.stringify(data));
 }
 
 update();
 };
 </script>
-
 </body>
 </html>
+
+
 
 
 
