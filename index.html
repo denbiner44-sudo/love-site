@@ -22,34 +22,44 @@ body{
   text-align:center;
 }
 
-.city{
+#map{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-  gap:15px;
-  margin-top:20px;
+  grid-template-columns:repeat(5,80px);
+  gap:5px;
+  justify-content:center;
+  margin:20px 0;
 }
 
-.build{
-  background:#16a085;
-  border:none;
-  border-radius:12px;
-  padding:15px;
-  color:#fff;
+.cell{
+  width:80px;
+  height:80px;
+  background:#1e8449;
+  border-radius:8px;
+  font-size:40px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   cursor:pointer;
-  transition:0.2s;
 }
 
-.build:hover{
-  transform:scale(1.05);
-  background:#1abc9c;
+.shop{
+  margin-top:10px;
 }
 
-.build:disabled{
-  background:#555;
+button{
+  padding:10px;
+  margin:5px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
 }
 
-.back{
-  display:inline-block;
+.selected{
+  background:#f39c12;
+}
+
+a{
+  display:block;
   margin-top:20px;
   color:#ffd700;
   text-decoration:none;
@@ -61,86 +71,101 @@ body{
 <body>
 <div class="container">
 
-<h1>🏙 Строительство города</h1>
-
+<h1>🏙 Ваш город</h1>
 <p>Монеты: <span id="coins">0</span></p>
 
-<div class="city">
+<div id="map"></div>
 
-<button class="build" id="house" data-cost="100" data-level="0">
-🏠 Дом<br>
-Цена: 100<br>
-Уровень: 0
-</button>
+<div class="shop">
+<p>Выбери здание:</p>
 
-<button class="build" id="shop" data-cost="500" data-level="0">
-🏪 Магазин<br>
-Цена: 500<br>
-Уровень: 0
-</button>
-
-<button class="build" id="factory" data-cost="2000" data-level="0">
-🏭 Фабрика<br>
-Цена: 2000<br>
-Уровень: 0
-</button>
-
-<button class="build" id="park" data-cost="800" data-level="0">
-🌳 Парк<br>
-Цена: 800<br>
-Уровень: 0
-</button>
-
+<button onclick="select('house')">🏠 Дом (100)</button>
+<button onclick="select('shop')">🏪 Магазин (500)</button>
+<button onclick="select('factory')">🏭 Фабрика (2000)</button>
+<button onclick="select('park')">🌳 Парк (800)</button>
 </div>
 
-<a href="index.html" class="back">
-⬅ Вернуться в кликер
-</a>
+<a href="index.html">⬅ Вернуться в кликер</a>
 
 </div>
 
 <script>
-let coins = +localStorage.getItem("clickerCoins") || 0;
+let coins = +localStorage.getItem("coins") || 0;
 const coinsEl = document.getElementById("coins");
-const builds = document.querySelectorAll(".build");
+
+const prices = {
+  house:100,
+  shop:500,
+  factory:2000,
+  park:800
+};
+
+const icons = {
+  house:"🏠",
+  shop:"🏪",
+  factory:"🏭",
+  park:"🌳"
+};
+
+let selected = null;
+
+function select(type){
+  selected = type;
+}
+
+let city = JSON.parse(localStorage.getItem("city")) || {};
+
+const map = document.getElementById("map");
+
+for(let i=0;i<25;i++){
+  let cell = document.createElement("div");
+  cell.className="cell";
+  cell.dataset.id=i;
+
+  if(city[i]){
+    cell.textContent = icons[city[i]];
+  }
+
+  cell.onclick = ()=>{
+    if(!selected) return;
+
+    let price = prices[selected];
+
+    if(coins>=price && !city[i]){
+      coins -= price;
+      city[i] = selected;
+
+      if(!city[selected]){
+        city[selected] = {level:0};
+      }
+
+      city[selected].level++;
+
+      cell.textContent = icons[selected];
+
+      save();
+    }
+  };
+
+  map.appendChild(cell);
+}
+
+function save(){
+  localStorage.setItem("coins", coins);
+  localStorage.setItem("city", JSON.stringify(city));
+  update();
+}
 
 function update(){
   coinsEl.textContent = Math.floor(coins);
-
-  builds.forEach(b=>{
-    let cost=+b.dataset.cost;
-    let lvl=+b.dataset.level;
-
-    b.innerHTML = `
-      ${b.id==="house"?"🏠 Дом":
-        b.id==="shop"?"🏪 Магазин":
-        b.id==="factory"?"🏭 Фабрика":"🌳 Парк"}<br>
-      Цена: ${cost}<br>
-      Уровень: ${lvl}
-    `;
-
-    b.disabled = coins<cost;
-  });
-
-  localStorage.setItem("clickerCoins", coins);
 }
-
-builds.forEach(b=>{
-  b.onclick=()=>{
-    let cost=+b.dataset.cost;
-    if(coins>=cost){
-      coins-=cost;
-      b.dataset.level++;
-      b.dataset.cost=Math.floor(cost*1.5);
-      update();
-    }
-  };
-});
 
 update();
 </script>
 </body>
 </html>
+
+
 
 
 
