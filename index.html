@@ -1,131 +1,154 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Mini ASCII Shooter</title>
+<title>Кликер Бомжа</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
-  body {
-    background-color: black;
-    color: white;
-    font-family: monospace;
-    text-align: center;
-    user-select: none;
-  }
-  pre {
-    font-size: 16px;
-    line-height: 1.1;
-  }
-  button {
-    margin: 5px;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-  }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #1e1e1e;
+  color: white;
+  text-align: center;
+}
+
+h1 {
+  margin-top: 10px;
+}
+
+#money {
+  font-size: 28px;
+  margin: 10px;
+}
+
+button {
+  padding: 12px 18px;
+  margin: 6px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#clickBtn {
+  font-size: 22px;
+  background: #2ecc71;
+}
+
+.upgrade {
+  background: #3498db;
+}
+
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
 </style>
 </head>
+
 <body>
 
-<h1>
-  ____  _   _    _    ____  ____  
- |  _ \| | | |  / \  |  _ \|  _ \ 
- | |_) | | | | / _ \ | |_) | | | |
- |  _ <| |_| |/ ___ \|  _ <| |_| |
- |_| \_\\___//_/   \_\_| \_\____/ 
-</h1>
+<h1>💸 Кликер Бомжа</h1>
 
-<p>Mini ASCII Shooter - press <b>Space</b> to shoot!</p>
-<p>Score: <span id="score">0</span></p>
+<div id="money">Деньги: 0 ₽</div>
+<div>За клик: <span id="perClick">1</span> ₽</div>
+<div>Пассивный доход: <span id="passive">0</span> ₽/сек</div>
 
-<button id="playBtn">Play</button>
-<button id="howBtn">How to play</button>
+<br>
 
-<pre id="gameArea"></pre>
+<button id="clickBtn" onclick="clickMoney()">Попросить милостыню</button>
+
+<h2>Улучшения</h2>
+
+<div class="container" id="upgrades"></div>
 
 <script>
-const gameArea = document.getElementById("gameArea");
-const scoreEl = document.getElementById("score");
-const playBtn = document.getElementById("playBtn");
-const howBtn = document.getElementById("howBtn");
+let game = {
+  money: 0,
+  perClick: 1,
+  passive: 0,
+  upgrades: [
+    {name: "Грязная шапка", cost: 20, type: "click", value: 1, level: 0},
+    {name: "Картонная табличка", cost: 60, type: "click", value: 2, level: 0},
+    {name: "Удачное место", cost: 120, type: "passive", value: 1, level: 0},
+    {name: "Старый пёс", cost: 250, type: "passive", value: 2, level: 0},
+    {name: "Музыкальная колонка", cost: 500, type: "click", value: 5, level: 0},
+    {name: "Помощник", cost: 900, type: "passive", value: 5, level: 0}
+  ]
+};
 
-let playerX = 5;
-let bullets = [];
-let enemies = [];
-let score = 0;
-let gameInterval;
-let width = 20;
-let height = 10;
-
-function draw() {
-  let grid = Array.from({length: height}, () => Array(width).fill(' '));
-
-  // Player
-  grid[height-1][playerX] = 'A';
-
-  // Bullets
-  bullets.forEach(b => {
-    if(b.y >= 0) grid[b.y][b.x] = '|';
-  });
-
-  // Enemies
-  enemies.forEach(e => {
-    if(e.y >=0 && e.y < height) grid[e.y][e.x] = 'V';
-  });
-
-  // Collision check
-  bullets.forEach(b => {
-    enemies.forEach((e, i) => {
-      if(b.x === e.x && b.y === e.y) {
-        score += 10;
-        scoreEl.textContent = score;
-        e.y = -1;
-        b.y = -1;
-      }
-    });
-  });
-
-  // Render
-  gameArea.textContent = grid.map(row => row.join('')).join('\n');
+function saveGame() {
+  localStorage.setItem("beggarClickerSave", JSON.stringify(game));
 }
 
-function update() {
-  // Move bullets
-  bullets.forEach(b => b.y--);
-  bullets = bullets.filter(b => b.y >= 0);
+function loadGame() {
+  let save = localStorage.getItem("beggarClickerSave");
+  if (save) game = JSON.parse(save);
+}
 
-  // Move enemies
-  enemies.forEach(e => e.y++);
-  enemies = enemies.filter(e => e.y < height);
+function clickMoney() {
+  game.money += game.perClick;
+  updateUI();
+}
 
-  // Randomly spawn enemies
-  if(Math.random() < 0.1) {
-    enemies.push({x: Math.floor(Math.random()*width), y: 0});
+function buyUpgrade(i) {
+  let up = game.upgrades[i];
+  if (game.money >= up.cost) {
+    game.money -= up.cost;
+    up.level++;
+
+    if (up.type === "click") game.perClick += up.value;
+    if (up.type === "passive") game.passive += up.value;
+
+    up.cost = Math.floor(up.cost * 1.6);
+    updateUI();
   }
-
-  draw();
 }
 
-function startGame() {
-  bullets = [];
-  enemies = [];
-  score = 0;
-  scoreEl.textContent = score;
-  playerX = Math.floor(width/2);
-  clearInterval(gameInterval);
-  gameInterval = setInterval(update, 200);
+function createUpgrades() {
+  let container = document.getElementById("upgrades");
+  container.innerHTML = "";
+
+  game.upgrades.forEach((up, i) => {
+    let btn = document.createElement("button");
+    btn.className = "upgrade";
+    btn.onclick = () => buyUpgrade(i);
+    btn.innerHTML = `
+      <b>${up.name}</b><br>
+      Цена: ${up.cost} ₽<br>
+      Уровень: ${up.level}
+    `;
+    container.appendChild(btn);
+  });
 }
 
-document.addEventListener('keydown', e => {
-  if(e.key === 'ArrowLeft') playerX = Math.max(0, playerX-1);
-  if(e.key === 'ArrowRight') playerX = Math.min(width-1, playerX+1);
-  if(e.key === ' ') bullets.push({x: playerX, y: height-2});
-});
+function updateUI() {
+  document.getElementById("money").innerText =
+    "Деньги: " + Math.floor(game.money) + " ₽";
 
-playBtn.addEventListener('click', startGame);
-howBtn.addEventListener('click', () => alert("Use arrow keys to move, Space to shoot."));
+  document.getElementById("perClick").innerText = game.perClick;
+  document.getElementById("passive").innerText = game.passive;
+
+  createUpgrades();
+  saveGame();
+}
+
+setInterval(() => {
+  game.money += game.passive;
+  updateUI();
+}, 1000);
+
+loadGame();
+updateUI();
 </script>
 
 </body>
 </html>
+
+
 
 
 
