@@ -2,44 +2,40 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Хуйное занятие</title>
+<title>Кликер Бомжа PRO</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
+  font-family: Arial;
   background: #1e1e1e;
   color: white;
   text-align: center;
 }
 
-h1 {
-  margin-top: 10px;
-}
+h1 { margin: 10px; }
 
-#money {
-  font-size: 28px;
+.panel {
+  border: 2px solid #444;
   margin: 10px;
+  padding: 10px;
+  border-radius: 10px;
 }
 
 button {
-  padding: 12px 18px;
-  margin: 6px;
-  font-size: 16px;
+  padding: 10px;
+  margin: 5px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  font-size: 14px;
 }
 
-#clickBtn {
-  font-size: 22px;
-  background: #2ecc71;
-}
-
-.upgrade {
-  background: #3498db;
-}
+.clickBtn { background: #2ecc71; font-size: 20px; }
+.shopBtn { background: #3498db; }
+.clothesBtn { background: #9b59b6; }
+.locationBtn { background: #e67e22; }
 
 .container {
   display: flex;
@@ -51,46 +47,88 @@ button {
 
 <body>
 
-<h1>💸 Кликер Бомжа</h1>
+<h1>💸 Кликер Бомжа PRO</h1>
 
-<div id="money">Деньги: 0 ₽</div>
-<div>За клик: <span id="perClick">1</span> ₽</div>
-<div>Пассивный доход: <span id="passive">0</span> ₽/сек</div>
+<div class="panel">
+<div>💰 Деньги: <span id="money">0</span> ₽</div>
+<div>👤 Уровень: <span id="level">1</span></div>
+<div>⭐ Опыт: <span id="xp">0</span>/<span id="xpNeed">50</span></div>
+<div>🖱 За клик: <span id="perClick">1</span></div>
+<div>⏳ Пассивный доход: <span id="passive">0</span>/сек</div>
+<div>📍 Локация: <span id="location">Улица</span></div>
+</div>
 
-<br>
+<button class="clickBtn" onclick="clickMoney()">Попросить милостыню</button>
 
-<button id="clickBtn" onclick="clickMoney()">Попросить милостыню</button>
-
-<h2>Улучшения</h2>
-
+<div class="panel">
+<h2>🚀 Улучшения</h2>
 <div class="container" id="upgrades"></div>
+</div>
+
+<div class="panel">
+<h2>👕 Магазин одежды</h2>
+<div class="container" id="clothes"></div>
+</div>
+
+<div class="panel">
+<h2>🌍 Локации</h2>
+<div class="container" id="locations"></div>
+</div>
 
 <script>
 let game = {
   money: 0,
   perClick: 1,
   passive: 0,
+
+  level: 1,
+  xp: 0,
+  xpNeed: 50,
+
+  location: 0,
+
   upgrades: [
-    {name: "Грязная шапка", cost: 20, type: "click", value: 1, level: 0},
-    {name: "Картонная табличка", cost: 60, type: "click", value: 2, level: 0},
-    {name: "Удачное место", cost: 120, type: "passive", value: 1, level: 0},
-    {name: "Старый пёс", cost: 250, type: "passive", value: 2, level: 0},
-    {name: "Музыкальная колонка", cost: 500, type: "click", value: 5, level: 0},
-    {name: "Помощник", cost: 900, type: "passive", value: 5, level: 0}
+    {name: "Шапка", cost: 20, type: "click", value: 1, level: 0},
+    {name: "Табличка", cost: 80, type: "click", value: 2, level: 0},
+    {name: "Помощник", cost: 200, type: "passive", value: 1, level: 0}
+  ],
+
+  clothes: [
+    {name: "Рваная куртка", cost: 150, click: 1, owned: false},
+    {name: "Старые кроссовки", cost: 400, passive: 2, owned: false},
+    {name: "Нормальная одежда", cost: 1000, click: 3, owned: false}
+  ],
+
+  locations: [
+    {name: "Улица", bonus: 1, unlock: 1},
+    {name: "Метро", bonus: 2, unlock: 3},
+    {name: "Центр города", bonus: 3, unlock: 5},
+    {name: "Элитный район", bonus: 5, unlock: 8}
   ]
 };
 
 function saveGame() {
-  localStorage.setItem("beggarClickerSave", JSON.stringify(game));
+  localStorage.setItem("beggarProSave", JSON.stringify(game));
 }
 
 function loadGame() {
-  let save = localStorage.getItem("beggarClickerSave");
+  let save = localStorage.getItem("beggarProSave");
   if (save) game = JSON.parse(save);
 }
 
+function addXP(amount) {
+  game.xp += amount;
+  if (game.xp >= game.xpNeed) {
+    game.xp -= game.xpNeed;
+    game.level++;
+    game.xpNeed = Math.floor(game.xpNeed * 1.5);
+  }
+}
+
 function clickMoney() {
-  game.money += game.perClick;
+  let bonus = game.locations[game.location].bonus;
+  game.money += game.perClick * bonus;
+  addXP(5);
   updateUI();
 }
 
@@ -103,41 +141,100 @@ function buyUpgrade(i) {
     if (up.type === "click") game.perClick += up.value;
     if (up.type === "passive") game.passive += up.value;
 
-    up.cost = Math.floor(up.cost * 1.6);
+    up.cost = Math.floor(up.cost * 1.7);
     updateUI();
   }
 }
 
-function createUpgrades() {
-  let container = document.getElementById("upgrades");
-  container.innerHTML = "";
+function buyClothes(i) {
+  let c = game.clothes[i];
+  if (!c.owned && game.money >= c.cost) {
+    game.money -= c.cost;
+    c.owned = true;
 
-  game.upgrades.forEach((up, i) => {
-    let btn = document.createElement("button");
-    btn.className = "upgrade";
-    btn.onclick = () => buyUpgrade(i);
-    btn.innerHTML = `
-      <b>${up.name}</b><br>
-      Цена: ${up.cost} ₽<br>
-      Уровень: ${up.level}
-    `;
-    container.appendChild(btn);
+    if (c.click) game.perClick += c.click;
+    if (c.passive) game.passive += c.passive;
+
+    updateUI();
+  }
+}
+
+function changeLocation(i) {
+  if (game.level >= game.locations[i].unlock) {
+    game.location = i;
+    updateUI();
+  }
+}
+
+function drawUpgrades() {
+  let div = document.getElementById("upgrades");
+  div.innerHTML = "";
+
+  game.upgrades.forEach((u, i) => {
+    let b = document.createElement("button");
+    b.className = "shopBtn";
+    b.innerHTML = `${u.name}<br>Цена: ${u.cost}<br>Ур: ${u.level}`;
+    b.onclick = () => buyUpgrade(i);
+    div.appendChild(b);
+  });
+}
+
+function drawClothes() {
+  let div = document.getElementById("clothes");
+  div.innerHTML = "";
+
+  game.clothes.forEach((c, i) => {
+    let b = document.createElement("button");
+    b.className = "clothesBtn";
+
+    b.innerHTML = c.owned
+      ? `${c.name}<br>Куплено`
+      : `${c.name}<br>${c.cost} ₽`;
+
+    b.onclick = () => buyClothes(i);
+    div.appendChild(b);
+  });
+}
+
+function drawLocations() {
+  let div = document.getElementById("locations");
+  div.innerHTML = "";
+
+  game.locations.forEach((l, i) => {
+    let b = document.createElement("button");
+    b.className = "locationBtn";
+
+    let locked = game.level < l.unlock;
+
+    b.innerHTML = locked
+      ? `${l.name}<br>Нужен ур. ${l.unlock}`
+      : `${l.name}<br>x${l.bonus}`;
+
+    b.onclick = () => changeLocation(i);
+    div.appendChild(b);
   });
 }
 
 function updateUI() {
-  document.getElementById("money").innerText =
-    "Деньги: " + Math.floor(game.money) + " ₽";
-
+  document.getElementById("money").innerText = Math.floor(game.money);
+  document.getElementById("level").innerText = game.level;
+  document.getElementById("xp").innerText = game.xp;
+  document.getElementById("xpNeed").innerText = game.xpNeed;
   document.getElementById("perClick").innerText = game.perClick;
   document.getElementById("passive").innerText = game.passive;
+  document.getElementById("location").innerText =
+    game.locations[game.location].name;
 
-  createUpgrades();
+  drawUpgrades();
+  drawClothes();
+  drawLocations();
   saveGame();
 }
 
 setInterval(() => {
-  game.money += game.passive;
+  let bonus = game.locations[game.location].bonus;
+  game.money += game.passive * bonus;
+  addXP(2);
   updateUI();
 }, 1000);
 
@@ -147,6 +244,8 @@ updateUI();
 
 </body>
 </html>
+
+
 
 
 
