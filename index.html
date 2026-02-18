@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport"
 content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>Кликер Бомжа PRO 4.5</title>
+<title>Кликер Бомжа PRO 4.6</title>
 <style>
 body{
 margin:0;
@@ -24,16 +24,215 @@ button{padding:8px;margin:4px;border:none;border-radius:8px;cursor:pointer}
 </head>
 <body>
 
-<h2>🔥 Кликер Бомжа PRO 4.5</h2>
+<h2>🔥 Кликер Бомжа PRO 4.6</h2>
 
 <div class="panel">
 💰 Деньги: <span id="money"></span><br>
-🏢 Доход/сек: <span id="income"></span><br>
 ⭐ Уровень: <span id="level"></span><br>
 ⚡ Бонус: x<span id="bonus"></span><br>
 🌍 Экономика: <span id="economy"></span>
 </div>
 
+<button class="green" onclick="clickMoney()">Клик</button>
+
+<div class="panel">
+<h3>🏢 Бизнес</h3>
+<div id="biz"></div>
+</div>
+
+<div class="panel">
+<h3>👔 Менеджеры</h3>
+<div id="managers"></div>
+</div>
+
+<script>
+// анти-зум
+document.addEventListener('touchstart',e=>{
+if(e.touches.length>1)e.preventDefault();
+},{passive:false});
+
+let lastTouchEnd=0;
+document.addEventListener('touchend',e=>{
+let now=Date.now();
+if(now-lastTouchEnd<=300)e.preventDefault();
+lastTouchEnd=now;
+},false);
+
+//////////////// BASE //////////////////
+const baseGame={
+money:0,
+clickPower:1,
+level:1,
+bonus:1,
+economy:1,
+crisisTimer:0,
+business:[
+{name:"Киоск",cost:100,income:2,owned:0,upgrade:0,manager:false,incomeAccum:0},
+{name:"Магазин",cost:500,income:6,owned:0,upgrade:0,manager:false,incomeAccum:0},
+{name:"Кафе",cost:2000,income:15,owned:0,upgrade:0,manager:false,incomeAccum:0},
+{name:"Завод",cost:8000,income:40,owned:0,upgrade:0,manager:false,incomeAccum:0},
+{name:"Корпорация",cost:40000,income:120,owned:0,upgrade:0,manager:false,incomeAccum:0}
+],
+lastTime:Date.now()
+};
+
+let game;
+
+//////////////// CLICK //////////////////
+function clickMoney(){
+game.money+=game.clickPower*game.bonus;
+updateLevel();
+update();
+}
+
+//////////////// SAVE //////////////////
+function save(){
+game.lastTime=Date.now();
+localStorage.setItem("beggarV46",JSON.stringify(game));
+}
+
+function load(){
+let s=localStorage.getItem("beggarV46");
+game=s
+?Object.assign(structuredClone(baseGame),JSON.parse(s))
+:structuredClone(baseGame);
+
+let offlineSec=Math.floor((Date.now()-game.lastTime)/1000);
+offlineSec=Math.min(offlineSec,28800);
+
+if(offlineSec>0){
+game.business.forEach(b=>{
+b.incomeAccum += offlineSec * b.owned * b.income;
+});
+alert("⏳ Оффлайн доход накоплен в бизнесах");
+}
+}
+
+//////////////// LEVEL //////////////////
+function updateLevel(){
+let lvl=Math.floor(Math.log10(game.money+1))+1;
+if(lvl>game.level){
+game.level=lvl;
+game.bonus=1+(game.level-1)*0.1;
+}
+}
+
+//////////////// ECONOMY //////////////////
+function economyTick(){
+game.crisisTimer++;
+if(game.crisisTimer>20){
+game.crisisTimer=0;
+let r=Math.random();
+if(r<0.25){
+game.economy=0.5;
+setEconomyText("💥 КРИЗИС");
+game.business.forEach(b=>b.incomeAccum*=0.8); // часть дохода теряется
+}
+else if(r<0.5){
+game.economy=0.8;
+setEconomyText("📉 Спад");
+}
+else if(r<0.75){
+game.economy=1.2;
+setEconomyText("📈 Рост");
+}
+else{
+game.economy=1.5;
+setEconomyText("🚀 Бум");
+}
+}
+}
+
+function setEconomyText(text){
+document.getElementById("economy").innerText=text;
+}
+
+//////////////// BUSINESS //////////////////
+function buyBiz(i){
+let b=game.business[i];
+if(game.money<b.cost)return;
+game.money-=b.cost;
+b.owned++;
+b.cost=Math.floor(b.cost*1.5);
+}
+
+function upgradeBiz(i){
+let b=game.business[i];
+let price=b.cost*2;
+if(game.money<price)return;
+game.money-=price;
+b.upgrade++;
+}
+
+function collectBiz(i){
+let b=game.business[i];
+game.money += Math.floor(b.incomeAccum * game.bonus * game.economy);
+b.incomeAccum = 0;
+update();
+}
+
+function drawBiz(){
+let d=document.getElementById("biz");
+d.innerHTML="";
+game.business.forEach((b,i)=>{
+d.innerHTML+=`
+<div class="panel">
+<b>${b.name}</b><br>
+Цена: ${b.cost}$<br>
+Доход за сек: ${b.income*(b.upgrade+1)}<br>
+Владение: x${b.owned}<br>
+Накоплено: ${Math.floor(b.incomeAccum)}$<br>
+<button onclick="buyBiz(${i})">Купить</button>
+<button class="blue" onclick="upgradeBiz(${i})">Апгрейд (${b.cost*2}$)</button><br>
+<button class="green" onclick="collectBiz(${i})">Собрать</button>
+<button class="blue" onclick="hireManager(${i})">${b.manager?"✅":"Нанять менеджера"}</button>
+</div>
+`;
+});
+}
+
+//////////////// MANAGERS //////////////////
+function hireManager(i){
+let b=game.business[i];
+let price=b.cost*5;
+if(game.money<price||b.manager)return;
+game.money-=price;
+b.manager=true;
+update();
+}
+
+function managerTick(){
+game.business.forEach(b=>{
+if(b.manager){
+b.incomeAccum += b.owned * b.income;
+}
+});
+}
+
+//////////////// LOOP //////////////////
+setInterval(()=>{
+managerTick();
+economyTick();
+updateLevel();
+update();
+},1000);
+
+//////////////// UI //////////////////
+function update(){
+document.getElementById("money").innerText=Math.floor(game.money);
+document.getElementById("level").innerText=game.level;
+document.getElementById("bonus").innerText=game.bonus.toFixed(1);
+drawBiz();
+save();
+}
+
+//////////////// START //////////////////
+load();
+setEconomyText("Стабильно");
+update();
+</script>
+</body>
+</html>
 <button class="green" onclick="clickMoney()">Клик</button>
 
 <div class="panel">
@@ -1313,6 +1512,7 @@ update();
 </script>
 </body>
 </html>
+
 
 
 
