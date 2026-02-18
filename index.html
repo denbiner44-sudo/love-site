@@ -2,248 +2,269 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Кликер Бомжа PRO</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Кликер Бомжа PRO 4.2</title>
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: #1e1e1e;
-  color: white;
-  text-align: center;
-}
-
-h1 { margin: 10px; }
-
-.panel {
-  border: 2px solid #444;
-  margin: 10px;
-  padding: 10px;
-  border-radius: 10px;
-}
-
-button {
-  padding: 10px;
-  margin: 5px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.clickBtn { background: #2ecc71; font-size: 20px; }
-.shopBtn { background: #3498db; }
-.clothesBtn { background: #9b59b6; }
-.locationBtn { background: #e67e22; }
-
-.container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-}
+body{margin:0;font-family:Arial;background:#0f0f0f;color:#fff;text-align:center}
+.panel{border:2px solid #222;margin:6px;padding:6px;border-radius:10px}
+button{padding:8px;margin:4px;border:none;border-radius:8px;cursor:pointer}
+.green{background:#2ecc71}
+.red{background:#e74c3c}
+.blue{background:#3498db}
 </style>
 </head>
 
 <body>
 
-<h1>💸 Кликер Бомжа PRO</h1>
+<h2>🔥 Кликер Бомжа PRO 4.2</h2>
 
 <div class="panel">
-<div>💰 Деньги: <span id="money">0</span> ₽</div>
-<div>👤 Уровень: <span id="level">1</span></div>
-<div>⭐ Опыт: <span id="xp">0</span>/<span id="xpNeed">50</span></div>
-<div>🖱 За клик: <span id="perClick">1</span></div>
-<div>⏳ Пассивный доход: <span id="passive">0</span>/сек</div>
-<div>📍 Локация: <span id="location">Улица</span></div>
+💰 Деньги: <span id="money"></span><br>
+🏢 Доход/сек: <span id="income"></span><br>
+⭐ Уровень: <span id="level"></span><br>
+⚡ Бонус: x<span id="bonus"></span><br>
+🌍 Экономика: <span id="economy"></span>
 </div>
 
-<button class="clickBtn" onclick="clickMoney()">Попросить милостыню</button>
+<button class="green" onclick="clickMoney()">Клик</button>
 
 <div class="panel">
-<h2>🚀 Улучшения</h2>
-<div class="container" id="upgrades"></div>
-</div>
-
-<div class="panel">
-<h2>👕 Магазин одежды</h2>
-<div class="container" id="clothes"></div>
+<h3>🏢 Бизнес</h3>
+<div id="biz"></div>
 </div>
 
 <div class="panel">
-<h2>🌍 Локации</h2>
-<div class="container" id="locations"></div>
+<h3>👔 Менеджеры</h3>
+<div id="managers"></div>
 </div>
 
 <script>
-let game = {
-  money: 0,
-  perClick: 1,
-  passive: 0,
 
-  level: 1,
-  xp: 0,
-  xpNeed: 50,
+//////////////// GAME //////////////////
 
-  location: 0,
+const baseGame={
+money:0,
+income:0,
+clickPower:1,
 
-  upgrades: [
-    {name: "Шапка", cost: 20, type: "click", value: 1, level: 0},
-    {name: "Табличка", cost: 80, type: "click", value: 2, level: 0},
-    {name: "Помощник", cost: 200, type: "passive", value: 1, level: 0}
-  ],
+level:1,
+bonus:1,
 
-  clothes: [
-    {name: "Рваная куртка", cost: 150, click: 1, owned: false},
-    {name: "Старые кроссовки", cost: 400, passive: 2, owned: false},
-    {name: "Нормальная одежда", cost: 1000, click: 3, owned: false}
-  ],
+economy:1,
+crisisTimer:0,
 
-  locations: [
-    {name: "Улица", bonus: 1, unlock: 1},
-    {name: "Метро", bonus: 2, unlock: 3},
-    {name: "Центр города", bonus: 3, unlock: 5},
-    {name: "Элитный район", bonus: 5, unlock: 8}
-  ]
+business:[
+{name:"Киоск",cost:100,income:2,owned:0,upgrade:0,manager:false},
+{name:"Магазин",cost:500,income:6,owned:0,upgrade:0,manager:false},
+{name:"Кафе",cost:2000,income:15,owned:0,upgrade:0,manager:false},
+{name:"Завод",cost:8000,income:40,owned:0,upgrade:0,manager:false},
+{name:"Корпорация",cost:40000,income:120,owned:0,upgrade:0,manager:false}
+],
+
+lastTime:Date.now()
 };
 
-function saveGame() {
-  localStorage.setItem("beggarProSave", JSON.stringify(game));
+let game;
+
+//////////////// SAVE //////////////////
+
+function save(){
+game.lastTime=Date.now();
+localStorage.setItem("beggarV42",JSON.stringify(game));
 }
 
-function loadGame() {
-  let save = localStorage.getItem("beggarProSave");
-  if (save) game = JSON.parse(save);
+function load(){
+let s=localStorage.getItem("beggarV42");
+game=s?Object.assign(structuredClone(baseGame),JSON.parse(s))
+:structuredClone(baseGame);
+
+let offlineSec=Math.floor((Date.now()-game.lastTime)/1000);
+offlineSec=Math.min(offlineSec,28800);
+
+if(offlineSec>0){
+let earn=offlineSec*game.income*game.bonus*game.economy;
+game.money+=earn;
+alert("⏳ Оффлайн доход: +"+Math.floor(earn)+"$");
+}
 }
 
-function addXP(amount) {
-  game.xp += amount;
-  if (game.xp >= game.xpNeed) {
-    game.xp -= game.xpNeed;
-    game.level++;
-    game.xpNeed = Math.floor(game.xpNeed * 1.5);
-  }
+//////////////// CLICK //////////////////
+
+function clickMoney(){
+game.money+=game.clickPower*game.bonus;
+updateLevel();
+update();
 }
 
-function clickMoney() {
-  let bonus = game.locations[game.location].bonus;
-  game.money += game.perClick * bonus;
-  addXP(5);
-  updateUI();
+//////////////// LEVEL //////////////////
+
+function updateLevel(){
+let lvl=Math.floor(Math.log10(game.money+1))+1;
+if(lvl>game.level){
+game.level=lvl;
+game.bonus=1+(game.level-1)*0.1;
+}
 }
 
-function buyUpgrade(i) {
-  let up = game.upgrades[i];
-  if (game.money >= up.cost) {
-    game.money -= up.cost;
-    up.level++;
+//////////////// ECONOMY //////////////////
 
-    if (up.type === "click") game.perClick += up.value;
-    if (up.type === "passive") game.passive += up.value;
+function economyTick(){
 
-    up.cost = Math.floor(up.cost * 1.7);
-    updateUI();
-  }
+game.crisisTimer++;
+
+if(game.crisisTimer>20){
+
+game.crisisTimer=0;
+
+let r=Math.random();
+
+if(r<0.25){
+game.economy=0.5;
+setEconomyText("💥 КРИЗИС");
+}
+else if(r<0.5){
+game.economy=0.8;
+setEconomyText("📉 Спад");
+}
+else if(r<0.75){
+game.economy=1.2;
+setEconomyText("📈 Рост");
+}
+else{
+game.economy=1.5;
+setEconomyText("🚀 Бум");
+}
+}
 }
 
-function buyClothes(i) {
-  let c = game.clothes[i];
-  if (!c.owned && game.money >= c.cost) {
-    game.money -= c.cost;
-    c.owned = true;
-
-    if (c.click) game.perClick += c.click;
-    if (c.passive) game.passive += c.passive;
-
-    updateUI();
-  }
+function setEconomyText(text){
+document.getElementById("economy").innerText=text;
 }
 
-function changeLocation(i) {
-  if (game.level >= game.locations[i].unlock) {
-    game.location = i;
-    updateUI();
-  }
+//////////////// BUSINESS //////////////////
+
+function buyBiz(i){
+let b=game.business[i];
+if(game.money<b.cost)return;
+
+game.money-=b.cost;
+b.owned++;
+
+game.income+=b.income*(b.upgrade+1);
+b.cost=Math.floor(b.cost*1.5);
 }
 
-function drawUpgrades() {
-  let div = document.getElementById("upgrades");
-  div.innerHTML = "";
+function upgradeBiz(i){
+let b=game.business[i];
+let price=b.cost*2;
 
-  game.upgrades.forEach((u, i) => {
-    let b = document.createElement("button");
-    b.className = "shopBtn";
-    b.innerHTML = `${u.name}<br>Цена: ${u.cost}<br>Ур: ${u.level}`;
-    b.onclick = () => buyUpgrade(i);
-    div.appendChild(b);
-  });
+if(game.money<price)return;
+
+game.money-=price;
+b.upgrade++;
+
+game.income+=b.income;
 }
 
-function drawClothes() {
-  let div = document.getElementById("clothes");
-  div.innerHTML = "";
+function drawBiz(){
+let d=document.getElementById("biz");
+d.innerHTML="";
 
-  game.clothes.forEach((c, i) => {
-    let b = document.createElement("button");
-    b.className = "clothesBtn";
+game.business.forEach((b,i)=>{
 
-    b.innerHTML = c.owned
-      ? `${c.name}<br>Куплено`
-      : `${c.name}<br>${c.cost} ₽`;
-
-    b.onclick = () => buyClothes(i);
-    div.appendChild(b);
-  });
+d.innerHTML+=`
+<div class="panel">
+<b>${b.name}</b><br>
+Цена: ${b.cost}$<br>
+Доход: ${b.income*(b.upgrade+1)}<br>
+Владение: x${b.owned}<br>
+Апгрейд: ${b.upgrade}
+<br>
+<button onclick="buyBiz(${i})">Купить</button>
+<button class="blue" onclick="upgradeBiz(${i})">
+Апгрейд (${b.cost*2}$)
+</button>
+</div>
+`;
+});
 }
 
-function drawLocations() {
-  let div = document.getElementById("locations");
-  div.innerHTML = "";
+//////////////// MANAGERS //////////////////
 
-  game.locations.forEach((l, i) => {
-    let b = document.createElement("button");
-    b.className = "locationBtn";
+function hireManager(i){
+let b=game.business[i];
+let price=b.cost*5;
 
-    let locked = game.level < l.unlock;
+if(game.money<price||b.manager)return;
 
-    b.innerHTML = locked
-      ? `${l.name}<br>Нужен ур. ${l.unlock}`
-      : `${l.name}<br>x${l.bonus}`;
-
-    b.onclick = () => changeLocation(i);
-    div.appendChild(b);
-  });
+game.money-=price;
+b.manager=true;
 }
 
-function updateUI() {
-  document.getElementById("money").innerText = Math.floor(game.money);
-  document.getElementById("level").innerText = game.level;
-  document.getElementById("xp").innerText = game.xp;
-  document.getElementById("xpNeed").innerText = game.xpNeed;
-  document.getElementById("perClick").innerText = game.perClick;
-  document.getElementById("passive").innerText = game.passive;
-  document.getElementById("location").innerText =
-    game.locations[game.location].name;
-
-  drawUpgrades();
-  drawClothes();
-  drawLocations();
-  saveGame();
+function managerTick(){
+game.business.forEach((b,i)=>{
+if(b.manager && game.money>=b.cost){
+buyBiz(i);
+}
+});
 }
 
-setInterval(() => {
-  let bonus = game.locations[game.location].bonus;
-  game.money += game.passive * bonus;
-  addXP(2);
-  updateUI();
-}, 1000);
+function drawManagers(){
+let d=document.getElementById("managers");
+d.innerHTML="";
 
-loadGame();
-updateUI();
+game.business.forEach((b,i)=>{
+
+d.innerHTML+=`
+<button onclick="hireManager(${i})">
+${b.name}: ${b.manager?"✅":"Нанять ("+b.cost*5+"$)"}
+</button><br>
+`;
+});
+}
+
+//////////////// LOOP //////////////////
+
+setInterval(()=>{
+
+managerTick();
+economyTick();
+
+game.money+=game.income*game.bonus*game.economy;
+
+updateLevel();
+update();
+
+},1000);
+
+//////////////// UI //////////////////
+
+function update(){
+
+document.getElementById("money").innerText=Math.floor(game.money);
+document.getElementById("income").innerText=
+Math.floor(game.income*game.economy);
+document.getElementById("level").innerText=game.level;
+document.getElementById("bonus").innerText=
+game.bonus.toFixed(1);
+
+drawBiz();
+drawManagers();
+save();
+}
+
+//////////////// START //////////////////
+
+load();
+setEconomyText("Стабильно");
+update();
+
 </script>
-
 </body>
 </html>
+
+
 
 
 
