@@ -1,23 +1,42 @@
 <!DOCTYPE html>
+
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Кликер Бомжа PRO 4.2</title>
+
+<!-- ✅ анти-зум для iPhone -->
+
+<meta name="viewport"
+content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+
+<title>Кликер Бомжа PRO 4.3 FIXED</title>
 
 <style>
-body{margin:0;font-family:Arial;background:#0f0f0f;color:#fff;text-align:center}
+body{
+margin:0;
+font-family:Arial;
+background:#0f0f0f;
+color:#fff;
+text-align:center;
+
+/* ✅ защита от выделения и зума */
+touch-action:manipulation;
+-webkit-user-select:none;
+user-select:none;
+}
+
 .panel{border:2px solid #222;margin:6px;padding:6px;border-radius:10px}
 button{padding:8px;margin:4px;border:none;border-radius:8px;cursor:pointer}
 .green{background:#2ecc71}
 .red{background:#e74c3c}
 .blue{background:#3498db}
 </style>
+
 </head>
 
 <body>
 
-<h2>🔥 Кликер Бомжа PRO 4.2</h2>
+<h2>🔥 Кликер Бомжа PRO 4.3 (FIXED)</h2>
 
 <div class="panel">
 💰 Деньги: <span id="money"></span><br>
@@ -41,16 +60,26 @@ button{padding:8px;margin:4px;border:none;border-radius:8px;cursor:pointer}
 
 <script>
 
-//////////////// GAME //////////////////
+/* ✅ JS анти-зум (двойной тап) */
+document.addEventListener('touchstart',e=>{
+if(e.touches.length>1)e.preventDefault();
+},{passive:false});
+
+let lastTouchEnd=0;
+document.addEventListener('touchend',e=>{
+let now=Date.now();
+if(now-lastTouchEnd<=300)e.preventDefault();
+lastTouchEnd=now;
+},false);
+
+//////////////// BASE //////////////////
 
 const baseGame={
 money:0,
 income:0,
 clickPower:1,
-
 level:1,
 bonus:1,
-
 economy:1,
 crisisTimer:0,
 
@@ -71,29 +100,34 @@ let game;
 
 function save(){
 game.lastTime=Date.now();
-localStorage.setItem("beggarV42",JSON.stringify(game));
+localStorage.setItem("beggarV43",JSON.stringify(game));
 }
 
 function load(){
-let s=localStorage.getItem("beggarV42");
+let s=localStorage.getItem("beggarV43");
 game=s?Object.assign(structuredClone(baseGame),JSON.parse(s))
 :structuredClone(baseGame);
+
+recalcIncome();
 
 let offlineSec=Math.floor((Date.now()-game.lastTime)/1000);
 offlineSec=Math.min(offlineSec,28800);
 
 if(offlineSec>0){
-let earn=offlineSec*game.income*game.bonus*game.economy;
+let earn=offlineSec*
+game.income*
+game.bonus*
+game.economy;
+
 game.money+=earn;
 alert("⏳ Оффлайн доход: +"+Math.floor(earn)+"$");
 }
 }
 
-//////////////// CLICK //////////////////
+//////////////// INCOME //////////////////
 
-function clickMoney(){
-game.money+=game.clickPower*game.bonus;
-updateLevel();
+function recalcIncome(){
+let total=0
 update();
 }
 
@@ -263,6 +297,7 @@ update();
 </script>
 </body>
 </html>
+
 
 
 
