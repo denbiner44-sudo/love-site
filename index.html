@@ -3,37 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-    <title>Бомж-Магнат PRO 6.0</title>
+    <title>Бомж-Магнат 8.0: Mining Edition</title>
     <style>
-        :root { --bg: #121212; --panel: #1e1e1e; --green: #2ecc71; --red: #e74c3c; --blue: #3498db; --gold: #f1c40f; }
-        body { margin:0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; text-align: center; user-select: none; }
-        .panel { background: var(--panel); margin: 8px; padding: 12px; border-radius: 12px; border: 1px solid #333; }
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
-        button { padding: 10px; margin: 4px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: #fff; transition: 0.2s; }
-        button:active { transform: scale(0.95); }
-        .btn-click { width: 90%; height: 70px; font-size: 1.4rem; background: var(--red); margin: 10px 0; box-shadow: 0 4px 0 #c0392b; }
-        .btn-click:active { box-shadow: 0 0 0; transform: translateY(4px); }
-        .green { background: var(--green); } .blue { background: var(--blue); } .orange { background: #e67e22; }
-        .bar-container { background: #333; height: 10px; border-radius: 5px; margin: 5px 0; overflow: hidden; }
-        #hungerBar { background: var(--green); height: 100%; transition: width 0.3s; }
-        .log { height: 60px; overflow-y: auto; font-size: 0.85rem; color: #aaa; background: #000; padding: 5px; margin: 5px; border-radius: 5px; }
+        :root { --bg: #0d1117; --panel: #161b22; --green: #238636; --red: #da3633; --blue: #1f6feb; --gold: #f0883e; --neon: #00ffc3; }
+        body { margin:0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #c9d1d9; text-align: center; }
+        .panel { background: var(--panel); margin: 8px; padding: 12px; border-radius: 12px; border: 1px solid #30363d; }
+        .stats-main { font-size: 1.3rem; color: var(--gold); font-weight: bold; margin-bottom: 10px; }
+        .crypto-row { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #21262d; }
+        button { padding: 8px 12px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; color: #fff; transition: 0.2s; }
+        .btn-buy { background: var(--green); } .btn-sell { background: var(--red); } .btn-blue { background: var(--blue); }
+        .tab-nav { display: flex; justify-content: center; gap: 5px; margin-bottom: 10px; }
+        .tab-btn { background: #21262d; flex: 1; font-size: 0.8rem; }
+        .active-tab { background: var(--blue); border-color: #58a6ff; }
+        .mining-status { font-size: 0.8rem; color: var(--neon); margin: 5px 0; }
         .hidden { display: none; }
+        #clickBtn { width: 95%; height: 60px; background: linear-gradient(45deg, #f0883e, #d35400); margin-bottom: 15px; border-radius: 15px; font-size: 1.2rem; }
     </style>
 </head>
 <body>
 
 <div class="panel">
-    <h2>🏦 Бомж-Магнат 6.0</h2>
-    <div class="stats-grid">
-        <div>💰 Гроші: <span id="money" style="color:var(--gold)">0</span>$</div>
-        <div>⭐ Рівень: <span id="level">1</span></div>
-        <div>🏠 Житло: <span id="house">Коробка</span></div>
-        <div>🌍 Економіка: <span id="economy">Стабільна</span></div>
+    <div class="stats-main">💰 <span id="money">0</span>$</div>
+    <div style="font-size:0.8rem; color:#8b949e">⚡ Енергія: <span id="powerUse">0</span> кВт/год (Витрати: <span id="powerCost">0</span>$/с)</div>
+    
+    <div class="tab-nav">
+        <button class="tab-btn active-tab" onclick="showTab('biz')">🏢 Бізнес</button>
+        <button class="tab-btn" onclick="showTab('crypto')">📉 Біржа</button>
+        <button class="tab-btn" onclick="showTab('mining')">⛏️ Майнінг</button>
     </div>
-    <div style="margin-top:10px">🍔 Стійкість (Голод):</div>
-    <div class="bar-container"><div id="hungerBar"></div></div>
-    <button class="green" onclick="buyFood()">Поїсти (10$)</button>
 </div>
+
+<!-- ТАБ 1: БІЗНЕС -->
+<div id="tab-biz" class="tab-content">
+    <button id="clickBtn" onclick="doClick()">ПРАЦЮВАТИ 💸</button>
+    <div id="bizList"></div>
+</div>
+
+<!-- ТАБ 2: КРИПТОБІРЖА -->
+<div id="tab-crypto" class="tab-content hidden">
+    <div class="panel">
+        <h3>📊 Ринок монет</h3>
+        <div id="cryptoList"></div>
+    </div>
+</div>
+
+<!-- ТАБ 3: МАЙНІНГ -->
+<div id="tab-mining" class="tab-content hidden">
+    <div class="panel">
+        <h3 style="color:var(--neon)">🛠️ Крипто-Ферма</h3>
+        <p style="font-size:0.8rem">Купуйте відеокарти, щоб добувати BTC автоматично!</p>
+        <div id="rigList"></div>
+    </div>
+</div>
+
+<script>
+// --- ПАРАМЕТРИ ГРИ ---
+let g = JSON.parse(localStorage.getItem('homeless_v8')) || {
+    money: 200,
+    biz: [
+        {name: "Збір пляшок", cost: 50, inc: 2, owned: 0},
+        {name: "Кіоск", cost: 500, inc: 15, owned: 0},
+        {name: "Магазин", cost: 5000, inc: 180, owned: 0}
+    ],
+    crypto: [
+        {id: 'btc', name: "Bitcoin", price: 45000, owned: 0, trend: 'up'},
+        {id: 'eth', name: "Ethereum", price: 2800, owned: 0, trend: 'down'}
+    ],
+    mining: [
+        {name: "GTX 1660", cost: 800, hashrate: 0.00001, power: 0.2, owned: 0},
+        {name: "RTX 3080", cost: 3500, hashrate: 0.00008, power: 0.5, owned: 0},
+        {name: "ASIC Miner", cost: 15000, hashrate: 0.0005, power: 2.0, owned: 0}
+    ],
+    powerPrice: 0.5 // Ціна 1 кВт
+};
+
+function showTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+    document.getElementById('tab-' + tabId).classList.remove('hidden');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-tab'));
+    event.currentTarget.classList.add('active-tab');
+}
+
+// --- КРИПТО ЛОГІКА ---
+function updatePrices() {
+    g.crypto.forEach(c => {
+        let change = 1 + (Math.random() * 0.16 - 0.08); // +/- 8%
+        c.price *= change;
+        c.trend = change >= 1 ? 'up' : 'down';
+    });
+}
+
+function buyCrypto(id) {
+    let c = g.crypto.find(x => x.id === id);
+    if(g.money >= c.price) { g.money -= c.price; c.owned++; updateUI(); }
+}
+
+function sellCrypto(id) {
+    let c = g.crypto.find(x => x.id === id);
+    if(c.owned > 0) { g.money += c.price; c.owned--; updateUI(); }
+}
+
+// --- МАЙНІНГ ЛОГІКА ---
+function buyRig(i) {
+    if(g.money >= g.mining[i].cost) {
+        g.money -= g.mining[i].cost;
+        g.mining[i].owned++;
+        g.mining[i].cost *= 1.3;
+        updateUI();
+    }
+}
+
+// --- ОСНОВНЕ ОНОВЛЕННЯ ---
+function updateUI() {
+    document.getElementById('money').innerText = Math.floor(g.money);
+    
+    // Бізнес
+    let bHtml = '';
+    g.biz.forEach((b, i) => {
+        bHtml += `<div class="panel"><b>${b.name}</b> (x${b.owned})<br>
+        <button class="btn-buy" onclick="buyBiz(${i})">Купити (${Math.floor(b.cost)}$)</button></div>`;
+    });
+    document.getElementById('bizList').innerHTML = bHtml;
+
+    // Крипта
+    let cHtml = '';
+    g.crypto.forEach(c => {
+        cHtml += `<div class="crypto-row">
+            <div style="text-align:left"><b>${c.name}</b><br><span class="price-${c.trend}">${c.price.toFixed(2)}$</span></div>
+            <div><button class="btn-buy" onclick="buyCrypto('${c.id}')">Вклад</button>
+            <button class="btn-sell" onclick="sellCrypto('${c.id}')">Продати (${c.owned.toFixed(4)})</button></div>
+        </div>`;
+    });
+    document.getElementById('cryptoList').innerHTML = cHtml;
+
+    // Майнінг
+    let mHtml = '';
+    let totalPower = 0;
+    g.mining.forEach((m, i) => {
+        totalPower += m.owned * m.power;
+        mHtml += `<div class="panel">
+            <b>${m.name}</b> (x${m.owned})<br>
+            <small>Добуток: ${m.hashrate} BTC/с | ⚡ ${m.power} кВт</small><br>
+            <button class="btn-blue" onclick="buyRig(${i})">Купити (${Math.floor(m.cost)}$)</button>
+        </div>`;
+    });
+    document.getElementById('rigList').innerHTML = mHtml;
+    document.getElementById('powerUse').innerText = totalPower.toFixed(1);
+    document.getElementById('powerCost').innerText = (totalPower * g.powerPrice).toFixed(2);
+
+    localStorage.setItem('homeless_v8', JSON.stringify(g));
+}
+
+function buyBiz(i) {
+    if(g.money >= g.biz[i].cost) {
+        g.money -= g.biz[i].cost;
+        g.biz[i].owned++;
+        g.biz[i].cost *= 1.4;
+        updateUI();
+    }
+}
+
+function doClick() { g.money += 1; updateUI(); }
+
+// --- ІГРОВИЙ ЦИКЛ ---
+setInterval(() => {
+    // 1. Дохід від бізнесу
+    g.biz.forEach(b => g.money += (b.owned * b.inc / 10));
+
+    // 2. Майнінг BTC
+    let btc = g.crypto.find(c => c.id === 'btc');
+    let totalPower = 0;
+    g.mining.forEach(m => {
+        btc.owned += (m.owned * m.hashrate / 10);
+        totalPower += (m.owned * m.power);
+    });
+
+    // 3. Витрати на світло
+    g.money -= (totalPower * g.powerPrice / 10);
+    
+    // Перевірка на банкрутство по світлу
+    if(g.money < 0) g.money = 0; 
+
+    updateUI();
+}, 100);
+
+setInterval(updatePrices, 4000); // Ринок рухається кожні 4с
+
+updateUI();
+</script>
+</body>
+</html>
 
 <div class="log" id="gameLog">Ласкаво просимо на вулиці, майбутній мільярдер!</div>
 
@@ -2328,6 +2487,7 @@ update();
 </script>
 </body>
 </html>
+
 
 
 
