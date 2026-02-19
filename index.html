@@ -1,39 +1,184 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="uk">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>Кликер Бомжа PRO 5.3</title>
-<style>
-body{margin:0;font-family:Arial;background:#0f0f0f;color:#fff;text-align:center;touch-action:manipulation;-webkit-user-select:none;user-select:none;}
-.panel{border:2px solid #222;margin:6px;padding:6px;border-radius:10px}
-button{padding:8px;margin:4px;border:none;border-radius:8px;cursor:pointer}
-.green{background:#2ecc71}
-.blue{background:#3498db}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>Бомж-Магнат PRO 6.0</title>
+    <style>
+        :root { --bg: #121212; --panel: #1e1e1e; --green: #2ecc71; --red: #e74c3c; --blue: #3498db; --gold: #f1c40f; }
+        body { margin:0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; text-align: center; user-select: none; }
+        .panel { background: var(--panel); margin: 8px; padding: 12px; border-radius: 12px; border: 1px solid #333; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+        button { padding: 10px; margin: 4px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: #fff; transition: 0.2s; }
+        button:active { transform: scale(0.95); }
+        .btn-click { width: 90%; height: 70px; font-size: 1.4rem; background: var(--red); margin: 10px 0; box-shadow: 0 4px 0 #c0392b; }
+        .btn-click:active { box-shadow: 0 0 0; transform: translateY(4px); }
+        .green { background: var(--green); } .blue { background: var(--blue); } .orange { background: #e67e22; }
+        .bar-container { background: #333; height: 10px; border-radius: 5px; margin: 5px 0; overflow: hidden; }
+        #hungerBar { background: var(--green); height: 100%; transition: width 0.3s; }
+        .log { height: 60px; overflow-y: auto; font-size: 0.85rem; color: #aaa; background: #000; padding: 5px; margin: 5px; border-radius: 5px; }
+        .hidden { display: none; }
+    </style>
 </head>
 <body>
 
-<h2>🔥 Кликер Бомжа PRO 5.3</h2>
-
 <div class="panel">
-💰 Деньги: <span id="money">0</span><br>
-⭐ Уровень: <span id="level">1</span><br>
-⚡ Бонус: x<span id="bonus">1.0</span><br>
-🌍 Экономика: <span id="economy">Стабильно</span>
+    <h2>🏦 Бомж-Магнат 6.0</h2>
+    <div class="stats-grid">
+        <div>💰 Гроші: <span id="money" style="color:var(--gold)">0</span>$</div>
+        <div>⭐ Рівень: <span id="level">1</span></div>
+        <div>🏠 Житло: <span id="house">Коробка</span></div>
+        <div>🌍 Економіка: <span id="economy">Стабільна</span></div>
+    </div>
+    <div style="margin-top:10px">🍔 Стійкість (Голод):</div>
+    <div class="bar-container"><div id="hungerBar"></div></div>
+    <button class="green" onclick="buyFood()">Поїсти (10$)</button>
 </div>
 
-<button id="clickBtn" class="green">Клик</button>
+<div class="log" id="gameLog">Ласкаво просимо на вулиці, майбутній мільярдер!</div>
+
+<button id="clickBtn" class="btn-click">ПРАЦЮВАТИ 💸</button>
 
 <div class="panel">
-<h3>🏦 Банк и Сейф</h3>
-💵 В банке: <span id="bankMoney">0</span>$<br>
-💰 В сейфе: <span id="safeMoney">0</span>$<br>
-<button class="green" onclick="depositBank()">Положить в банк</button>
-<button class="blue" onclick="withdrawBank()">Забрать из банка</button><br>
-<button class="green" onclick="depositSafe()">Положить в сейф</button>
-<button class="blue" onclick="withdrawSafe()">Забрать из сейфа</button>
+    <h3>📈 Швидкі дії</h3>
+    <button class="blue" onclick="depositBank()">Все в Банк (+0.2%/сек)</button>
+    <button class="orange" onclick="depositSafe()">Все в Сейф (Захист)</button>
+    <button class="blue" onclick="withdrawAll()">Зняти все</button>
 </div>
+
+<div id="bizList"></div>
+
+<script>
+const baseGame = {
+    money: 0, bank: 0, safe: 0, hunger: 100,
+    level: 1, bonus: 1, economy: 1, houseIdx: 0,
+    lastTime: Date.now(),
+    houses: [
+        {name: "Коробка", cost: 0, mult: 1},
+        {name: "Підвал", cost: 500, mult: 1.5},
+        {name: "Квартира", cost: 5000, mult: 3},
+        {name: "Вілла", cost: 50000, mult: 10}
+    ],
+    biz: [
+        {name: "Збір пляшок", cost: 50, inc: 1, owned: 0, mngr: false},
+        {name: "Кіоск", cost: 300, inc: 5, owned: 0, mngr: false},
+        {name: "Мийка авто", cost: 1500, inc: 20, owned: 0, mngr: false},
+        {name: "Мережа кафе", cost: 10000, inc: 120, owned: 0, mngr: false},
+        {name: "IT-Корпорація", cost: 100000, inc: 800, owned: 0, mngr: false}
+    ]
+};
+
+let g = JSON.parse(localStorage.getItem('homeless_pro_6')) || JSON.parse(JSON.stringify(baseGame));
+
+function log(msg, color="#fff") {
+    const l = document.getElementById('gameLog');
+    l.innerHTML = `<span style="color:${color}">${msg}</span><br>${l.innerHTML}`;
+}
+
+function buyFood() {
+    if(g.money >= 10) { g.money -= 10; g.hunger = Math.min(100, g.hunger + 30); updateUI(); }
+}
+
+function depositBank() { g.bank += g.money; g.money = 0; log("Гроші переведено в банк під відсотки"); updateUI(); }
+function depositSafe() { g.safe += g.money; g.money = 0; log("Гроші заховані в сейф", "#f1c40f"); updateUI(); }
+function withdrawAll() { g.money += (g.bank + g.safe); g.bank = 0; g.safe = 0; updateUI(); }
+
+function randomEvent() {
+    let r = Math.random();
+    if(r < 0.05) { // Грабіж
+        let loss = Math.floor(g.money * 0.5);
+        if(loss > 0) {
+            g.money -= loss;
+            log(`КРИМІНАЛ: Вас пограбували! Вкрадено ${loss}$`, "#e74c3c");
+        }
+    } else if (r < 0.1) { // Знахідка
+        let win = g.level * 50;
+        g.money += win;
+        log(`УДАЧА: Ви знайшли гаманець із ${win}$!`, "#2ecc71");
+    }
+}
+
+function updateUI() {
+    document.getElementById('money').innerText = Math.floor(g.money);
+    document.getElementById('level').innerText = g.level;
+    document.getElementById('house').innerText = g.houses[g.houseIdx].name;
+    document.getElementById('hungerBar').style.width = g.hunger + "%";
+    document.getElementById('hungerBar').style.background = g.hunger < 30 ? "var(--red)" : "var(--green)";
+    
+    let html = '';
+    g.biz.forEach((b, i) => {
+        html += `<div class="panel">
+            <b>${b.name}</b> (x${b.owned}) | +${Math.floor(b.inc * g.bonus * g.economy)}/сек<br>
+            <button class="green" onclick="buyBiz(${i})">Купити (${Math.floor(b.cost)}$)</button>
+            <button class="blue" onclick="hireMngr(${i})" ${b.mngr?'disabled':''}>
+                ${b.mngr ? 'Менеджер працює' : 'Менеджер ('+(b.cost*5)+'$)'}
+            </button>
+        </div>`;
+    });
+    document.getElementById('bizList').innerHTML = html;
+    
+    // Перевірка на нове житло
+    let nextHouse = g.houses[g.houseIdx + 1];
+    if(nextHouse && g.money >= nextHouse.cost) {
+        if(confirm(`Переїхати в ${nextHouse.name} за ${nextHouse.cost}$?`)) {
+            g.money -= nextHouse.cost;
+            g.houseIdx++;
+            g.bonus = nextHouse.mult;
+            log(`НОВОСІЛЛЯ: Ви тепер живете в: ${nextHouse.name}!`, "#3498db");
+        }
+    }
+    localStorage.setItem('homeless_pro_6', JSON.stringify(g));
+}
+
+function buyBiz(i) {
+    if(g.money >= g.biz[i].cost) {
+        g.money -= g.biz[i].cost;
+        g.biz[i].owned++;
+        g.biz[i].cost *= 1.5;
+        updateUI();
+    }
+}
+
+function hireMngr(i) {
+    let price = g.biz[i].cost * 5;
+    if(g.money >= price) {
+        g.money -= price;
+        g.biz[i].mngr = true;
+        updateUI();
+    }
+}
+
+document.getElementById('clickBtn').onclick = () => {
+    if(g.hunger <= 0) return log("Ви занадто голодні, щоб працювати!", "#e74c3c");
+    let gain = (1 + g.houseIdx) * g.bonus;
+    g.money += gain;
+    g.hunger -= 0.2;
+    updateUI();
+};
+
+// Головний цикл
+setInterval(() => {
+    // Дохід від бізнесу
+    g.biz.forEach(b => {
+        if(b.mngr) g.money += (b.owned * b.inc * g.bonus * g.economy);
+    });
+    
+    // Банківські відсотки
+    g.bank *= 1.002;
+    
+    // Голод
+    g.hunger = Math.max(0, g.hunger - 0.5);
+    
+    // Події та Економіка
+    if(Math.random() < 0.1) randomEvent();
+    
+    updateUI();
+}, 1000);
+
+updateUI();
+</script>
+</body>
+</html>
 
 <div class="panel">
 <h3>🏢 Бизнес</h3>
@@ -2183,6 +2328,7 @@ update();
 </script>
 </body>
 </html>
+
 
 
 
