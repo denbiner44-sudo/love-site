@@ -1,40 +1,201 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-    <title>Бомж-Магнат 8.1: Clean & Stable</title>
-    <style>
-        :root { --bg: #0d1117; --panel: #161b22; --green: #238636; --red: #f85149; --blue: #1f6feb; --gold: #f0883e; --neon: #58a6ff; }
-        body { margin:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: #c9d1d9; line-height: 1.5; }
-        .panel { background: var(--panel); margin: 8px; padding: 12px; border-radius: 8px; border: 1px solid #30363d; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        .val { color: var(--gold); font-weight: bold; }
-        button { padding: 10px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; color: #fff; transition: 0.2s; width: 100%; margin: 4px 0; }
-        button:active { transform: scale(0.98); opacity: 0.8; }
-        .btn-buy { background: var(--green); } .btn-sell { background: var(--red); } .btn-tab { background: #21262d; border: 1px solid #30363d; }
-        .active-tab { background: var(--blue); border-color: var(--neon); }
-        .crypto-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #21262d; }
-        .up { color: #3fb950; } .down { color: #f85149; }
-        #clickBtn { background: linear-gradient(180deg, #f0883e 0%, #d35400 100%); height: 50px; font-size: 1.1rem; text-transform: uppercase; }
-        .hidden { display: none; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Бомж-Магнат 8.1: Clean & Stable</title>
+<style>
+:root { --bg: #0d1117; --panel: #161b22; --green: #238636; --red: #f85149; --blue: #1f6feb; --gold: #f0883e; --neon: #58a6ff; --btn-dark: #21262d; }
+body { margin:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: #c9d1d9; line-height: 1.5; }
+.panel { background: var(--panel); margin: 8px; padding: 12px; border-radius: 8px; border: 1px solid #30363d; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.val { color: var(--gold); font-weight: bold; }
+button { padding: 10px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; color: #fff; transition: 0.2s; width: 100%; margin: 4px 0; background: var(--btn-dark); }
+button:active { transform: scale(0.98); opacity: 0.8; }
+.btn-buy { background: var(--green); } 
+.btn-sell { background: var(--red); } 
+.btn-tab { background: var(--btn-dark); border: 1px solid #30363d; }
+.active-tab { background: var(--blue); border-color: var(--neon); }
+.crypto-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #21262d; }
+.up { color: #3fb950; transition: color 0.5s; } 
+.down { color: #f85149; transition: color 0.5s; }
+#clickBtn { background: linear-gradient(180deg, #f0883e 0%, #d35400 100%); height: 50px; font-size: 1.1rem; text-transform: uppercase; }
+.hidden { display: none; }
+input { padding: 8px; border-radius: 6px; border: 1px solid #30363d; background: #121619; color: #c9d1d9; margin-bottom: 8px; width: 100%; }
+</style>
 </head>
 <body>
 
-<div class="panel">
-    <div class="stats-grid">
-        <div>💵 Готівка: <span id="money" class="val">0</span>$</div>
-        <div>🔋 Світло: <span id="powerCost" class="down">0</span>$/с</div>
+<div id="startScreen" class="panel">
+    <h2>Введіть свої дані</h2>
+    <input type="text" id="playerName" placeholder="Ім'я">
+    <input type="number" id="playerAge" placeholder="Вік">
+    <button onclick="startGame()">Почати гру</button>
+</div>
+
+<div id="gameScreen" class="hidden">
+    <div class="panel">
+        <div class="stats-grid">
+            <div>💵 Готівка: <span id="money" class="val">0</span>$</div>
+            <div>🔋 Світло: <span id="powerCost" class="down">0</span>$/с</div>
+        </div>
+        <div class="stats-grid" style="font-size: 0.85rem;">
+            <div>🪙 BTC: <span id="btcOwned" class="val" style="color:var(--neon)">0</span></div>
+            <div>📉 Курс: <span id="btcPrice">0</span>$</div>
+        </div>
+        
+        <div style="display:flex; gap:5px;">
+            <button class="btn-tab active-tab" id="tabBtnBiz" onclick="setTab('biz', event)">Бізнес</button>
+            <button class="btn-tab" id="tabBtnTrade" onclick="setTab('trade', event)">Біржа</button>
+            <button class="btn-tab" id="tabBtnFarm" onclick="setTab('farm', event)">Ферма</button>
+        </div>
     </div>
-    <div class="stats-grid" style="font-size: 0.85rem;">
-        <div>🪙 BTC: <span id="btcOwned" class="val" style="color:var(--neon)">0</span></div>
-        <div>📉 Курс: <span id="btcPrice">0</span>$</div>
+
+    <div id="view-biz" class="tab-content">
+        <div class="panel">
+            <button id="clickBtn" onclick="doClick()">Зібрати пляшки (+1$)</button>
+        </div>
+        <div id="bizList"></div>
     </div>
-    
-    <div style="display:flex; gap:5px;">
-        <button class="btn-tab active-tab" id="tabBtnBiz" onclick="setTab('biz')">Бізнес</button>
-        <button class="btn-tab" id="tabBtnTrade" onclick="setTab('trade')">Біржа</button>
+
+    <div id="view-trade" class="tab-content hidden">
+        <div class="panel">
+            <h3>🏦 Обмін BTC</h3>
+            <button class="btn-buy" onclick="trade('buy')">Купити 0.1 BTC</button>
+            <button class="btn-sell" onclick="trade('sell')">Продати ВСЕ BTC</button>
+            <p style="font-size:0.75rem; color:#8b949e; margin-top:10px;">*Ціна змінюється кожні 3 секунди</p>
+        </div>
+    </div>
+
+    <div id="view-farm" class="tab-content hidden">
+        <div id="farmList"></div>
+    </div>
+</div>
+
+<script>
+// --- СТАБІЛЬНІ ДАНІ ---
+const DB = {
+    money: 100, btc: 0, btcPrice: 42000, 
+    biz: [
+        {name: "Кіоск", cost: 300, inc: 5, count: 0},
+        {name: "Магазин", cost: 2000, inc: 40, count: 0},
+        {name: "Мережа СТО", cost: 12000, inc: 250, count: 0}
+    ],
+    farm: [
+        {name: "GTX 1660 Super", cost: 600, hashrate: 0.00002, power: 0.15, count: 0},
+        {name: "RTX 4090 TI", cost: 4500, hashrate: 0.00015, power: 0.6, count: 0}
+    ]
+};
+
+let g = JSON.parse(localStorage.getItem('homeless_v8_1')) || JSON.parse(JSON.stringify(DB));
+let player = {name:"", age:0};
+
+// --- СТАРТ ГРИ ---
+function startGame() {
+    const name = document.getElementById('playerName').value.trim();
+    const age = parseInt(document.getElementById('playerAge').value);
+    if(!name || !age || age<1) { alert("Введіть коректні дані!"); return; }
+    player.name = name;
+    player.age = age;
+    document.getElementById('startScreen').classList.add('hidden');
+    document.getElementById('gameScreen').classList.remove('hidden');
+    updateUI();
+}
+
+// --- ВКЛАДКИ ---
+function setTab(name, ev) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+    document.getElementById('view-' + name).classList.remove('hidden');
+    document.querySelectorAll('.btn-tab').forEach(el => el.classList.remove('active-tab'));
+    if(ev) ev.currentTarget.classList.add('active-tab');
+}
+
+// --- ДІЇ ---
+function doClick() { g.money += 1; updateUI(); }
+
+function buyBiz(i) {
+    if(g.money >= g.biz[i].cost) {
+        g.money -= g.biz[i].cost;
+        g.biz[i].count++;
+        g.biz[i].cost *= 1.4;
+        updateUI();
+    }
+}
+
+function buyRig(i) {
+    if(g.money >= g.farm[i].cost) {
+        g.money -= g.farm[i].cost;
+        g.farm[i].count++;
+        g.farm[i].cost *= 1.3;
+        updateUI();
+    }
+}
+
+function trade(action) {
+    if(action === 'buy' && g.money >= g.btcPrice * 0.1) {
+        g.money -= g.btcPrice * 0.1;
+        g.btc += 0.1;
+    } else if(action === 'sell' && g.btc > 0) {
+        g.money += g.btc * g.btcPrice;
+        g.btc = 0;
+    }
+    updateUI();
+}
+
+// --- ОНОВЛЕННЯ UI ---
+function updateUI() {
+    document.getElementById('money').innerText = g.money.toFixed(2);
+    document.getElementById('btcOwned').innerText = g.btc.toFixed(6);
+    document.getElementById('btcPrice').innerText = Math.floor(g.btcPrice);
+
+    // Бізнес
+    let bHtml = '';
+    g.biz.forEach((b, i) => {
+        bHtml += `<div class="panel"><b>${b.name}</b> (x${b.count}) | +${b.inc}$/с<br>
+        <button class="btn-buy" onclick="buyBiz(${i})">Купити (${Math.floor(b.cost)}$)</button></div>`;
+    });
+    document.getElementById('bizList').innerHTML = bHtml;
+
+    // Ферма
+    let fHtml = '';
+    let totalPwr = 0;
+    g.farm.forEach((f, i) => {
+        totalPwr += f.count * f.power;
+        fHtml += `<div class="panel"><b>${f.name}</b> (x${f.count})<br>
+        <small>+${(f.hashrate*10).toFixed(5)} BTC/с | ⚡ ${f.power}кВт</small>
+        <button class="btn-buy" style="background:var(--blue)" onclick="buyRig(${i})">Додати (${Math.floor(f.cost)}$)</button></div>`;
+    });
+    document.getElementById('farmList').innerHTML = fHtml;
+    document.getElementById('powerCost').innerText = (totalPwr * 0.5).toFixed(2);
+
+    localStorage.setItem('homeless_v8_1', JSON.stringify(g));
+}
+
+// --- ЦИКЛ ДОХОДУ ---
+setInterval(() => {
+    const dt = 0.1;
+    g.biz.forEach(b => g.money += b.count * b.inc * dt);
+    let totalPwr = 0;
+    g.farm.forEach(f => {
+        g.btc += f.count * f.hashrate * dt;
+        totalPwr += f.count * f.power;
+    });
+    g.money -= totalPwr * 0.5 * dt;
+    if(g.money < 0) g.money = 0;
+    updateUI();
+}, 100);
+
+// --- Курс BTC ---
+setInterval(() => {
+    let change = 1 + (Math.random()*0.1 - 0.05);
+    g.btcPrice *= change;
+    let el = document.getElementById('btcPrice');
+    el.className = change>=1 ? 'up' : 'down';
+}, 3000);
+
+</script>
+</body>
+</html>        <button class="btn-tab" id="tabBtnTrade" onclick="setTab('trade')">Біржа</button>
         <button class="btn-tab" id="tabBtnFarm" onclick="setTab('farm')">Ферма</button>
     </div>
 </div>
@@ -2567,6 +2728,7 @@ update();
 </script>
 </body>
 </html>
+
 
 
 
