@@ -73,6 +73,26 @@ height:60px;
 font-size:18px;
 background:linear-gradient(180deg,#ffb703,#fb8500);
 }
+#xpBar{
+height:20px;
+border-radius:10px;
+background:#444;
+margin-top:5px;
+overflow:hidden;
+}
+#xpFill{
+height:100%;
+width:0%;
+background:#ffb703;
+transition:width 0.3s;
+}
+input[type=number]{
+width:60%;
+padding:5px;
+border-radius:6px;
+border:none;
+margin-bottom:5px;
+}
 </style>
 </head>
 <body>
@@ -95,6 +115,7 @@ background:linear-gradient(180deg,#ffb703,#fb8500);
 
 <div class="panel active" id="tab0">
 <button id="clickBtn">РАБОТАТЬ 💸</button>
+<div id="xpBar"><div id="xpFill"></div></div>
 </div>
 
 <div class="panel" id="tab1"></div>
@@ -153,11 +174,20 @@ crypto:[
 ]
 };
 
+let money=document.getElementById("money");
+let bank=document.getElementById("bank");
+let level=document.getElementById("level");
+let mult=document.getElementById("mult");
+let xpFill=document.getElementById("xpFill");
+let bankInput=document.getElementById("bankInput");
+let clickBtn=document.getElementById("clickBtn");
+
 function updateTop(){
 money.innerText=g.money.toFixed(1);
 bank.innerText=g.bank.toFixed(1);
 level.innerText=g.level;
 mult.innerText=g.mult.toFixed(2);
+xpFill.style.width = Math.min(100,(g.xp/(100*g.level))*100) + "%";
 }
 
 function openTab(i){
@@ -181,57 +211,69 @@ html+=`
 document.getElementById(container).innerHTML=html;
 }
 
-function buy(cat,i){
-let b=g[cat][i];
-if(g.money>=b.cost){
-g.money-=b.cost;
+function buy(container,i){
+let catMap={"tab1":"markets","tab2":"auto","tab3":"oil","tab4":"crypto"};
+let cat = catMap[container];
+let b = g[cat][i];
+if(g.money >= b.cost){
+g.money -= b.cost;
 b.owned++;
-b.cost*=1.5;
+b.cost = Math.floor(b.cost*1.5);
+renderCategory(g[cat],container);
+updateTop();
 }
 }
 
 function deposit(){
 let v=parseFloat(bankInput.value);
-if(v>0 && g.money>=v){
-g.money-=v;
-g.bank+=v;
+if(!isNaN(v) && v>0 && g.money>=v){
+g.money -= v;
+g.bank += v;
+bankInput.value="";
+updateTop();
 }
 }
 
 function withdraw(){
 let v=parseFloat(bankInput.value);
-if(v>0 && g.bank>=v){
-g.bank-=v;
-g.money+=v;
+if(!isNaN(v) && v>0 && g.bank>=v){
+g.bank -= v;
+g.money += v;
+bankInput.value="";
+updateTop();
 }
 }
 
 clickBtn.onclick=()=>{
-g.money+=1*g.mult;
+g.money += 1*g.mult;
 g.xp++;
+levelCheck();
+updateTop();
 };
 
 function levelCheck(){
-if(g.xp>=100*g.level){
+if(g.xp >= 100*g.level){
 g.xp=0;
 g.level++;
-g.mult+=0.2;
+g.mult += 0.2;
 }
 }
 
+// Пассивный доход и проценты банка
 setInterval(()=>{
 let total=0;
 ["markets","auto","oil","crypto"].forEach(cat=>{
 g[cat].forEach(b=>{
-total+=b.owned*b.inc;
+total += b.owned*b.inc;
 });
 });
-g.money+=total*0.1*g.mult;
-g.bank+=g.bank*0.002;
+g.money += total*g.mult;  // доход от всех бизнесов
+g.bank += g.bank*0.01;     // 1% в секунду
 levelCheck();
 updateTop();
-},100);
+},1000);
 
+// Рендерим все категории при старте
 function renderAll(){
 renderCategory(g.markets,"tab1");
 renderCategory(g.auto,"tab2");
@@ -244,6 +286,7 @@ renderAll();
 
 </body>
 </html>
+
 
 
 
