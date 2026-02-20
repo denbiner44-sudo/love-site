@@ -6,128 +6,31 @@
 <title>MEGA TYCOON CLICKER</title>
 <style>
 :root{
---bg:#1e1e2f;
---panel:#2a2a40;
---accent:#ffb703;
---green:#4caf50;
---red:#ff5252;
---blue:#42a5f5;
---yellow:#ffd60a;
+--bg:#1e1e2f; --panel:#2a2a40; --accent:#ffb703; --green:#4caf50; --red:#ff5252;
+--blue:#42a5f5; --yellow:#ffd60a;
 }
-body{
-margin:0;
-background:linear-gradient(180deg,#1e1e2f,#25253b);
-font-family:Arial;
-color:white;
-overflow-x:hidden;
-}
-.topbar{
-display:flex;
-justify-content:space-around;
-padding:10px;
-background:#111827;
-font-weight:bold;
-}
-.tabs{
-display:flex;
-overflow:auto;
-background:#181825;
-}
-.tab{
-flex:1;
-padding:10px;
-text-align:center;
-cursor:pointer;
-background:#222;
-}
-.tab.active{
-background:var(--accent);
-color:black;
-font-weight:bold;
-}
-.panel{
-padding:15px;
-display:none;
-}
+body{margin:0; background:linear-gradient(180deg,#1e1e2f,#25253b);
+font-family:Arial; color:white; overflow-x:hidden;}
+.topbar{display:flex; justify-content:space-around; padding:10px; background:#111827; font-weight:bold;}
+.tabs{display:flex; overflow:auto; background:#181825;}
+.tab{flex:1; padding:10px; text-align:center; cursor:pointer; background:#222;}
+.tab.active{background:var(--accent); color:black; font-weight:bold;}
+.panel{padding:15px; display:none;}
 .panel.active{display:block;}
-.card{
-background:var(--panel);
-padding:10px;
-margin:8px 0;
-border-radius:10px;
-box-shadow:0 4px 10px rgba(0,0,0,0.4);
-position:relative;
-}
-button{
-width:100%;
-padding:8px;
-margin-top:6px;
-border:none;
-border-radius:8px;
-cursor:pointer;
-font-weight:bold;
-}
+.card{background:var(--panel); padding:10px; margin:8px 0; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.4); position:relative;}
+button{width:100%; padding:8px; margin-top:6px; border:none; border-radius:8px; cursor:pointer; font-weight:bold;}
 .buy{background:var(--green);}
 .danger{background:var(--red);}
 .blue{background:var(--blue);}
-#clickBtn{
-height:60px;
-font-size:18px;
-background:linear-gradient(180deg,#ffb703,#fb8500);
-}
-#clickUpgradeBtn{
-height:40px;
-font-size:16px;
-margin-top:10px;
-background:#42a5f5;
-color:white;
-}
-#xpBar{
-height:20px;
-border-radius:10px;
-background:#444;
-margin-top:5px;
-overflow:hidden;
-}
-#xpFill{
-height:100%;
-width:0%;
-background:#ffb703;
-transition:width 0.3s;
-}
-input[type=number]{
-width:60%;
-padding:5px;
-border-radius:6px;
-border:none;
-margin-bottom:5px;
-}
-.floating{
-position:absolute;
-font-weight:bold;
-color:var(--yellow);
-pointer-events:none;
-animation:floatUp 1s forwards;
-}
-@keyframes floatUp{
-0%{opacity:1; transform:translateY(0);}
-100%{opacity:0; transform:translateY(-30px);}
-}
-.bonus{
-position:fixed;
-top:50px;
-left:50%;
-transform:translateX(-50%);
-padding:15px 25px;
-background:var(--yellow);
-color:black;
-font-weight:bold;
-border-radius:12px;
-cursor:pointer;
-box-shadow:0 4px 15px rgba(0,0,0,0.5);
-display:none;
-z-index:1000;
-}
+#clickBtn{height:60px; font-size:18px; background:linear-gradient(180deg,#ffb703,#fb8500);}
+#clickUpgradeBtn{height:40px; font-size:16px; margin-top:10px; background:#42a5f5; color:white;}
+#xpBar{height:20px; border-radius:10px; background:#444; margin-top:5px; overflow:hidden;}
+#xpFill{height:100%; width:0%; background:#ffb703; transition:width 0.3s;}
+input[type=number]{width:60%; padding:5px; border-radius:6px; border:none; margin-bottom:5px;}
+.floating{position:absolute; font-weight:bold; color:var(--yellow); pointer-events:none; animation:floatUp 1s forwards;}
+@keyframes floatUp{0%{opacity:1; transform:translateY(0);}100%{opacity:0; transform:translateY(-30px);}}
+.bonus{position:fixed; top:50px; left:50%; transform:translateX(-50%); padding:15px 25px; background:var(--yellow);
+color:black; font-weight:bold; border-radius:12px; cursor:pointer; box-shadow:0 4px 15px rgba(0,0,0,0.5); display:none; z-index:1000;}
 </style>
 </head>
 <body>
@@ -166,12 +69,11 @@ z-index:1000;
 <br><br>
 <div>💳 Кредит: $<span id="loan">0</span></div>
 <div>💹 Процент: <span id="loanRate">0</span>%</div>
+<div>⏳ Срок: <span id="loanTime">0</span> сек</div>
 <div>Быстрый займ:</div>
-<button class="buy" onclick="takeQuickLoan(10000,2)">$10 000 - 2%</button>
-<button class="buy" onclick="takeQuickLoan(50000,4)">$50 000 - 4%</button>
-<button class="buy" onclick="takeQuickLoan(100000,6)">$100 000 - 6%</button>
-<button class="buy" onclick="takeQuickLoan(500000,10)">$500 000 - 10%</button>
-<button class="buy" onclick="takeQuickLoan(1000000,20)">$1 000 000 - 20%</button>
+<button class="buy" onclick="takeLoan('micro')">$10 000 - 1%</button>
+<button class="buy" onclick="takeLoan('standard')">$50 000 - 2%</button>
+<button class="buy" onclick="takeLoan('risky')">$500 000 - 5%</button>
 <br>
 <input type="number" id="loanInput" placeholder="Сумма для погашения">
 <button class="danger" onclick="repayLoan()">Погасить кредит</button>
@@ -181,17 +83,8 @@ z-index:1000;
 
 <script>
 let g={
-money:1000,
-bank:0,
-level:1,
-xp:0,
-mult:1,
-clickPower:1,
-bonusActive:false,
-bonusTimer:0,
-
-loan:0,
-loanRate:0,
+money:1000, bank:0, level:1, xp:0, mult:1, clickPower:1, bonusActive:false,
+loan:0, loanRate:0, loanTime:0, loanType:'',
 
 markets:[
 {name:"Фруктовая лавка",cost:500,inc:5,owned:0,upgrade:0,manager:false},
@@ -201,7 +94,6 @@ markets:[
 {name:"Оптовый склад",cost:90000,inc:1200,owned:0,upgrade:0,manager:false},
 {name:"Международная сеть",cost:250000,inc:3500,owned:0,upgrade:0,manager:false}
 ],
-
 auto:[
 {name:"Гараж",cost:1500,inc:15,owned:0,upgrade:0,manager:false},
 {name:"Автомойка",cost:5000,inc:60,owned:0,upgrade:0,manager:false},
@@ -210,7 +102,6 @@ auto:[
 {name:"Автозавод",cost:200000,inc:2500,owned:0,upgrade:0,manager:false},
 {name:"Автоимперия",cost:700000,inc:7000,owned:0,upgrade:0,manager:false}
 ],
-
 oil:[
 {name:"Малая скважина",cost:10000,inc:120,owned:0,upgrade:0,manager:false},
 {name:"Нефтяная вышка",cost:40000,inc:500,owned:0,upgrade:0,manager:false},
@@ -219,7 +110,6 @@ oil:[
 {name:"Экспортная компания",cost:1200000,inc:12000,owned:0,upgrade:0,manager:false},
 {name:"Нефтяная корпорация",cost:5000000,inc:35000,owned:0,upgrade:0,manager:false}
 ],
-
 crypto:[
 {name:"GPU ферма",cost:8000,inc:90,owned:0,upgrade:0,manager:false},
 {name:"ASIC ферма",cost:30000,inc:400,owned:0,upgrade:0,manager:false},
@@ -239,9 +129,7 @@ let bankInput=document.getElementById("bankInput");
 let clickBtn=document.getElementById("clickBtn");
 let clickUpgradeBtn=document.getElementById("clickUpgradeBtn");
 let bonus=document.getElementById("bonus");
-
-let displayMoney=g.money;
-let displayBank=g.bank;
+let displayMoney=g.money, displayBank=g.bank;
 
 function updateTop(){
 xpFill.style.width=Math.min(100,(g.xp/(100*g.level))*100)+"%";
@@ -250,6 +138,7 @@ mult.innerText=g.mult.toFixed(2);
 clickUpgradeBtn.innerText=`Апгрейд клика ($${Math.floor(50*g.clickPower)})`;
 document.getElementById("loan").innerText=g.loan.toFixed(1);
 document.getElementById("loanRate").innerText=g.loanRate;
+document.getElementById("loanTime").innerText=g.loanTime;
 }
 
 function animateMoney(){
@@ -269,14 +158,10 @@ document.querySelectorAll(".panel").forEach((p,idx)=>p.classList.toggle("active"
 function renderCategory(arr,container){
 let html="";
 arr.forEach((b,i)=>{
-html+=`<div class="card">
-<b>${b.name}</b><br>
-Владение: ${b.owned}<br>
-Доход: $${b.inc}/с<br>
+html+=`<div class="card"><b>${b.name}</b><br>Владение: ${b.owned}<br>Доход: $${b.inc}/с<br>
 <button class="buy" onclick="buy('${container}',${i})">Купить ($${Math.floor(b.cost)})</button>
 <button class="blue" onclick="upgrade('${container}',${i})">Апгрейд ($${Math.floor(b.cost*1.5)})</button>
-<button class="green" onclick="hireManager('${container}',${i})" style="background:#ffd60a;color:black;">Менеджер</button>
-</div>`;
+<button class="green" onclick="hireManager('${container}',${i})" style="background:#ffd60a;color:black;">Менеджер</button></div>`;
 });
 document.getElementById(container).innerHTML=html;
 }
@@ -285,14 +170,7 @@ function buy(container,i){
 let catMap={"tab1":"markets","tab2":"auto","tab3":"oil","tab4":"crypto"};
 let cat=catMap[container];
 let b=g[cat][i];
-if(g.money>=b.cost){
-g.money-=b.cost;
-b.owned++;
-b.cost=Math.floor(b.cost*1.5);
-renderCategory(g[cat],container);
-showFloating(`+$${b.inc}`);
-updateTop();
-}
+if(g.money>=b.cost){g.money-=b.cost;b.owned++;b.cost=Math.floor(b.cost*1.5);renderCategory(g[cat],container);showFloating(`+$${b.inc}`);updateTop();}
 }
 
 function upgrade(container,i){
@@ -300,14 +178,7 @@ let catMap={"tab1":"markets","tab2":"auto","tab3":"oil","tab4":"crypto"};
 let cat=catMap[container];
 let b=g[cat][i];
 let cost=Math.floor(b.cost*1.5);
-if(g.money>=cost){
-g.money-=cost;
-b.inc=Math.floor(b.inc*1.5);
-b.upgrade++;
-renderCategory(g[cat],container);
-showFloating(`Апгрейд!`);
-updateTop();
-}
+if(g.money>=cost){g.money-=cost;b.inc=Math.floor(b.inc*1.5);b.upgrade++;renderCategory(g[cat],container);showFloating(`Апгрейд!`);updateTop();}
 }
 
 function hireManager(container,i){
@@ -315,68 +186,45 @@ let catMap={"tab1":"markets","tab2":"auto","tab3":"oil","tab4":"crypto"};
 let cat=catMap[container];
 let b=g[cat][i];
 let cost=Math.floor(b.cost*10);
-if(!b.manager && g.money>=cost){
-g.money-=cost;
-b.manager=true;
-renderCategory(g[cat],container);
-showFloating("Менеджер нанят!");
-updateTop();
-}
+if(!b.manager && g.money>=cost){g.money-=cost;b.manager=true;renderCategory(g[cat],container);showFloating("Менеджер нанят!");updateTop();}
 }
 
 function deposit(){
 let v=parseFloat(bankInput.value);
-if(!isNaN(v) && v>0 && g.money>=v){
-g.money-=v;
-g.bank+=v;
-bankInput.value="";
-updateTop();
-showFloating(`$${v} в банк`);
-}
+if(!isNaN(v) && v>0 && g.money>=v){g.money-=v;g.bank+=v;bankInput.value="";updateTop();showFloating(`$${v} в банк`);}
 }
 
 function withdraw(){
 let v=parseFloat(bankInput.value);
-if(!isNaN(v) && v>0 && g.bank>=v){
-g.bank-=v;
-g.money+=v;
-bankInput.value="";
-updateTop();
-showFloating(`$${v} снято`);
-}
+if(!isNaN(v) && v>0 && g.bank>=v){g.bank-=v;g.money+=v;bankInput.value="";updateTop();showFloating(`$${v} снято`);}
 }
 
 clickBtn.onclick=()=>{
 g.money+=g.clickPower*g.mult;
 g.xp++;
 levelCheck();
-showFloating(`+$${g.clickPower}`);
+showFloating(`+$${(g.clickPower*g.mult).toFixed(2)}`);
 updateTop();
 };
 
-clickUpgradeBtn.onclick=()=>{
-let cost=50*g.clickPower;
-if(g.money>=cost){
-g.money-=cost;
-g.clickPower=Math.floor(g.clickPower*1.5);
-showFloating("Клик ↑");
-updateTop();
+// 🔧 Исправленный апгрейд клика
+clickUpgradeBtn.onclick = () => {
+let cost = 50 * g.clickPower;
+if (g.money >= cost) {
+  g.money -= cost;
+  g.clickPower = g.clickPower * 1.5;
+  showFloating(`Клик ↑ ${g.clickPower.toFixed(2)}`);
+  updateTop();
 }
 };
 
 function levelCheck(){
-if(g.xp>=100*g.level){
-g.xp=0;
-g.level++;
-g.mult+=0.2;
-showFloating("Уровень ↑");
-}
+if(g.xp>=100*g.level){g.xp=0;g.level++;g.mult+=0.2;showFloating("Уровень ↑");}
 }
 
 function showFloating(text){
 let f=document.createElement("div");
-f.className="floating";
-f.innerText=text;
+f.className="floating";f.innerText=text;
 document.body.appendChild(f);
 f.style.left=(window.innerWidth/2+(Math.random()*100-50))+"px";
 f.style.top=(window.innerHeight/2+(Math.random()*50-25))+"px";
@@ -385,84 +233,49 @@ setTimeout(()=>f.remove(),1000);
 
 // Пассивный доход + менеджеры + бонус
 setInterval(()=>{
-let total=0;
 ["markets","auto","oil","crypto"].forEach(cat=>{
 g[cat].forEach(b=>{
-if(b.owned>0){
-let income=b.owned*b.inc;
-if(b.manager) income*=1;
-if(g.bonusActive) income*=2;
-g.money+=income;
-total+=income;
-}
+if(b.owned>0){let income=b.owned*b.inc;if(b.manager) income*=1;if(g.bonusActive) income*=2;g.money+=income;}
 });
 });
-g.bank+=g.bank*0.01;
-levelCheck();
-updateTop();
+g.bank+=g.bank*0.01/60;
+levelCheck();updateTop();
 },1000);
 
 // Случайный бонус
-setInterval(()=>{
-if(Math.random()<0.01 && !g.bonusActive){
-bonus.style.display="block";
-}
-},1000);
-
-bonus.onclick=()=>{
-g.bonusActive=true;
-bonus.style.display="none";
-showFloating("Бонус x2 активен!");
-setTimeout(()=>{g.bonusActive=false;},15000);
-};
+setInterval(()=>{if(Math.random()<0.01 && !g.bonusActive){bonus.style.display="block";}},1000);
+bonus.onclick=()=>{g.bonusActive=true;bonus.style.display="none";showFloating("Бонус x2 активен!");setTimeout(()=>{g.bonusActive=false;},15000);};
 
 // кредиты
-function takeQuickLoan(amount, rate){
-if(g.loan>0){
-alert("У вас уже есть активный кредит!");
-return;
-}
-g.loan=amount+amount*rate/100;
-g.loanRate=rate;
-g.money+=amount;
-showFloating(`Взято $${amount} (+${rate}%)`);
-updateTop();
+function takeLoan(type){
+if(g.loan>0){alert("У вас уже есть активный кредит!"); return;}
+let loans={"micro":{amount:10000,rate:1,time:60},"standard":{amount:50000,rate:2,time:120},"risky":{amount:500000,rate:5,time:180}};
+let l=loans[type]; g.loan=l.amount; g.loanRate=l.rate; g.loanTime=l.time; g.loanType=type; g.money+=l.amount;
+showFloating(`Взято $${l.amount} (+${l.rate}%)`); updateTop();
 }
 
 function repayLoan(){
-let v=parseFloat(document.getElementById("loanInput").value);
-if(isNaN(v)||v<=0)return;
-if(v>g.money)v=g.money;
-let pay=Math.min(v,g.loan);
-g.money-=pay;
-g.loan-=pay;
-document.getElementById("loanInput").value="";
-showFloating(`Погашено $${pay.toFixed(1)}`);
-if(g.loan<=0){g.loan=0; g.loanRate=0;}
-updateTop();
+let v=parseFloat(document.getElementById("loanInput").value); if(isNaN(v)||v<=0)return;
+if(v>g.money)v=g.money; let pay=Math.min(v,g.loan); g.money-=pay; g.loan-=pay; document.getElementById("loanInput").value="";
+showFloating(`Погашено $${pay.toFixed(1)}`); if(g.loan<=0){ g.loan=0; g.loanRate=0; g.loanTime=0; g.loanType=''; } updateTop();
 }
 
-// процент на кредит каждую секунду
+// начисление процентов каждую секунду и уменьшение времени
 setInterval(()=>{
 if(g.loan>0){
-g.loan+=g.loan*g.loanRate/100;
+g.loan += g.loan * g.loanRate/100/6;
+g.loanTime--; if(g.loanTime<=0){showFloating("Просрочка! -$"+(g.loan*0.1).toFixed(1)); g.money-=g.loan*0.1; g.loanTime=10;}
 updateTop();
 }
-},1000);
+},10000);
 
 // рендер всех категорий
-function renderAll(){
-renderCategory(g.markets,"tab1");
-renderCategory(g.auto,"tab2");
-renderCategory(g.oil,"tab3");
-renderCategory(g.crypto,"tab4");
-updateTop();
-}
+function renderAll(){renderCategory(g.markets,"tab1"); renderCategory(g.auto,"tab2"); renderCategory(g.oil,"tab3"); renderCategory(g.crypto,"tab4"); updateTop();}
 renderAll();
 </script>
-
 </body>
 </html>
+
 
 
 
