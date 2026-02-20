@@ -3,37 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>HARDCORE TYCOON: CAPITALISM</title>
+    <title>ULTIMATE EMPIRE TYCOON</title>
     <style>
         :root {
-            --bg: #020617; --panel: #0f172a; --accent: #eab308; 
-            --green: #22c55e; --red: #ef4444; --blue: #3b82f6; --text: #f1f5f9;
+            --bg: #0f172a; --panel: #1e293b; --accent: #fbbf24; 
+            --green: #22c55e; --blue: #3b82f6; --purple: #a855f7; --text: #f8fafc;
         }
         body {
-            margin: 0; background: var(--bg); font-family: 'Segoe UI', Roboto, sans-serif;
-            color: var(--text); user-select: none; overflow-x: hidden;
+            margin: 0; background: var(--bg); font-family: 'Segoe UI', sans-serif;
+            color: var(--text); user-select: none;
         }
-        /* Статистика */
         .topbar {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
-            padding: 15px; background: #000; position: sticky; top: 0; z-index: 100;
-            border-bottom: 3px solid var(--accent);
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+            padding: 15px; background: #020617; position: sticky; top: 0; z-index: 100;
+            border-bottom: 2px solid var(--accent);
         }
         .stat-box { text-align: center; }
-        .stat-val { color: var(--accent); font-weight: bold; display: block; font-size: 1.1em; }
-        .tax-alert { font-size: 0.7em; color: var(--red); font-weight: bold; }
+        .stat-val { color: var(--accent); font-weight: bold; display: block; font-size: 1.2em; }
 
-        /* Вкладки */
-        .tabs { display: flex; background: var(--panel); border-bottom: 1px solid #1e293b; }
-        .tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; opacity: 0.5; transition: 0.3s; }
-        .tab.active { opacity: 1; border-bottom: 3px solid var(--accent); background: #1e293b; }
+        .tabs { display: flex; background: var(--panel); overflow-x: auto; }
+        .tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; white-space: nowrap; opacity: 0.5; }
+        .tab.active { opacity: 1; border-bottom: 3px solid var(--accent); background: #334155; }
 
-        .panel { padding: 15px; display: none; max-width: 500px; margin: auto; }
+        .panel { padding: 15px; display: none; max-width: 500px; margin: auto; padding-bottom: 100px; }
         .panel.active { display: block; }
 
-        /* Карточки */
         .card { 
             background: var(--panel); padding: 15px; margin: 10px 0; border-radius: 12px;
+            border: 1px solid #334155; position: relative;
+        }
+        .card.locked { opacity: 0.4; filter: grayscale(1); }
+
+        .tag { font-size: 0.7em; background: var(--accent); color: black; padding: 2px 6px; border-radius: 4px; float: right; }
+
+        button { 
+            padding: 12px; border: none; border-radius: 8px; cursor: pointer; 
+            font-weight: bold; transition: 0.2s; color: white; width: 100%; margin-top: 10px;
+        }
+        .btn-buy { background: var(--green); }
+        .btn-upg { background: var(--blue); }
+        button:disabled { background: #475569 !important; opacity: 0.5; }
+
+        #clickBtn { 
+            height: 100px; font-size: 30px; margin-bottom: 20px;
+            background: linear-gradient(45deg, #fbbf24, #d97706); border-radius: 20px;
+        }
+
+        .desc { font-size: 0.85em; color: #94a3b8; margin: 5px 0; }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <div class="stat-box">💰 Баланс<span id="money" class="stat-val">0</span></div>
+    <div class="stat-box">📊 Доход/сек<span id="income" class="stat-val">0</span></div>
+</div>
+
+<div class="tabs">
+    <div class="tab active" onclick="openTab(0)">⚒️ Труд</div>
+    <div class="tab" onclick="openTab(1)">🏪 Бизнес</div>
+    <div class="tab" onclick="openTab(2)">🚀 Технологии</div>
+</div>
+
+<div class="panel active" id="tab0">
+    <button id="clickBtn">РАБОТАТЬ 💸</button>
+    <div class="card">
+        <strong>Улучшение инструментов</strong>
+        <p class="desc">Увеличивает силу клика за счет новых технологий.</p>
+        <button class="btn-upg" onclick="buyClickUpgrade()">Улучшить за $<span id="clickCostDisp">50</span></button>
+    </div>
+</div>
+
+<div class="panel" id="tab1">
+    <div id="businessList"></div>
+</div>
+
+<div class="panel" id="tab2">
+    <div id="upgradesList"></div>
+</div>
+
+<script>
+let g = {
+    money: 50, clickPower: 1, prestige: 1,
+    costMult: 1, // Скидка на покупки
+    biz: [
+        { id: 0, name: "Ларёк с шаурмой", cost: 20, inc: 1, owned: 0 },
+        { id: 1, name: "Кофейня", cost: 250, inc: 10, owned: 0 },
+        { id: 2, name: "Барбершоп", cost: 2000, inc: 50, owned: 0 },
+        { id: 3, name: "Автомойка", cost: 15000, inc: 250, owned: 0 },
+        { id: 4, name: "ТЦ «Галерея»", cost: 100000, inc: 1200, owned: 0 },
+        { id: 5, name: "Завод электроники", cost: 800000, inc: 6000, owned: 0 },
+        { id: 6, name: "Авиакомпания", cost: 10000000, inc: 50000, owned: 0 },
+        { id: 7, name: "Космодром", cost: 100000000, inc: 400000, owned: 0 }
+    ],
+    upgrades: [
+        { id: 0, name: "Агрессивный маркетинг", cost: 5000, desc: "Все здания дешевле на 15%", bought: false, action: () => { g.costMult *= 0.85; } },
+        { id: 1, name: "Офшоры", cost: 50000, desc: "Увеличивает весь доход на 25%", bought: false, action: () => { g.prestige *= 1.25; } },
+        { id: 2, name: "Искусственный интеллект", cost: 500000, desc: "Здания приносят доход на 50% больше", bought: false, action: () => { g.prestige *= 1.5; } },
+        { id: 3, name: "Монополия", cost: 5000000, desc: "Скидка на здания еще 20%", bought: false, action: () => { g.costMult *= 0.8; } }
+    ]
+};
+
+function f(n) {
+    if (n < 1000) return Math.floor(n);
+    let s = ['k', 'M', 'B', 'T'];
+    let e = Math.floor(Math.log10(n) / 3);
+    return (n / Math.pow(1000, e)).toFixed(2) + s[e - 1];
+}
+
+function updateUI() {
+    document.getElementById('money').innerText = f(g.money);
+    document.getElementById('income').innerText = f(getTotalIncome());
+    document.getElementById('clickCostDisp').innerText = f(50 * Math.pow(3, g.clickPower - 1));
+    renderBusiness();
+    renderUpgrades();
+}
+
+function getTotalIncome() {
+    return g.biz.reduce((sum, b) => sum + (b.owned * b.inc * g.prestige), 0);
+}
+
+document.getElementById('clickBtn').onclick = () => {
+    g.money += g.clickPower * g.prestige;
+    updateUI();
+};
+
+function buyClickUpgrade() {
+    let cost = 50 * Math.pow(3, g.clickPower - 1);
+    if (g.money >= cost) {
+        g.money -= cost;
+        g.clickPower++;
+        updateUI();
+    }
+}
+
+function renderBusiness() {
+    let html = '';
+    g.biz.forEach(b => {
+        let isVisible = g.money >= b.cost * 0.4 || b.owned > 0;
+        let actualCost = b.cost * g.costMult;
+        
+        if (isVisible) {
+            html += `
+                <div class="card">
+                    <span class="tag">Ур. ${b.owned}</span>
+                    <strong>${b.name}</strong>
+                    <p class="desc">Доход: $${f(b.inc * g.prestige)}/с</p>
+                    <button class="btn-buy" onclick="buyBiz(${b.id})" ${g.money < actualCost ? 'disabled' : ''}>
+                        Купить ($${f(actualCost)})
+                    </button>
+                </div>`;
+        } else {
+            html += `<div class="card locked">??? Заблокировано ???</div>`;
+        }
+    });
+    document.getElementById('businessList').innerHTML = html;
+}
+
+function buyBiz(id) {
+    let b = g.biz[id];
+    let actualCost = b.cost * g.costMult;
+    if (g.money >= actualCost) {
+        g.money -= actualCost;
+        b.owned++;
+        b.cost *= 1.25;
+        updateUI();
+    }
+}
+
+function renderUpgrades() {
+    let html = '';
+    g.upgrades.forEach(u => {
+        if (!u.bought) {
+            html += `
+                <div class="card" style="border-left: 4px solid var(--purple);">
+                    <strong>${u.name}</strong>
+                    <p class="desc">${u.desc}</p>
+                    <button class="btn-upg" onclick="buySpecialUpgrade(${u.id})" ${g.money < u.cost ? 'disabled' : ''}>
+                        Исследовать ($${f(u.cost)})
+                    </button>
+                </div>`;
+        }
+    });
+    if (html === '') html = '<p style="text-align:center">Все технологии изучены!</p>';
+    document.getElementById('upgradesList').innerHTML = html;
+}
+
+function buySpecialUpgrade(id) {
+    let u = g.upgrades[id];
+    if (g.money >= u.cost) {
+        g.money -= u.cost;
+        u.bought = true;
+        u.action();
+        updateUI();
+    }
+}
+
+function openTab(i) {
+    document.querySelectorAll('.tab, .panel').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab')[i].classList.add('active');
+    document.querySelectorAll('.panel')[i].classList.add('active');
+}
+
+setInterval(() => {
+    g.money += getTotalIncome() / 10;
+    updateUI();
+}, 100);
+
+window.onload = updateUI;
+</script>
+</body>
+</html>
             border: 1px solid #1e293b; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
         }
         .biz-name { font-weight: bold; font-size: 1.1em; color: var(--accent); }
@@ -299,3 +479,4 @@ window.onload = () => { load(); renderBusinesses(); updateUI(); };
 </script>
 </body>
 </html>
+
