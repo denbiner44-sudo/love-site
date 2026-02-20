@@ -1,148 +1,192 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Бомж-Магнат 9.0 PRO</title>
+<title>MEGA TYCOON CLICKER</title>
 
 <style>
 :root{
---bg:#0d1117;
---panel:#161b22;
---green:#238636;
---red:#f85149;
---blue:#1f6feb;
---gold:#f0883e;
---btn:#21262d;
+--bg:#1e1e2f;
+--panel:#2a2a40;
+--accent:#ffb703;
+--green:#4caf50;
+--red:#ff5252;
+--blue:#42a5f5;
 }
-body{margin:0;background:var(--bg);color:#c9d1d9;font-family:sans-serif}
-.panel{background:var(--panel);margin:8px;padding:12px;border-radius:8px;border:1px solid #30363d}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.val{color:var(--gold);font-weight:bold}
-button{width:100%;padding:8px;margin:4px 0;border:none;border-radius:6px;background:var(--btn);color:white;font-weight:600;cursor:pointer}
-.btn-buy{background:var(--green)}
-.btn-sell{background:var(--red)}
-input{width:100%;padding:6px;margin:4px 0;background:#121619;border:1px solid #30363d;color:white;border-radius:6px}
-#crisis{color:#ff4444;font-weight:bold;text-align:center}
-#clickBtn{background:linear-gradient(180deg,#f0883e,#d35400);height:55px}
+body{
+margin:0;
+background:linear-gradient(180deg,#1e1e2f,#25253b);
+font-family:Arial;
+color:white;
+}
+.topbar{
+display:flex;
+justify-content:space-around;
+padding:10px;
+background:#111827;
+font-weight:bold;
+}
+.tabs{
+display:flex;
+overflow:auto;
+background:#181825;
+}
+.tab{
+flex:1;
+padding:10px;
+text-align:center;
+cursor:pointer;
+background:#222;
+}
+.tab.active{
+background:var(--accent);
+color:black;
+font-weight:bold;
+}
+.panel{
+padding:15px;
+display:none;
+}
+.panel.active{display:block;}
+.card{
+background:var(--panel);
+padding:10px;
+margin:8px 0;
+border-radius:10px;
+box-shadow:0 4px 10px rgba(0,0,0,0.4);
+}
+button{
+width:100%;
+padding:8px;
+margin-top:6px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;
+}
+.buy{background:var(--green);}
+.danger{background:var(--red);}
+.blue{background:var(--blue);}
+#clickBtn{
+height:60px;
+font-size:18px;
+background:linear-gradient(180deg,#ffb703,#fb8500);
+}
 </style>
 </head>
 <body>
 
-<div class="panel">
-<div class="grid">
-<div>💵 Готівка: <span id="money" class="val">0</span>$</div>
-<div>🏦 Банк: <span id="bank" class="val">0</span>$</div>
-<div>⭐ Рівень: <span id="level">1</span></div>
-<div>🍔 Голод: <span id="hunger">100</span>%</div>
-</div>
-<div id="crisis"></div>
+<div class="topbar">
+<div>💰 $<span id="money">0</span></div>
+<div>🏦 $<span id="bank">0</span></div>
+<div>⭐ <span id="level">1</span></div>
+<div>⚡ x<span id="mult">1</span></div>
 </div>
 
-<div class="panel">
-<button id="clickBtn">ПРАЦЮВАТИ 💸</button>
+<div class="tabs">
+<div class="tab active" onclick="openTab(0)">💼 Работа</div>
+<div class="tab" onclick="openTab(1)">🏪 Рынки</div>
+<div class="tab" onclick="openTab(2)">🚗 Авто</div>
+<div class="tab" onclick="openTab(3)">🛢 Нефть</div>
+<div class="tab" onclick="openTab(4)">💻 Крипта</div>
+<div class="tab" onclick="openTab(5)">🏦 Банк</div>
 </div>
 
-<div class="panel">
-<h3>🏠 Дім</h3>
-<div id="house"></div>
+<div class="panel active" id="tab0">
+<button id="clickBtn">РАБОТАТЬ 💸</button>
 </div>
 
-<div class="panel">
-<h3>🏢 Бізнес</h3>
-<div id="biz"></div>
-</div>
+<div class="panel" id="tab1"></div>
+<div class="panel" id="tab2"></div>
+<div class="panel" id="tab3"></div>
+<div class="panel" id="tab4"></div>
 
-<div class="panel">
-<h3>🏦 Банк</h3>
-<input type="number" id="bankInput" placeholder="Сума">
-<button class="btn-buy" onclick="deposit()">Внести</button>
-<button class="btn-sell" onclick="withdraw()">Зняти</button>
+<div class="panel" id="tab5">
+<input type="number" id="bankInput" placeholder="Сумма">
+<button class="buy" onclick="deposit()">Внести</button>
+<button class="danger" onclick="withdraw()">Снять</button>
 </div>
 
 <script>
-const SAVE="homeless_9_pro";
-
-const BASE={
-money:100,
+let g={
+money:1000,
 bank:0,
-xp:0,
 level:1,
-hunger:100,
-houseIndex:0,
-crisis:false,
-crisisTime:0,
-biz:[
-{name:"Кіоск",cost:300,inc:5,owned:0,mngr:false},
-{name:"Магазин",cost:2000,inc:40,owned:0,mngr:false},
-{name:"СТО",cost:12000,inc:250,owned:0,mngr:false}
+xp:0,
+mult:1,
+
+markets:[
+{name:"Фруктовая лавка",cost:500,inc:5,owned:0},
+{name:"Мясной магазин",cost:2000,inc:25,owned:0},
+{name:"Супермаркет",cost:8000,inc:100,owned:0},
+{name:"Торговый центр",cost:30000,inc:450,owned:0},
+{name:"Оптовый склад",cost:90000,inc:1200,owned:0},
+{name:"Международная сеть",cost:250000,inc:3500,owned:0}
 ],
-houses:[
-{name:"Вулиця",cost:0,mult:1},
-{name:"Кімната",cost:2000,mult:1.2},
-{name:"Квартира",cost:15000,mult:1.5},
-{name:"Особняк",cost:100000,mult:2}
+
+auto:[
+{name:"Гараж",cost:1500,inc:15,owned:0},
+{name:"Автомойка",cost:5000,inc:60,owned:0},
+{name:"СТО",cost:15000,inc:200,owned:0},
+{name:"Дилерский центр",cost:60000,inc:800,owned:0},
+{name:"Автозавод",cost:200000,inc:2500,owned:0},
+{name:"Автоимперия",cost:700000,inc:7000,owned:0}
+],
+
+oil:[
+{name:"Малая скважина",cost:10000,inc:120,owned:0},
+{name:"Нефтяная вышка",cost:40000,inc:500,owned:0},
+{name:"НПЗ",cost:120000,inc:1600,owned:0},
+{name:"Нефтяное поле",cost:400000,inc:4500,owned:0},
+{name:"Экспортная компания",cost:1200000,inc:12000,owned:0},
+{name:"Нефтяная корпорация",cost:5000000,inc:35000,owned:0}
+],
+
+crypto:[
+{name:"GPU ферма",cost:8000,inc:90,owned:0},
+{name:"ASIC ферма",cost:30000,inc:400,owned:0},
+{name:"Криптобиржа",cost:100000,inc:1500,owned:0},
+{name:"DeFi платформа",cost:300000,inc:4200,owned:0},
+{name:"Международная биржа",cost:1000000,inc:11000,owned:0},
+{name:"Блокчейн корпорация",cost:4000000,inc:30000,owned:0}
 ]
 };
 
-let g=JSON.parse(localStorage.getItem(SAVE))||structuredClone(BASE);
-let displayMoney=g.money;
-
-function save(){localStorage.setItem(SAVE,JSON.stringify(g));}
-
-function multiplier(){
-let levelBonus=1+g.level*0.05;
-let houseBonus=g.houses[g.houseIndex].mult;
-let crisisPenalty=g.crisis?0.6:1;
-return levelBonus*houseBonus*crisisPenalty;
+function updateTop(){
+money.innerText=g.money.toFixed(1);
+bank.innerText=g.bank.toFixed(1);
+level.innerText=g.level;
+mult.innerText=g.mult.toFixed(2);
 }
 
-function updateUI(){
-document.getElementById("money").innerText=displayMoney.toFixed(2);
-document.getElementById("bank").innerText=g.bank.toFixed(2);
-document.getElementById("level").innerText=g.level;
-document.getElementById("hunger").innerText=Math.floor(g.hunger);
+function openTab(i){
+document.querySelectorAll(".tab").forEach((t,idx)=>t.classList.toggle("active",idx==i));
+document.querySelectorAll(".panel").forEach((p,idx)=>p.classList.toggle("active",idx==i));
+}
 
-document.getElementById("crisis").innerText=
-g.crisis?"⚠ ЕКОНОМІЧНА КРИЗА!":"";
-
-document.getElementById("house").innerText=
-"Поточний: "+g.houses[g.houseIndex].name+
-" (x"+g.houses[g.houseIndex].mult+")";
-
+function renderCategory(arr,container){
 let html="";
-g.biz.forEach((b,i)=>{
+arr.forEach((b,i)=>{
 html+=`
-<div class="panel">
-<b>${b.name}</b> (x${b.owned}) | +${b.inc}$/с
-<button class="btn-buy" onclick="buyBiz(${i})">
-Купити (${Math.floor(b.cost)}$)
-</button>
-<button onclick="hire(${i})">
-${b.mngr?"Менеджер активний":"Менеджер ("+(Math.floor(b.cost*3))+"$)"}
+<div class="card">
+<b>${b.name}</b><br>
+Владение: ${b.owned}<br>
+Доход: $${b.inc}/с<br>
+<button class="buy" onclick="buy('${container}',${i})">
+Купить ($${Math.floor(b.cost)})
 </button>
 </div>`;
 });
-document.getElementById("biz").innerHTML=html;
-
-save();
+document.getElementById(container).innerHTML=html;
 }
 
-function buyBiz(i){
-let b=g.biz[i];
+function buy(cat,i){
+let b=g[cat][i];
 if(g.money>=b.cost){
 g.money-=b.cost;
 b.owned++;
 b.cost*=1.5;
-}
-}
-
-function hire(i){
-let b=g.biz[i];
-let price=b.cost*3;
-if(!b.mngr && g.money>=price){
-g.money-=price;
-b.mngr=true;
 }
 }
 
@@ -162,70 +206,45 @@ g.money+=v;
 }
 }
 
-document.getElementById("clickBtn").onclick=()=>{
-if(g.hunger<=0)return;
-let gain=1*multiplier();
-g.money+=gain;
-g.xp+=1;
-g.hunger-=0.5;
+clickBtn.onclick=()=>{
+g.money+=1*g.mult;
+g.xp++;
 };
 
 function levelCheck(){
-let need=50*g.level;
-if(g.xp>=need){
-g.xp-=need;
+if(g.xp>=100*g.level){
+g.xp=0;
 g.level++;
+g.mult+=0.2;
 }
-}
-
-function houseCheck(){
-let next=g.houses[g.houseIndex+1];
-if(next && g.money>=next.cost){
-g.houseIndex++;
-}
-}
-
-function startCrisis(){
-g.crisis=true;
-g.crisisTime=20;
 }
 
 setInterval(()=>{
-if(!g.crisis && Math.random()<0.01) startCrisis();
-},1000);
-
-setInterval(()=>{
-const dt=0.1;
-
-g.bank+=g.bank*0.005*dt;
-g.hunger=Math.max(0,g.hunger-0.1);
-
-g.biz.forEach(b=>{
-if(b.mngr)
-g.money+=b.owned*b.inc*multiplier()*dt;
+let total=0;
+["markets","auto","oil","crypto"].forEach(cat=>{
+g[cat].forEach(b=>{
+total+=b.owned*b.inc;
 });
-
-if(g.crisis){
-g.crisisTime-=dt;
-if(g.crisisTime<=0) g.crisis=false;
-}
-
-g.xp+=0.2*dt;
+});
+g.money+=total*0.1*g.mult;
+g.bank+=g.bank*0.002;
 levelCheck();
-houseCheck();
-
-save();
+updateTop();
 },100);
 
-function animate(){
-displayMoney+=(g.money-displayMoney)*0.1;
-updateUI();
-requestAnimationFrame(animate);
+function renderAll(){
+renderCategory(g.markets,"tab1");
+renderCategory(g.auto,"tab2");
+renderCategory(g.oil,"tab3");
+renderCategory(g.crypto,"tab4");
+updateTop();
 }
-animate();
+renderAll();
 </script>
+
 </body>
 </html>
+
 
 
 
