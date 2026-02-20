@@ -3,48 +3,54 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Бомж-Магнат 8.2 PRO</title>
+<title>Бомж-Магнат 9.0 PRO</title>
 
 <style>
 :root{
- --bg:#0d1117;
- --panel:#161b22;
- --green:#238636;
- --red:#f85149;
- --blue:#1f6feb;
- --gold:#f0883e;
- --neon:#58a6ff;
- --btn:#21262d;
+--bg:#0d1117;
+--panel:#161b22;
+--green:#238636;
+--red:#f85149;
+--blue:#1f6feb;
+--gold:#f0883e;
+--btn:#21262d;
 }
 body{margin:0;background:var(--bg);color:#c9d1d9;font-family:sans-serif}
 .panel{background:var(--panel);margin:8px;padding:12px;border-radius:8px;border:1px solid #30363d}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .val{color:var(--gold);font-weight:bold}
-button{width:100%;padding:10px;margin:4px 0;border:none;border-radius:6px;background:var(--btn);color:#fff;font-weight:600;cursor:pointer}
+button{width:100%;padding:8px;margin:4px 0;border:none;border-radius:6px;background:var(--btn);color:white;font-weight:600;cursor:pointer}
 .btn-buy{background:var(--green)}
 .btn-sell{background:var(--red)}
+input{width:100%;padding:6px;margin:4px 0;background:#121619;border:1px solid #30363d;color:white;border-radius:6px}
+#crisis{color:#ff4444;font-weight:bold;text-align:center}
 #clickBtn{background:linear-gradient(180deg,#f0883e,#d35400);height:55px}
-input{width:100%;padding:8px;margin:4px 0;background:#121619;border:1px solid #30363d;color:white;border-radius:6px}
-.hidden{display:none}
-#crisisWarn{color:#ff4444;font-weight:bold;text-align:center}
 </style>
 </head>
 <body>
 
-<div id="game">
-
 <div class="panel">
-<div class="stats">
+<div class="grid">
 <div>💵 Готівка: <span id="money" class="val">0</span>$</div>
-<div>🏦 Банк: <span id="bankMoney" class="val">0</span>$</div>
+<div>🏦 Банк: <span id="bank" class="val">0</span>$</div>
 <div>⭐ Рівень: <span id="level">1</span></div>
-<div>XP: <span id="xp">0</span></div>
+<div>🍔 Голод: <span id="hunger">100</span>%</div>
 </div>
-<div id="crisisWarn"></div>
+<div id="crisis"></div>
 </div>
 
 <div class="panel">
-<button id="clickBtn" onclick="clickMoney()">Зібрати (+1$)</button>
+<button id="clickBtn">ПРАЦЮВАТИ 💸</button>
+</div>
+
+<div class="panel">
+<h3>🏠 Дім</h3>
+<div id="house"></div>
+</div>
+
+<div class="panel">
+<h3>🏢 Бізнес</h3>
+<div id="biz"></div>
 </div>
 
 <div class="panel">
@@ -54,51 +60,117 @@ input{width:100%;padding:8px;margin:4px 0;background:#121619;border:1px solid #3
 <button class="btn-sell" onclick="withdraw()">Зняти</button>
 </div>
 
-</div>
-
 <script>
-const SAVE="homeless82";
+const SAVE="homeless_9_pro";
 
-const DB={
+const BASE={
 money:100,
 bank:0,
 xp:0,
 level:1,
+hunger:100,
+houseIndex:0,
 crisis:false,
-crisisTime:0
+crisisTime:0,
+biz:[
+{name:"Кіоск",cost:300,inc:5,owned:0,mngr:false},
+{name:"Магазин",cost:2000,inc:40,owned:0,mngr:false},
+{name:"СТО",cost:12000,inc:250,owned:0,mngr:false}
+],
+houses:[
+{name:"Вулиця",cost:0,mult:1},
+{name:"Кімната",cost:2000,mult:1.2},
+{name:"Квартира",cost:15000,mult:1.5},
+{name:"Особняк",cost:100000,mult:2}
+]
 };
 
-let g=JSON.parse(localStorage.getItem(SAVE))||structuredClone(DB);
+let g=JSON.parse(localStorage.getItem(SAVE))||structuredClone(BASE);
 let displayMoney=g.money;
 
 function save(){localStorage.setItem(SAVE,JSON.stringify(g));}
 
-function levelMultiplier(){return 1+g.level*0.05;}
+function multiplier(){
+let levelBonus=1+g.level*0.05;
+let houseBonus=g.houses[g.houseIndex].mult;
+let crisisPenalty=g.crisis?0.6:1;
+return levelBonus*houseBonus*crisisPenalty;
+}
 
-function clickMoney(){
-let gain=1*levelMultiplier();
-g.money+=gain;
-g.xp+=1;
-checkLevel();
+function updateUI(){
+document.getElementById("money").innerText=displayMoney.toFixed(2);
+document.getElementById("bank").innerText=g.bank.toFixed(2);
+document.getElementById("level").innerText=g.level;
+document.getElementById("hunger").innerText=Math.floor(g.hunger);
+
+document.getElementById("crisis").innerText=
+g.crisis?"⚠ ЕКОНОМІЧНА КРИЗА!":"";
+
+document.getElementById("house").innerText=
+"Поточний: "+g.houses[g.houseIndex].name+
+" (x"+g.houses[g.houseIndex].mult+")";
+
+let html="";
+g.biz.forEach((b,i)=>{
+html+=`
+<div class="panel">
+<b>${b.name}</b> (x${b.owned}) | +${b.inc}$/с
+<button class="btn-buy" onclick="buyBiz(${i})">
+Купити (${Math.floor(b.cost)}$)
+</button>
+<button onclick="hire(${i})">
+${b.mngr?"Менеджер активний":"Менеджер ("+(Math.floor(b.cost*3))+"$)"}
+</button>
+</div>`;
+});
+document.getElementById("biz").innerHTML=html;
+
+save();
+}
+
+function buyBiz(i){
+let b=g.biz[i];
+if(g.money>=b.cost){
+g.money-=b.cost;
+b.owned++;
+b.cost*=1.5;
+}
+}
+
+function hire(i){
+let b=g.biz[i];
+let price=b.cost*3;
+if(!b.mngr && g.money>=price){
+g.money-=price;
+b.mngr=true;
+}
 }
 
 function deposit(){
-let val=parseFloat(document.getElementById("bankInput").value);
-if(val>0 && g.money>=val){
-g.money-=val;
-g.bank+=val;
+let v=parseFloat(bankInput.value);
+if(v>0 && g.money>=v){
+g.money-=v;
+g.bank+=v;
 }
 }
 
 function withdraw(){
-let val=parseFloat(document.getElementById("bankInput").value);
-if(val>0 && g.bank>=val){
-g.bank-=val;
-g.money+=val;
+let v=parseFloat(bankInput.value);
+if(v>0 && g.bank>=v){
+g.bank-=v;
+g.money+=v;
 }
 }
 
-function checkLevel(){
+document.getElementById("clickBtn").onclick=()=>{
+if(g.hunger<=0)return;
+let gain=1*multiplier();
+g.money+=gain;
+g.xp+=1;
+g.hunger-=0.5;
+};
+
+function levelCheck(){
 let need=50*g.level;
 if(g.xp>=need){
 g.xp-=need;
@@ -106,56 +178,55 @@ g.level++;
 }
 }
 
+function houseCheck(){
+let next=g.houses[g.houseIndex+1];
+if(next && g.money>=next.cost){
+g.houseIndex++;
+}
+}
+
 function startCrisis(){
 g.crisis=true;
 g.crisisTime=20;
-document.getElementById("crisisWarn").innerText="⚠ ЕКОНОМІЧНА КРИЗА!";
 }
 
 setInterval(()=>{
-if(!g.crisis && Math.random()<0.01){
-startCrisis();
-}
+if(!g.crisis && Math.random()<0.01) startCrisis();
 },1000);
 
 setInterval(()=>{
 const dt=0.1;
 
-// банк 1% в сек
-g.bank+=g.bank*0.01*dt;
+g.bank+=g.bank*0.005*dt;
+g.hunger=Math.max(0,g.hunger-0.1);
 
-// кризис
-let income=2*levelMultiplier();
+g.biz.forEach(b=>{
+if(b.mngr)
+g.money+=b.owned*b.inc*multiplier()*dt;
+});
+
 if(g.crisis){
-income*=0.6;
 g.crisisTime-=dt;
-if(g.crisisTime<=0){
-g.crisis=false;
-document.getElementById("crisisWarn").innerText="";
-}
+if(g.crisisTime<=0) g.crisis=false;
 }
 
-g.money+=income*dt;
-g.xp+=income*0.1*dt;
-checkLevel();
+g.xp+=0.2*dt;
+levelCheck();
+houseCheck();
 
 save();
 },100);
 
-// плавная анимация денег
 function animate(){
-displayMoney+= (g.money-displayMoney)*0.1;
-document.getElementById("money").innerText=displayMoney.toFixed(2);
-document.getElementById("bankMoney").innerText=g.bank.toFixed(2);
-document.getElementById("level").innerText=g.level;
-document.getElementById("xp").innerText=Math.floor(g.xp);
+displayMoney+=(g.money-displayMoney)*0.1;
+updateUI();
 requestAnimationFrame(animate);
 }
 animate();
 </script>
-
 </body>
 </html>
+
 
 
 
