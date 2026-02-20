@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MEGA TYCOON CLICKER</title>
+<title>MEGA TYCOON CLICKER 2.0</title>
 <style>
 :root{
 --bg:#1e1e2f; --panel:#2a2a40; --accent:#ffb703; --green:#4caf50; --red:#ff5252;
@@ -31,6 +31,9 @@ input[type=number]{width:60%; padding:5px; border-radius:6px; border:none; margi
 @keyframes floatUp{0%{opacity:1; transform:translateY(0);}100%{opacity:0; transform:translateY(-30px);}}
 .bonus{position:fixed; top:50px; left:50%; transform:translateX(-50%); padding:15px 25px; background:var(--yellow);
 color:black; font-weight:bold; border-radius:12px; cursor:pointer; box-shadow:0 4px 15px rgba(0,0,0,0.5); display:none; z-index:1000;}
+#chartContainer{height:150px; margin-top:10px; background:#111827; border-radius:10px; padding:5px; overflow:hidden;}
+#chart{width:100%; height:100%; display:flex; align-items:flex-end;}
+.bar{flex:1; margin:0 1px; background:var(--blue);}
 </style>
 </head>
 <body>
@@ -40,6 +43,8 @@ color:black; font-weight:bold; border-radius:12px; cursor:pointer; box-shadow:0 
 <div>🏦 $<span id="bank">0</span></div>
 <div>⭐ <span id="level">1</span></div>
 <div>⚡ x<span id="mult">1</span></div>
+<div>📊 $/сек <span id="income">0</span></div>
+<div>🏅 Престиж: <span id="prestige">0</span></div>
 </div>
 
 <div class="tabs">
@@ -49,12 +54,14 @@ color:black; font-weight:bold; border-radius:12px; cursor:pointer; box-shadow:0 
 <div class="tab" onclick="openTab(3)">🛢 Нефть</div>
 <div class="tab" onclick="openTab(4)">💻 Крипта</div>
 <div class="tab" onclick="openTab(5)">🏦 Банк</div>
+<div class="tab" onclick="openTab(6)">📈 График</div>
 </div>
 
 <div class="panel active" id="tab0">
 <button id="clickBtn">РАБОТАТЬ 💸</button>
 <div id="xpBar"><div id="xpFill"></div></div>
 <button id="clickUpgradeBtn">Апгрейд клика ($50)</button>
+<button class="buy" onclick="prestigeReset()">Сбросить в Престиж</button>
 </div>
 
 <div class="panel" id="tab1"></div>
@@ -79,13 +86,18 @@ color:black; font-weight:bold; border-radius:12px; cursor:pointer; box-shadow:0 
 <button class="danger" onclick="repayLoan()">Погасить кредит</button>
 </div>
 
+<div class="panel" id="tab6">
+<div id="chartContainer"><div id="chart"></div></div>
+</div>
+
 <div id="bonus" class="bonus">💰 БОНУС x2!</div>
 
 <script>
 let g={
 money:1000, bank:0, level:1, xp:0, mult:1, clickPower:1, bonusActive:false,
 loan:0, loanRate:0, loanTime:0, loanType:'',
-
+economy:1, crisisTimer:0,
+prestige:0,
 markets:[
 {name:"Фруктовая лавка",cost:500,inc:5,owned:0,upgrade:0,manager:false},
 {name:"Мясной магазин",cost:2000,inc:25,owned:0,upgrade:0,manager:false},
@@ -129,7 +141,11 @@ let bankInput=document.getElementById("bankInput");
 let clickBtn=document.getElementById("clickBtn");
 let clickUpgradeBtn=document.getElementById("clickUpgradeBtn");
 let bonus=document.getElementById("bonus");
+let incomeDisplay=document.getElementById("income");
+let prestigeDisplay=document.getElementById("prestige");
+let chart=document.getElementById("chart");
 let displayMoney=g.money, displayBank=g.bank;
+let chartData = [];
 
 function updateTop(){
 xpFill.style.width=Math.min(100,(g.xp/(100*g.level))*100)+"%";
@@ -139,6 +155,8 @@ clickUpgradeBtn.innerText=`Апгрейд клика ($${Math.floor(50*g.clickPo
 document.getElementById("loan").innerText=g.loan.toFixed(1);
 document.getElementById("loanRate").innerText=g.loanRate;
 document.getElementById("loanTime").innerText=g.loanTime;
+incomeDisplay.innerText = calculateIncome().toFixed(1);
+prestigeDisplay.innerText = g.prestige;
 }
 
 function animateMoney(){
@@ -207,7 +225,7 @@ showFloating(`+$${(g.clickPower*g.mult).toFixed(2)}`);
 updateTop();
 };
 
-// 🔧 Исправленный апгрейд клика
+// Апгрейд клика
 clickUpgradeBtn.onclick = () => {
 let cost = 50 * g.clickPower;
 if (g.money >= cost) {
@@ -231,15 +249,32 @@ f.style.top=(window.innerHeight/2+(Math.random()*50-25))+"px";
 setTimeout(()=>f.remove(),1000);
 }
 
-// Пассивный доход + менеджеры + бонус
+// Расчёт дохода в секунду
+function calculateIncome(){
+  let total = 0;
+  ["markets","auto","oil","crypto"].forEach(cat=>{
+    g[cat].forEach(b=>{
+      if(b.owned>0){
+        let inc = b.owned * b.inc;
+        if(b.manager) inc *= 2; // менеджер x2
+        if(g.bonusActive) inc *= 2;
+        total += inc * g.economy;
+      }
+    });
+  });
+  return total;
+}
+
+// Пассивный доход
 setInterval(()=>{
-["markets","auto","oil","crypto"].forEach(cat=>{
-g[cat].forEach(b=>{
-if(b.owned>0){let income=b.owned*b.inc;if(b.manager) income*=1;if(g.bonusActive) income*=2;g.money+=income;}
-});
-});
-g.bank+=g.bank*0.01/60;
-levelCheck();updateTop();
+  let totalIncome = calculateIncome();
+  g.money += totalIncome;
+  g.bank += g.bank*0.01/60;
+  updateTop();
+  // график
+  chartData.push(totalIncome);
+  if(chartData.length>50) chartData.shift();
+  renderChart();
 },1000);
 
 // Случайный бонус
@@ -260,21 +295,80 @@ if(v>g.money)v=g.money; let pay=Math.min(v,g.loan); g.money-=pay; g.loan-=pay; d
 showFloating(`Погашено $${pay.toFixed(1)}`); if(g.loan<=0){ g.loan=0; g.loanRate=0; g.loanTime=0; g.loanType=''; } updateTop();
 }
 
-// начисление процентов каждую секунду и уменьшение времени
+// проценты по кредиту
 setInterval(()=>{
 if(g.loan>0){
-g.loan += g.loan * g.loanRate/100/6;
-g.loanTime--; if(g.loanTime<=0){showFloating("Просрочка! -$"+(g.loan*0.1).toFixed(1)); g.money-=g.loan*0.1; g.loanTime=10;}
-updateTop();
+  g.loan += g.loan * g.loanRate/100/6;
+  g.loanTime--; if(g.loanTime<=0){showFloating("Просрочка! -$"+(g.loan*0.1).toFixed(1)); g.money-=g
+.loan*0.1; g.loanTime=10;}
+  updateTop();
 }
 },10000);
 
-// рендер всех категорий
-function renderAll(){renderCategory(g.markets,"tab1"); renderCategory(g.auto,"tab2"); renderCategory(g.oil,"tab3"); renderCategory(g.crypto,"tab4"); updateTop();}
+// Система кризисов и бумов
+setInterval(()=>{
+  g.crisisTimer++;
+  if(g.crisisTimer>=60){ // каждые 60 секунд шанс события
+    let r=Math.random();
+    if(r<0.1){ g.economy=0.5; showFloating("Кризис! Доходы ↓50%"); }
+    else if(r<0.2){ g.economy=1.5; showFloating("Бум! Доходы ↑50%"); }
+    else g.economy=1;
+    g.crisisTimer=0;
+  }
+},1000);
+
+// Престиж - сброс прогресса с бонусом
+function prestigeReset(){
+  if(confirm("Сбросить игру и получить престиж?")) {
+    g.prestige += Math.floor(g.money/100000);
+    g.money = 1000;
+    g.bank = 0;
+    g.level = 1;
+    g.xp = 0;
+    g.mult = 1 + g.prestige*0.1;
+    g.clickPower = 1 + g.prestige*0.1;
+    ["markets","auto","oil","crypto"].forEach(cat=>{
+      g[cat].forEach(b=>{b.owned=0;b.inc=Math.floor(b.inc/Math.pow(1.5,b.upgrade));b.upgrade=0;b.manager=false;});
+    });
+    showFloating("Престиж +"+Math.floor(g.prestige));
+    updateTop();
+    renderAll();
+  }
+}
+
+// Рендер графика экономики
+function renderChart(){
+  chart.innerHTML = '';
+  chartData.forEach(v=>{
+    let bar = document.createElement('div');
+    bar.className='bar';
+    bar.style.height = Math.min(100,v/1000*100)+'%';
+    chart.appendChild(bar);
+  });
+}
+
+// Сохранение и загрузка
+function saveGame(){ localStorage.setItem('tycoonSave', JSON.stringify(g)); }
+function loadGame(){ 
+  let save = localStorage.getItem('tycoonSave');
+  if(save){ g = JSON.parse(save); updateTop(); renderAll(); }
+}
+setInterval(saveGame,10000);
+window.onload = loadGame;
+
+// Рендер всех категорий
+function renderAll(){
+  renderCategory(g.markets,"tab1"); 
+  renderCategory(g.auto,"tab2"); 
+  renderCategory(g.oil,"tab3"); 
+  renderCategory(g.crypto,"tab4"); 
+  updateTop();
+}
 renderAll();
 </script>
 </body>
 </html>
+
 
 
 
