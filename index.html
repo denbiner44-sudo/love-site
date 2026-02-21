@@ -3,37 +3,284 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>ULTIMATE EMPIRE TYCOON</title>
+    <title>EMPIRE TYCOON PRO</title>
     <style>
         :root {
             --bg: #0f172a; --panel: #1e293b; --accent: #fbbf24; 
-            --green: #22c55e; --blue: #3b82f6; --purple: #a855f7; --text: #f8fafc;
+            --green: #22c55e; --blue: #3b82f6; --red: #ef4444; --text: #f8fafc;
         }
         body {
-            margin: 0; background: var(--bg); font-family: 'Segoe UI', sans-serif;
-            color: var(--text); user-select: none;
+            margin: 0; background: var(--bg); font-family: 'Segoe UI', system-ui, sans-serif;
+            color: var(--text); user-select: none; overflow-x: hidden;
         }
+        /* Стили из вашего шаблона с небольшими правками для читаемости */
         .topbar {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px;
             padding: 15px; background: #020617; position: sticky; top: 0; z-index: 100;
             border-bottom: 2px solid var(--accent);
         }
-        .stat-box { text-align: center; }
-        .stat-val { color: var(--accent); font-weight: bold; display: block; font-size: 1.2em; }
+        .stat-box { text-align: center; font-size: 0.85em; }
+        .stat-val { color: var(--accent); font-weight: bold; display: block; font-size: 1.1em; }
+        .tax-alert { color: var(--red); font-size: 0.7em; display: block; }
 
-        .tabs { display: flex; background: var(--panel); overflow-x: auto; }
-        .tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; white-space: nowrap; opacity: 0.5; }
+        .tabs { display: flex; background: var(--panel); border-bottom: 1px solid #334155; }
+        .tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; opacity: 0.5; transition: 0.3s; }
         .tab.active { opacity: 1; border-bottom: 3px solid var(--accent); background: #334155; }
 
-        .panel { padding: 15px; display: none; max-width: 500px; margin: auto; padding-bottom: 100px; }
+        .panel { padding: 15px; display: none; max-width: 600px; margin: auto; padding-bottom: 100px; }
         .panel.active { display: block; }
 
         .card { 
             background: var(--panel); padding: 15px; margin: 10px 0; border-radius: 12px;
-            border: 1px solid #334155; position: relative;
+            border: 1px solid #334155; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
         }
-        .card.locked { opacity: 0.4; filter: grayscale(1); }
+        .biz-name { font-weight: bold; color: var(--accent); margin-bottom: 5px; }
+        .biz-stats { font-size: 0.8em; color: #94a3b8; margin-bottom: 10px; }
 
+        button { 
+            padding: 12px; border: none; border-radius: 8px; cursor: pointer; 
+            font-weight: bold; transition: 0.1s; color: white; width: 100%;
+        }
+        button:active { transform: scale(0.98); }
+        button:disabled { background: #475569 !important; opacity: 0.5; cursor: not-allowed; }
+
+        .btn-buy { background: var(--green); }
+        .btn-mgr { background: var(--blue); margin-top: 8px; font-size: 0.8em; }
+
+        #clickBtn { 
+            height: 120px; font-size: 28px; margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--accent), #d97706);
+            border-bottom: 5px solid #713f12; color: #000;
+        }
+
+        .buy-modes { display: flex; gap: 5px; margin-bottom: 10px; }
+        .mode-btn { background: #334155; padding: 8px; font-size: 0.9em; }
+        .mode-btn.active { background: var(--accent); color: #000; }
+
+        #event-toast {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            padding: 12px 25px; border-radius: 30px; font-weight: bold;
+            z-index: 1000; display: none; box-shadow: 0 10px 15px rgba(0,0,0,0.5);
+        }
+
+        .floating { 
+            position: absolute; font-weight: bold; color: var(--accent);
+            pointer-events: none; animation: floatUp 0.6s ease-out forwards;
+        }
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-50px); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <div class="stat-box">💰 Баланс<span id="money" class="stat-val">0</span><span id="taxDisp" class="tax-alert"></span></div>
+    <div class="stat-box">📊 Доход/с<span id="income" class="stat-val">0</span></div>
+    <div class="stat-box">🏅 Престиж<span id="prestige" class="stat-val">0</span></div>
+</div>
+
+<div class="tabs">
+    <div class="tab active" onclick="openTab(0)">⚒️ Труд</div>
+    <div class="tab" onclick="openTab(1)">🏙️ Активы</div>
+    <div class="tab" onclick="openTab(2)">⚖️ Управа</div>
+</div>
+
+<div class="panel active" id="tab0">
+    <button id="clickBtn">РАБОТАТЬ 💸</button>
+    <div class="card">
+        <div class="biz-name">Инструменты</div>
+        <div class="biz-stats">Сила клика: <span id="clickPwrDisp">1</span></div>
+        <button class="btn-buy" id="upgradeClickBtn" onclick="buyClickUpgrade()">Улучшить за $50</button>
+    </div>
+</div>
+
+<div class="panel" id="tab1">
+    <div class="buy-modes">
+        <button class="mode-btn active" onclick="setBuyMode(1, this)">x1</button>
+        <button class="mode-btn" onclick="setBuyMode(10, this)">x10</button>
+        <button class="mode-btn" onclick="setBuyMode(50, this)">x50</button>
+    </div>
+    <div id="businessList"></div>
+</div>
+
+<div class="panel" id="tab2">
+    <div class="card">
+        <h3>Экономика</h3>
+        <p>Текущий налог: <span id="currentTax">0</span>%</p>
+        <button class="btn-buy" onclick="prestigeReset()" style="background:var(--accent); color:black;">РЕИНКАРНАЦИЯ (Престиж)</button>
+    </div>
+    <button onclick="hardReset()" style="margin-top:20px; background:transparent; color:var(--red); border:1px solid var(--red); font-size:0.8em;">СБРОСИТЬ ПРОГРЕСС</button>
+</div>
+
+<div id="event-toast"></div>
+
+<script>
+// Глобальное состояние
+let g = {
+    money: 100, clickPower: 1, prestige: 0, buyMode: 1, eventMult: 1,
+    biz: [
+        { id: 0, name: "Ларёк с шаурмой", baseCost: 20, inc: 1, owned: 0, manager: false },
+        { id: 1, name: "Кофейня", baseCost: 300, inc: 8, owned: 0, manager: false },
+        { id: 2, name: "Барбершоп", baseCost: 2500, inc: 45, owned: 0, manager: false },
+        { id: 3, name: "Ночной клуб", baseCost: 15000, inc: 200, owned: 0, manager: false },
+        { id: 4, name: "Торговый центр", baseCost: 100000, inc: 1100, owned: 0, manager: false }
+    ]
+};
+
+const GROWTH = 1.15; // Множитель роста цены
+
+// Форматирование чисел
+function f(n) {
+    if (n < 1000) return Math.floor(n);
+    let s = ['k', 'M', 'B', 'T', 'Q'];
+    let e = Math.floor(Math.log10(n) / 3);
+    return (n / Math.pow(1000, e)).toFixed(2) + s[e - 1];
+}
+
+// Расчет налога
+function getTaxRate() {
+    if (g.money > 1e9) return 0.40;
+    if (g.money > 1e6) return 0.20;
+    return 0;
+}
+
+// Расчет суммарного дохода
+function getTotalIncome() {
+    let raw = g.biz.reduce((sum, b) => {
+        let bInc = b.owned * b.inc * (1 + g.prestige) * g.eventMult;
+        if (b.manager) bInc *= 1.5;
+        return sum + bInc;
+    }, 0);
+    return raw * (1 - getTaxRate());
+}
+
+// Расчет стоимости N построек (Сумма геометрической прогрессии)
+function getCost(baseCost, owned, count) {
+    return baseCost * (Math.pow(GROWTH, owned) * (Math.pow(GROWTH, count) - 1)) / (GROWTH - 1);
+}
+
+function updateUI() {
+    document.getElementById('money').innerText = f(g.money);
+    document.getElementById('income').innerText = f(getTotalIncome());
+    document.getElementById('prestige').innerText = f(g.prestige);
+    document.getElementById('clickPwrDisp').innerText = f(g.clickPower * (1 + g.prestige));
+    
+    let tax = getTaxRate();
+    document.getElementById('currentTax').innerText = (tax * 100).toFixed(0);
+    document.getElementById('taxDisp').innerText = tax > 0 ? `(-${(tax*100).toFixed(0)}%)` : "";
+    
+    let clickCost = 50 * Math.pow(2.5, g.clickPower - 1);
+    let upgBtn = document.getElementById('upgradeClickBtn');
+    upgBtn.innerText = `Улучшить за $${f(clickCost)}`;
+    upgBtn.disabled = g.money < clickCost;
+}
+
+document.getElementById('clickBtn').onclick = (e) => {
+    let pwr = g.clickPower * (1 + g.prestige) * g.eventMult;
+    g.money += pwr;
+    showFloating(e, `+$${f(pwr)}`);
+    updateUI();
+};
+
+function buyClickUpgrade() {
+    let cost = 50 * Math.pow(2.5, g.clickPower - 1);
+    if (g.money >= cost) {
+        g.money -= cost;
+        g.clickPower++;
+        updateUI();
+    }
+}
+
+function buyBiz(id) {
+    let b = g.biz[id];
+    let cost = getCost(b.baseCost, b.owned, g.buyMode);
+    if (g.money >= cost) {
+        g.money -= cost;
+        b.owned += g.buyMode;
+        renderBusinesses();
+        updateUI();
+    }
+}
+
+function hireManager(id) {
+    let b = g.biz[id];
+    let cost = b.baseCost * 50;
+    if (g.money >= cost && !b.manager) {
+        g.money -= cost;
+        b.manager = true;
+        renderBusinesses();
+        updateUI();
+    }
+}
+
+function renderBusinesses() {
+    let html = '';
+    g.biz.forEach(b => {
+        let cost = getCost(b.baseCost, b.owned, g.buyMode);
+        html += `
+            <div class="card">
+                <div class="biz-name">${b.name} <small>(ур. ${b.owned})</small></div>
+                <div class="biz-stats">Доход: $${f(b.owned * b.inc * (1+g.prestige))}/с</div>
+                <button class="btn-buy" onclick="buyBiz(${b.id})" ${g.money < cost ? 'disabled' : ''}>
+                    Купить x${g.buyMode} ($${f(cost)})
+                </button>
+                <button class="btn-mgr" onclick="hireManager(${b.id})" ${b.manager ? 'disabled' : ''}>
+                    ${b.manager ? '✅ Автоматизировано' : '👔 Менеджер ($' + f(b.baseCost*50) + ')'}
+                </button>
+            </div>`;
+    });
+    document.getElementById('businessList').innerHTML = html;
+}
+
+function setBuyMode(m, btn) {
+    g.buyMode = m;
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderBusinesses();
+}
+
+function openTab(i) {
+    document.querySelectorAll('.tab, .panel').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab')[i].classList.add('active');
+    document.querySelectorAll('.panel')[i].classList.add('active');
+    if(i === 1) renderBusinesses();
+}
+
+function showFloating(e, text) {
+    let div = document.createElement('div');
+    div.className = 'floating';
+    div.innerText = text;
+    div.style.left = e.pageX + 'px'; div.style.top = e.pageY + 'px';
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 600);
+}
+
+function prestigeReset() {
+    if(g.money < 1000000) return alert("Нужно $1M для престижа!");
+    let bonus = Math.floor(Math.sqrt(g.money / 100000));
+    if(confirm(`Сбросить всё и получить +${bonus} престижа?`)) {
+        g.prestige += bonus;
+        g.money = 100; g.clickPower = 1;
+        g.biz.forEach(b => { b.owned = 0; b.manager = false; });
+        renderBusinesses();
+        updateUI();
+    }
+}
+
+function hardReset() { if(confirm("Удалить всё?")) { localStorage.clear(); location.reload(); } }
+
+// Цикл дохода (10 раз в секунду)
+setInterval(() => { 
+    g.money += getTotalIncome() / 10; 
+    updateUI(); 
+}, 100);
+
+window.onload = () => { renderBusinesses(); updateUI(); };
+</script>
+</body>
+</html>
         .tag { font-size: 0.7em; background: var(--accent); color: black; padding: 2px 6px; border-radius: 4px; float: right; }
 
         button { 
@@ -479,4 +726,5 @@ window.onload = () => { load(); renderBusinesses(); updateUI(); };
 </script>
 </body>
 </html>
+
 
