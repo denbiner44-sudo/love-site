@@ -1,40 +1,232 @@
+ж`html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>EMPIRE TYCOON PRO</title>
-    <style>
-        :root {
-            --bg: #0f172a; --panel: #1e293b; --accent: #fbbf24; 
-            --green: #22c55e; --blue: #3b82f6; --red: #ef4444; --text: #f8fafc;
-        }
-        body {
-            margin: 0; background: var(--bg); font-family: 'Segoe UI', system-ui, sans-serif;
-            color: var(--text); user-select: none; overflow-x: hidden;
-        }
-        /* Стили из вашего шаблона с небольшими правками для читаемости */
-        .topbar {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px;
-            padding: 15px; background: #020617; position: sticky; top: 0; z-index: 100;
-            border-bottom: 2px solid var(--accent);
-        }
-        .stat-box { text-align: center; font-size: 0.85em; }
-        .stat-val { color: var(--accent); font-weight: bold; display: block; font-size: 1.1em; }
-        .tax-alert { color: var(--red); font-size: 0.7em; display: block; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Бомжара — выживание на улицах</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        .tabs { display: flex; background: var(--panel); border-bottom: 1px solid #334155; }
-        .tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; opacity: 0.5; transition: 0.3s; }
-        .tab.active { opacity: 1; border-bottom: 3px solid var(--accent); background: #334155; }
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(to bottom, #1a1a2e, #16213e);
+      color: #fff;
+      line-height: 1.6;
+      padding: 20px;
+    }
 
-        .panel { padding: 15px; display: none; max-width: 600px; margin: auto; padding-bottom: 100px; }
-        .panel.active { display: block; }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
 
-        .card { 
-            background: var(--panel); padding: 15px; margin: 10px 0; border-radius: 12px;
-            border: 1px solid #334155; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
-        }
-        .biz-name { font-weight: bold; color: var(--accent); margin-bottom: 5px; }
+    header {
+      text-align: center;
+      padding: 1rem 0;
+      border-bottom: 3px solid #e94560;
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      text-shadow: 0 0 10px #e94560;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .stat-box {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 10px;
+      width: 22%;
+      min-width: 120px;
+      text-align: center;
+      border: 1px solid rgba(233, 69, 96, 0.3);
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 2rem;
+    }
+
+    button {
+      padding: 15px;
+      font-size: 1rem;
+      background: #e94560;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    button:hover {
+      background: #ff6b81;
+      transform: translateY(-2px);
+    }
+
+    .log {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 15px;
+      border-radius: 10px;
+      height: 200px;
+      overflow-y: auto;
+      margin-top: 1rem;
+      border: 1px solid #444;
+    }
+
+    .message {
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>БОМЖАРА</h1>
+      <p>Выживание на улицах большого города</p>
+    </header>
+
+    <div class="stats">
+      <div class="stat-box">
+        <h3>День</h3>
+        <p id="day">1</p>
+      </div>
+      <div class="stat-box">
+        <h3>Голод</h3>
+        <p id="hunger">50</p>
+      </div>
+      <div class="stat-box">
+        <h3>Здоровье</h3>
+        <p id="health">100</p>
+      </div>
+      <div class="stat-box">
+        <h3>Деньги</h3>
+        <p id="money">0 ₽</p>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button onclick="searchGarbage()">Искать мусор</button>
+      <button onclick="sellItems()">Продать находки</button>
+      <button onclick="buyFood()">Купить еду</button>
+      <button onclick="rest()">Отдохнуть</button>
+    </div>
+
+    <h2>Журнал событий:</h2>
+    <div class="log" id="gameLog">
+      <div class="message">День 1: Вы оказались на улице без денег и еды. Начинайте выживать!</div>
+    </div>
+  </div>
+
+  <script>
+    // Начальные параметры
+    let day = 1;
+    let hunger = 50;
+    let health = 100;
+    let money = 0;
+    let itemsFound = 0;
+
+    // Обновление интерфейса
+    function updateUI() {
+      document.getElementById('day').textContent = day;
+      document.getElementById('hunger').textContent = hunger;
+      document.getElementById('health').textContent = health;
+      document.getElementById('money').textContent = money + ' ₽';
+    }
+
+    // Добавление сообщения в журнал
+    function addLog(message) {
+
+const log = document.getElementById('gameLog');
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'message';
+      messageDiv.textContent = message;
+      log.appendChild(messageDiv);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    // Поиск мусора
+    function searchGarbage() {
+      itemsFound += Math.floor(Math.random() * 3) + 1;
+      hunger -= 10;
+      health -= 5;
+      addLog(День ${day}: Вы нашли ${itemsFound} предметов. Голод увеличился, здоровье уменьшилось.);
+      checkGameOver();
+      updateUI();
+    }
+
+    // Продажа находок
+    function sellItems() {
+      if (itemsFound > 0) {
+        const earned = itemsFound * 10;
+        money += earned;
+        itemsFound = 0;
+        addLog(День ${day}: Вы продали находки за ${earned} ₽. Теперь у вас ${money} ₽.);
+      } else {
+        addLog(День ${day}: У вас нет предметов для продажи.);
+      }
+      updateUI();
+    }
+
+    // Покупка еды
+    function buyFood() {
+      if (money >= 20) {
+        money -= 20;
+        hunger += 30;
+        if (hunger > 100) hunger = 100;
+        addLog(День ${day}: Вы купили еду за 20 ₽. Голод уменьшился.);
+      } else {
+        addLog(День ${day}: Недостаточно денег для покупки еды.);
+      }
+      updateUI();
+    }
+
+    // Отдых
+    function rest() {
+      health += 20;
+      hunger += 10;
+      if (health > 100) health = 100;
+      day++;
+      addLog(День ${day}: Вы отдохнули. Здоровье улучшилось, но голод увеличился.);
+      checkGameOver();
+      updateUI();
+    }
+
+    // Проверка окончания игры
+    function checkGameOver() {
+      if (hunger <= 0 || health <= 0) {
+        addLog(Игра окончена! Вы не смогли выжить на улицах. Продержались ${day} дней.);
+        disableButtons();
+      }
+    }
+
+    // Отключение кнопок при проигрыше
+    function disableButtons() {
+      const buttons = document.querySelectorAll('button');
+      buttons.forEach(button => {
+        button.disabled = true;
+      });
+    }
+
+    // Инициализация игры
+    updateUI();
+  </script>
+</body>        .biz-name { font-weight: bold; color: var(--accent); margin-bottom: 5px; }
         .biz-stats { font-size: 0.8em; color: #94a3b8; margin-bottom: 10px; }
 
         button { 
@@ -726,5 +918,6 @@ window.onload = () => { load(); renderBusinesses(); updateUI(); };
 </script>
 </body>
 </html>
+
 
 
