@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LIFE EMPIRE PRO</title>
+<title>LIFE EMPIRE MEGA</title>
+
 <style>
 body{
     margin:0;
-    font-family:Arial;
+    font-family:Arial, sans-serif;
     background:linear-gradient(135deg,#0f172a,#1e293b);
     color:white;
 }
@@ -23,20 +24,24 @@ section{
     padding:15px;
 }
 h2{
-    margin-top:25px;
+    margin-top:30px;
+    text-align:center;
 }
 button{
     width:95%;
-    max-width:450px;
+    max-width:500px;
     padding:10px;
     margin:5px;
     border:none;
-    border-radius:10px;
+    border-radius:12px;
     background:linear-gradient(90deg,#06b6d4,#22c55e);
     color:white;
     cursor:pointer;
+    font-size:14px;
 }
-button:hover{transform:scale(1.03);}
+button:hover{
+    transform:scale(1.03);
+}
 .panel{
     display:flex;
     flex-direction:column;
@@ -50,7 +55,11 @@ button:hover{transform:scale(1.03);}
     justify-content:center;
     align-items:center;
     flex-direction:column;
-    font-size:28px;
+    font-size:30px;
+}
+.small{
+    font-size:12px;
+    opacity:0.8;
 }
 </style>
 </head>
@@ -67,31 +76,20 @@ button:hover{transform:scale(1.03);}
 <div>😊 <span id="mood"></span></div>
 </header>
 
-<section class="panel">
+<section class="panel" id="mainPanel">
 
-<h2>💼 Бизнес</h2>
-<button onclick="buyBusiness(500,'Ларёк',5)">Ларёк (500)</button>
-<button onclick="buyBusiness(5000,'Кафе',50)">Кафе (5000)</button>
-<button onclick="buyBusiness(50000,'Автосервис',500)">Автосервис (50000)</button>
-<button onclick="buyBusiness(500000,'Завод',5000)">Завод (500000)</button>
-
-<h2>🏢 Недвижимость</h2>
-<button onclick="buyAsset(10000,10)">Снять квартиру (10000)</button>
-<button onclick="buyAsset(100000,50)">Купить квартиру (100000)</button>
-
-<h2>🚗 Транспорт</h2>
-<button onclick="buyAsset(20000,20)">Купить машину (20000)</button>
-<button onclick="buyAsset(200000,100)">Купить спорткар (200000)</button>
-
-<h2>🏦 Кредит</h2>
-<button onclick="takeLoan(10000)">Взять 10000</button>
-<button onclick="takeLoan(50000)">Взять 50000</button>
+<h2>🏦 Кредиты</h2>
+<button onclick="takeLoan(10000)">Взять 10 000</button>
+<button onclick="takeLoan(100000)">Взять 100 000</button>
+<button onclick="takeLoan(1000000)">Взять 1 000 000</button>
 <button onclick="payLoan()">Погасить долг</button>
 
 <h2>🎉 Жизнь</h2>
 <button onclick="eat()">Поесть (200)</button>
 <button onclick="rest()">Отдых (500)</button>
 <button onclick="heal()">Лечение (1000)</button>
+
+<div class="small">Долг растёт на 1% в секунду</div>
 
 </section>
 
@@ -101,8 +99,8 @@ button:hover{transform:scale(1.03);}
 </div>
 
 <script>
-let game = JSON.parse(localStorage.getItem("lifeEmpire")) || {
-    money:2000,
+let game = JSON.parse(localStorage.getItem("lifeEmpireMega")) || {
+    money:5000,
     income:0,
     debt:0,
     rating:0,
@@ -110,24 +108,48 @@ let game = JSON.parse(localStorage.getItem("lifeEmpire")) || {
     xp:0,
     health:80,
     food:70,
-    mood:70
+    mood:70,
+    businesses:[
+        {name:"Ларёк",baseCost:500,baseIncome:5,level:0},
+        {name:"Кафе",baseCost:5000,baseIncome:50,level:0},
+        {name:"Автосервис",baseCost:50000,baseIncome:500,level:0},
+        {name:"Завод",baseCost:500000,baseIncome:5000,level:0},
+        {name:"Сеть ресторанов",baseCost:2000000,baseIncome:20000,level:0},
+        {name:"Нефтевышка",baseCost:10000000,baseIncome:120000,level:0},
+        {name:"Банк",baseCost:50000000,baseIncome:600000,level:0},
+        {name:"IT компания",baseCost:100000000,baseIncome:1500000,level:0},
+        {name:"Авиакомпания",baseCost:500000000,baseIncome:8000000,level:0},
+        {name:"Корпорация",baseCost:2000000000,baseIncome:30000000,level:0},
+        {name:"Медиа Империя",baseCost:5000000000,baseIncome:70000000,level:0},
+        {name:"Мировой Холдинг",baseCost:20000000000,baseIncome:200000000,level:0}
+    ]
 };
 
 function save(){
-    localStorage.setItem("lifeEmpire",JSON.stringify(game));
+    localStorage.setItem("lifeEmpireMega",JSON.stringify(game));
+}
+
+function format(n){
+    if(n>=1e12) return (n/1e12).toFixed(1)+"T";
+    if(n>=1e9) return (n/1e9).toFixed(1)+"B";
+    if(n>=1e6) return (n/1e6).toFixed(1)+"M";
+    if(n>=1e3) return (n/1e3).toFixed(1)+"K";
+    return Math.floor(n);
 }
 
 function update(){
-    document.getElementById("money").innerText=Math.floor(game.money);
-    document.getElementById("income").innerText=game.income;
-    document.getElementById("debt").innerText=Math.floor(game.debt);
+    document.getElementById("money").innerText=format(game.money);
+    document.getElementById("income").innerText=format(game.income);
+    document.getElementById("debt").innerText=format(game.debt);
     document.getElementById("rating").innerText=game.rating;
     document.getElementById("level").innerText=game.level;
     document.getElementById("health").innerText=game.health;
     document.getElementById("food").innerText=game.food;
     document.getElementById("mood").innerText=game.mood;
 
-    if(game.money < -100000 || game.health<=0){
+    renderBusinesses();
+
+    if(game.money < -1000000 || game.health<=0){
         document.getElementById("gameover").style.display="flex";
     }
     save();
@@ -138,25 +160,40 @@ function addXP(amount){
     if(game.xp>=100){
         game.xp=0;
         game.level++;
-        game.income*=1.2;
+        game.income*=1.1;
     }
 }
 
-function buyBusiness(cost,name,inc){
-    if(game.money>=cost){
-        game.money-=cost;
-        game.income+=inc;
-        game.rating+=10;
-        addXP(20);
-        update();
-    }
+function renderBusinesses(){
+    let old = document.getElementById("bizContainer");
+    if(old) old.remove();
+
+    let div = document.createElement("div");
+    div.id="bizContainer";
+    div.innerHTML="<h2>💼 Бизнес Империя</h2>";
+    div.style.display="flex";
+    div.style.flexDirection="column";
+    div.style.alignItems="center";
+
+    game.businesses.forEach((b,i)=>{
+        let cost = Math.floor(b.baseCost * Math.pow(1.15,b.level));
+        let btn = document.createElement("button");
+        btn.innerText=`${b.name} | Ур.${b.level} | Цена: ${format(cost)} | +${format(b.baseIncome)}/сек`;
+        btn.onclick=()=>buyBusiness(i,cost);
+        div.appendChild(btn);
+    });
+
+    document.getElementById("mainPanel").prepend(div);
 }
 
-function buyAsset(cost,rate){
+function buyBusiness(i,cost){
+    let b = game.businesses[i];
     if(game.money>=cost){
         game.money-=cost;
-        game.rating+=rate;
-        addXP(10);
+        b.level++;
+        game.income+=b.baseIncome;
+        game.rating+=5;
+        addXP(15);
         update();
     }
 }
@@ -180,8 +217,7 @@ function payLoan(){
 function eat(){
     if(game.money>=200){
         game.money-=200;
-        game.food+=20;
-        if(game.food>100) game.food=100;
+        game.food=Math.min(100,game.food+20);
         update();
     }
 }
@@ -189,8 +225,7 @@ function eat(){
 function rest(){
     if(game.money>=500){
         game.money-=500;
-        game.mood+=20;
-        if(game.mood>100) game.mood=100;
+        game.mood=Math.min(100,game.mood+20);
         update();
     }
 }
@@ -198,27 +233,30 @@ function rest(){
 function heal(){
     if(game.money>=1000){
         game.money-=1000;
-        game.health+=30;
-        if(game.health>100) game.health=100;
+        game.health=Math.min(100,game.health+30);
         update();
     }
 }
 
 setInterval(()=>{
     game.money+=game.income;
+
     if(game.debt>0){
         game.debt*=1.01;
     }
+
     game.food-=1;
     game.mood-=1;
+
     if(game.food<=0){
         game.health-=2;
     }
+
     update();
 },1000);
 
 function resetGame(){
-    localStorage.removeItem("lifeEmpire");
+    localStorage.removeItem("lifeEmpireMega");
     location.reload();
 }
 
