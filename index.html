@@ -1,159 +1,207 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>ULTRA PIDOR DESTROYER 3000</title>
-    <style>
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            background: #000; color: #f00;
-            font-family: 'Courier New', Courier, monospace;
-            overflow: hidden; user-select: none;
-        }
-
-        #game-ui {
-            position: absolute; top: 20px; width: 100%; text-align: center;
-            z-index: 10;
-        }
-
-        .hp-bar-container {
-            width: 80%; height: 30px; border: 3px solid #fff;
-            margin: 10px auto; background: #333;
-        }
-
-        #hp-fill {
-            width: 100%; height: 100%; background: linear-gradient(90deg, #ff0, #f00);
-            transition: width 0.3s;
-        }
-
-        .boss-title {
-            font-size: 40px; font-weight: 900; text-shadow: 0 0 20px #f00;
-            animation: glitch 0.2s infinite;
-        }
-
-        #arena { width: 100vw; height: 100vh; position: relative; }
-
-        .btn {
-            position: absolute; padding: 20px 40px; font-size: 24px;
-            font-weight: bold; border-radius: 10px; cursor: pointer;
-            border: 4px solid #fff; outline: none;
-        }
-
-        #yesBtn {
-            background: #ff0055; color: #fff;
-            left: 50%; top: 60%; transform: translate(-50%, -50%);
-            box-shadow: 0 0 50px #ff0055;
-            z-index: 5;
-        }
-
-        #noBtn {
-            background: #00ff44; color: #000;
-            left: 20%; top: 20%;
-            transition: all 0.1s ease;
-            z-index: 100;
-        }
-
-        @keyframes glitch {
-            0% { transform: skew(5deg); }
-            50% { transform: skew(-5deg); text-shadow: -5px 0 #0ff; }
-            100% { transform: skew(5deg); }
-        }
-
-        #final-screen {
-            display: none; position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%; background: #fff;
-            color: #000; z-index: 9999; text-align: center;
-            justify-content: center; align-items: center;
-            flex-direction: column; font-size: 50px; font-weight: 900;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Mario Style Web Game</title>
+<style>
+body{
+    margin:0;
+    overflow:hidden;
+    background:#87CEEB;
+    font-family:Arial, sans-serif;
+}
+canvas{
+    display:block;
+}
+#ui{
+    position:fixed;
+    top:10px;
+    left:10px;
+    font-weight:bold;
+    color:#000;
+}
+</style>
 </head>
 <body>
 
-<div id="game-ui">
-    <div class="boss-title">BOSS: ГЕЙ-ДЕТЕКТОР 228</div>
-    <div>УРОВЕНЬ НАТУРАЛЬНОСТИ:</div>
-    <div class="hp-bar-container"><div id="hp-fill"></div></div>
-    <div id="status-text">СТАТУС: ПОД ПОДОЗРЕНИЕМ...</div>
-</div>
-
-<div id="arena">
-    <button id="yesBtn" class="btn">Я ПИДОР (СДАЮСЬ)</button>
-    <button id="noBtn" class="btn">НЕТ, Я МУЖИК!</button>
-</div>
-
-<div id="final-screen">
-    <h1 style="font-size: 150px;">🐓 ПЕТУХ! 🐓</h1>
-    <p>ТЫ ПРИЗНАЛ ЭТО, СЛАБАК!</p>
-    <p style="font-size: 20px;">(или у тебя просто сдали нервы)</p>
-</div>
+<div id="ui">Счёт: <span id="score">0</span></div>
+<canvas id="game"></canvas>
 
 <script>
-    const noBtn = document.getElementById('noBtn');
-    const yesBtn = document.getElementById('yesBtn');
-    const hpFill = document.getElementById('hp-fill');
-    const statusText = document.getElementById('status-text');
-    const finalScreen = document.getElementById('final-screen');
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-    let hp = 100;
-    let yesScale = 1;
+const gravity = 0.6;
+let cameraX = 0;
+let score = 0;
 
-    // Таймер падения "натуральности"
-    const hpInterval = setInterval(() => {
-        hp -= 0.5;
-        hpFill.style.width = hp + '%';
-        
-        if (hp <= 70) statusText.innerText = "СТАТУС: СОМНИТЕЛЬНО, НО ОКЭЙ";
-        if (hp <= 40) statusText.innerText = "СТАТУС: КУПИЛ УЗКИЕ ДЖИНСЫ";
-        if (hp <= 15) statusText.innerText = "СТАТУС: СМОТРИТ АНИМЕ";
-        
-        if (hp <= 0) {
-            clearInterval(hpInterval);
-            finishGame();
-        }
+const player = {
+    x:100,
+    y:0,
+    w:40,
+    h:50,
+    vx:0,
+    vy:0,
+    speed:5,
+    jump:-12,
+    onGround:false
+};
 
-        // Кнопка "ДА" растет со временем, захватывая экран
-        yesScale += 0.002;
-        yesBtn.style.transform = `translate(-50%, -50%) scale(${yesScale})`;
-    }, 100);
+const keys = {};
+document.addEventListener("keydown",e=>keys[e.code]=true);
+document.addEventListener("keyup",e=>keys[e.code]=false);
 
-    const moveNo = () => {
-        const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
-        const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
-        noBtn.style.left = x + 'px';
-        noBtn.style.top = y + 'px';
-        
-        // Оскорбления при попытке нажать
-        const phrases = ["ХУЙ ТЕБЕ", "МАЗИЛА", "ПОЧТИ!", "ТЫ ГЕЙ, СМИРИСЬ", "НЕ ПОПАЛ", "ЛОШАРА"];
-        noBtn.innerText = phrases[Math.floor(Math.random() * phrases.length)];
-        
-        // Звуковой эффект (синтезатор)
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(100 + Math.random() * 500, audioCtx.currentTime);
-        osc.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.1);
-    };
+const platforms = [
+    {x:0,y:500,w:3000,h:40},
+    {x:300,y:420,w:200,h:20},
+    {x:650,y:350,w:200,h:20},
+    {x:1000,y:300,w:200,h:20},
+    {x:1400,y:400,w:200,h:20},
+    {x:1800,y:320,w:200,h:20}
+];
 
-    noBtn.addEventListener('mouseover', moveNo);
-    noBtn.addEventListener('touchstart', (e) => { e.preventDefault(); moveNo(); });
+const coins = [
+    {x:350,y:380,collected:false},
+    {x:700,y:310,collected:false},
+    {x:1050,y:260,collected:false},
+    {x:1450,y:360,collected:false},
+    {x:1850,y:280,collected:false}
+];
 
-    yesBtn.addEventListener('click', () => {
-        finishGame();
-    });
+const enemies = [
+    {x:600,y:460,w:40,h:40,dir:1},
+    {x:1200,y:460,w:40,h:40,dir:1},
+    {x:1700,y:460,w:40,h:40,dir:1}
+];
 
-    function finishGame() {
-        finalScreen.style.display = 'flex';
-        document.body.style.background = 'white';
-        // Бесконечный спам алертов для финального унижения
-        setTimeout(() => {
-            while(true) {
-                alert("ЕБАТЬ ТЫ ПЕТУШАРА!");
-            }
-        }, 1000);
+function update(){
+
+    // движение
+    player.vx = 0;
+    if(keys["ArrowLeft"]) player.vx = -player.speed;
+    if(keys["ArrowRight"]) player.vx = player.speed;
+
+    if(keys["Space"] && player.onGround){
+        player.vy = player.jump;
+        player.onGround = false;
     }
+
+    player.vy += gravity;
+
+    player.x += player.vx;
+    player.y += player.vy;
+
+    player.onGround = false;
+
+    // платформы
+    for(let p of platforms){
+        if(
+            player.x < p.x + p.w &&
+            player.x + player.w > p.x &&
+            player.y < p.y + p.h &&
+            player.y + player.h > p.y
+        ){
+            if(player.vy > 0){
+                player.y = p.y - player.h;
+                player.vy = 0;
+                player.onGround = true;
+            }
+        }
+    }
+
+    // монеты
+    for(let coin of coins){
+        if(!coin.collected &&
+            player.x < coin.x + 20 &&
+            player.x + player.w > coin.x &&
+            player.y < coin.y + 20 &&
+            player.y + player.h > coin.y
+        ){
+            coin.collected = true;
+            score += 10;
+            document.getElementById("score").textContent = score;
+        }
+    }
+
+    // враги
+    for(let e of enemies){
+        e.x += 2 * e.dir;
+        if(e.x < 0 || e.x > 2800) e.dir *= -1;
+
+        if(
+            player.x < e.x + e.w &&
+            player.x + player.w > e.x &&
+            player.y < e.y + e.h &&
+            player.y + player.h > e.y
+        ){
+            // прыжок на врага
+            if(player.vy > 0){
+                e.x = -1000;
+                player.vy = -8;
+                score += 20;
+                document.getElementById("score").textContent = score;
+            } else {
+                // проигрыш
+                alert("Ты проиграл!");
+                location.reload();
+            }
+        }
+    }
+
+    // камера
+    cameraX = player.x - canvas.width/3;
+
+}
+
+function draw(){
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    ctx.save();
+    ctx.translate(-cameraX,0);
+
+    // платформы
+    ctx.fillStyle="#654321";
+    for(let p of platforms){
+        ctx.fillRect(p.x,p.y,p.w,p.h);
+    }
+
+    // монеты
+    ctx.fillStyle="gold";
+    for(let coin of coins){
+        if(!coin.collected){
+            ctx.beginPath();
+            ctx.arc(coin.x+10,coin.y+10,10,0,Math.PI*2);
+            ctx.fill();
+        }
+    }
+
+    // враги
+    ctx.fillStyle="green";
+    for(let e of enemies){
+        ctx.fillRect(e.x,e.y,e.w,e.h);
+    }
+
+    // игрок
+    ctx.fillStyle="red";
+    ctx.fillRect(player.x,player.y,player.w,player.h);
+
+    ctx.restore();
+
+    // финиш
+    ctx.fillStyle="black";
+    ctx.fillRect(2900 - cameraX,450,20,50);
+}
+
+function gameLoop(){
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
 </script>
 
 </body>
