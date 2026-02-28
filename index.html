@@ -2,15 +2,15 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mario Style Game</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Mario Mobile Game</title>
 
 <style>
 body {
   margin: 0;
   overflow: hidden;
   background: #87CEEB;
-  font-family: Arial;
+  touch-action: none;
 }
 
 canvas {
@@ -19,21 +19,39 @@ canvas {
 
 .controls {
   position: fixed;
-  bottom: 20px;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  padding: 0 30px;
+  bottom: 30px;
+  left: 20px;
 }
 
-button {
-  width: 70px;
-  height: 70px;
-  font-size: 28px;
+.joystick {
+  width: 120px;
+  height: 120px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 50%;
+  position: relative;
+}
+
+.stick {
+  width: 50px;
+  height: 50px;
+  background: rgba(0,0,0,0.6);
+  border-radius: 50%;
+  position: absolute;
+  left: 35px;
+  top: 35px;
+}
+
+.jump {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
   border: none;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0,0,0,0.5);
   color: white;
+  font-size: 30px;
 }
 </style>
 </head>
@@ -43,10 +61,12 @@ button {
 <canvas id="game"></canvas>
 
 <div class="controls">
-  <button id="left">◀</button>
-  <button id="jump">▲</button>
-  <button id="right">▶</button>
+  <div class="joystick" id="joystick">
+    <div class="stick" id="stick"></div>
+  </div>
 </div>
+
+<button class="jump" id="jump">▲</button>
 
 <script>
 const canvas = document.getElementById("game");
@@ -60,12 +80,12 @@ let gravity = 0.6;
 const player = {
   x: 100,
   y: 100,
-  width: 40,
-  height: 40,
+  w: 40,
+  h: 40,
   vx: 0,
   vy: 0,
-  speed: 4,
-  jump: -12,
+  speed: 5,
+  jump: -14,
   onGround: false
 };
 
@@ -73,28 +93,29 @@ let cameraX = 0;
 let score = 0;
 
 const platforms = [
-  {x:0, y:400, w:2000, h:40},
-  {x:300, y:320, w:150, h:20},
-  {x:550, y:260, w:150, h:20},
-  {x:800, y:200, w:150, h:20}
+  {x:0,y:420,w:3000,h:40},
+  {x:300,y:340,w:150,h:20},
+  {x:550,y:280,w:150,h:20},
+  {x:800,y:220,w:150,h:20},
+  {x:1050,y:300,w:150,h:20}
 ];
 
 const coins = [
-  {x:350, y:280, r:10, taken:false},
-  {x:600, y:220, r:10, taken:false},
-  {x:850, y:160, r:10, taken:false}
+  {x:350,y:300,taken:false},
+  {x:600,y:240,taken:false},
+  {x:850,y:180,taken:false},
+  {x:1100,y:260,taken:false}
 ];
 
-const keys = {
-  left:false,
-  right:false
-};
+const enemies = [
+  {x:500,y:390,w:40,h:30,dir:1},
+  {x:900,y:390,w:40,h:30,dir:-1}
+];
+
+let move = 0;
 
 function update() {
-  player.vx = 0;
-
-  if (keys.left) player.vx = -player.speed;
-  if (keys.right) player.vx = player.speed;
+  player.vx = move * player.speed;
 
   player.vy += gravity;
   player.x += player.vx;
@@ -102,34 +123,50 @@ function update() {
 
   player.onGround = false;
 
-  platforms.forEach(p => {
-    if (
-      player.x < p.x + p.w &&
-      player.x + player.width > p.x &&
-      player.y < p.y + p.h &&
-      player.y + player.height > p.y
-    ) {
-      if (player.vy > 0) {
-        player.y = p.y - player.height;
+  platforms.forEach(p=>{
+    if(
+      player.x < p.x+p.w &&
+      player.x+player.w > p.x &&
+      player.y < p.y+p.h &&
+      player.y+player.h > p.y
+    ){
+      if(player.vy > 0){
+        player.y = p.y-player.h;
         player.vy = 0;
         player.onGround = true;
       }
     }
   });
 
-  coins.forEach(c => {
-    if (!c.taken) {
-      let dx = player.x + player.width/2 - c.x;
-      let dy = player.y + player.height/2 - c.y;
-      let dist = Math.sqrt(dx*dx + dy*dy);
-      if (dist < 30) {
+  coins.forEach(c=>{
+    if(!c.taken){
+      let dx = player.x - c.x;
+      let dy = player.y - c.y;
+      if(Math.abs(dx)<40 && Math.abs(dy)<40){
         c.taken = true;
         score++;
       }
     }
   });
 
-  cameraX = player.x - canvas.width / 2;
+  enemies.forEach(e=>{
+    e.x += e.dir * 2;
+
+    if(e.x < e.start || e.x > (e.start+200 || e.x+200)){
+      e.dir *= -1;
+    }
+
+    if(
+      player.x < e.x+e.w &&
+      player.x+player.w > e.x &&
+      player.y < e.y+e.h &&
+      player.y+player.h > e.y
+    ){
+      location.reload();
+    }
+  });
+
+  cameraX = player.x - canvas.width/2;
 }
 
 function draw() {
@@ -138,69 +175,66 @@ function draw() {
   ctx.save();
   ctx.translate(-cameraX,0);
 
-  // платформы
-  ctx.fillStyle = "#5c3a1e";
+  ctx.fillStyle="#5c3a1e";
   platforms.forEach(p=>{
     ctx.fillRect(p.x,p.y,p.w,p.h);
   });
 
-  // монеты
   coins.forEach(c=>{
     if(!c.taken){
       ctx.beginPath();
-      ctx.arc(c.x,c.y,c.r,0,Math.PI*2);
+      ctx.arc(c.x,c.y,10,0,Math.PI*2);
       ctx.fillStyle="gold";
       ctx.fill();
     }
   });
 
-  // игрок
-  ctx.fillStyle = "red";
-  ctx.fillRect(player.x,player.y,player.width,player.height);
+  ctx.fillStyle="green";
+  enemies.forEach(e=>{
+    ctx.fillRect(e.x,e.y,e.w,e.h);
+  });
+
+  ctx.fillStyle="red";
+  ctx.fillRect(player.x,player.y,player.w,player.h);
 
   ctx.restore();
 
-  // счет
-  ctx.fillStyle = "black";
-  ctx.font = "20px Arial";
-  ctx.fillText("Счет: " + score, 20, 30);
+  ctx.fillStyle="black";
+  ctx.font="20px Arial";
+  ctx.fillText("Coins: "+score,20,30);
 }
 
-function gameLoop(){
+function loop(){
   update();
   draw();
-  requestAnimationFrame(gameLoop);
+  requestAnimationFrame(loop);
 }
+loop();
 
-gameLoop();
+// ДЖОЙСТИК
+const joystick = document.getElementById("joystick");
+const stick = document.getElementById("stick");
 
-// кнопки телефона
-const leftBtn = document.getElementById("left");
-const rightBtn = document.getElementById("right");
-const jumpBtn = document.getElementById("jump");
+joystick.addEventListener("pointermove", e=>{
+  if(e.pressure>0){
+    const rect = joystick.getBoundingClientRect();
+    const x = e.clientX - rect.left - 60;
 
-leftBtn.addEventListener("touchstart", ()=> keys.left = true);
-leftBtn.addEventListener("touchend", ()=> keys.left = false);
-
-rightBtn.addEventListener("touchstart", ()=> keys.right = true);
-rightBtn.addEventListener("touchend", ()=> keys.right = false);
-
-jumpBtn.addEventListener("touchstart", ()=>{
-  if(player.onGround){
-    player.vy = player.jump;
+    if(x < -20) move = -1;
+    else if(x > 20) move = 1;
+    else move = 0;
   }
 });
 
-// клавиатура (для ПК)
-document.addEventListener("keydown", e=>{
-  if(e.key==="ArrowLeft") keys.left = true;
-  if(e.key==="ArrowRight") keys.right = true;
-  if(e.key===" " && player.onGround) player.vy = player.jump;
+joystick.addEventListener("pointerup", ()=>{
+  move = 0;
 });
 
-document.addEventListener("keyup", e=>{
-  if(e.key==="ArrowLeft") keys.left = false;
-  if(e.key==="ArrowRight") keys.right = false;
+// ПРЫЖОК
+document.getElementById("jump").addEventListener("pointerdown", ()=>{
+  if(player.onGround){
+    player.vy = player.jump;
+  }
 });
 </script>
 
