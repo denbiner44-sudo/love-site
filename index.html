@@ -1,924 +1,229 @@
-`html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Бомжара — выживание на улицах</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Arial', sans-serif;
-      background: linear-gradient(to bottom, #1a1a2e, #16213e);
-      color: #fff;
-      line-height: 1.6;
-      padding: 20px;
-    }
-
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    header {
-      text-align: center;
-      padding: 1rem 0;
-      border-bottom: 3px solid #e94560;
-      margin-bottom: 2rem;
-    }
-
-    h1 {
-      font-size: 2.5rem;
-      text-shadow: 0 0 10px #e94560;
-    }
-
-    .stats {
-      display: flex;
-      justify-content: space-around;
-      margin-bottom: 2rem;
-      flex-wrap: wrap;
-    }
-
-    .stat-box {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 15px;
-      border-radius: 10px;
-      width: 22%;
-      min-width: 120px;
-      text-align: center;
-      border: 1px solid rgba(233, 69, 96, 0.3);
-    }
-
-    .actions {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      margin-bottom: 2rem;
-    }
-
-    button {
-      padding: 15px;
-      font-size: 1rem;
-      background: #e94560;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    button:hover {
-      background: #ff6b81;
-      transform: translateY(-2px);
-    }
-
-    .log {
-      background: rgba(0, 0, 0, 0.5);
-      padding: 15px;
-      border-radius: 10px;
-      height: 200px;
-      overflow-y: auto;
-      margin-top: 1rem;
-      border: 1px solid #444;
-    }
-
-    .message {
-      margin-bottom: 10px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <header>
-      <h1>БОМЖАРА</h1>
-      <p>Выживание на улицах большого города</p>
-    </header>
-
-    <div class="stats">
-      <div class="stat-box">
-        <h3>День</h3>
-        <p id="day">1</p>
-      </div>
-      <div class="stat-box">
-        <h3>Голод</h3>
-        <p id="hunger">50</p>
-      </div>
-      <div class="stat-box">
-        <h3>Здоровье</h3>
-        <p id="health">100</p>
-      </div>
-      <div class="stat-box">
-        <h3>Деньги</h3>
-        <p id="money">0 ₽</p>
-      </div>
-    </div>
-
-    <div class="actions">
-      <button onclick="searchGarbage()">Искать мусор</button>
-      <button onclick="sellItems()">Продать находки</button>
-      <button onclick="buyFood()">Купить еду</button>
-      <button onclick="rest()">Отдохнуть</button>
-    </div>
-
-    <h2>Журнал событий:</h2>
-    <div class="log" id="gameLog">
-      <div class="message">День 1: Вы оказались на улице без денег и еды. Начинайте выживать!</div>
-    </div>
-  </div>
-
-  <script>
-    // Начальные параметры
-    let day = 1;
-    let hunger = 50;
-    let health = 100;
-    let money = 0;
-    let itemsFound = 0;
-
-    // Обновление интерфейса
-    function updateUI() {
-      document.getElementById('day').textContent = day;
-      document.getElementById('hunger').textContent = hunger;
-      document.getElementById('health').textContent = health;
-      document.getElementById('money').textContent = money + ' ₽';
-    }
-
-    // Добавление сообщения в журнал
-    function addLog(message) {
-
-const log = document.getElementById('gameLog');
-      const messageDiv = document.createElement('div');
-      messageDiv.className = 'message';
-      messageDiv.textContent = message;
-      log.appendChild(messageDiv);
-      log.scrollTop = log.scrollHeight;
-    }
-
-    // Поиск мусора
-    function searchGarbage() {
-      itemsFound += Math.floor(Math.random() * 3) + 1;
-      hunger -= 10;
-      health -= 5;
-      addLog(День ${day}: Вы нашли ${itemsFound} предметов. Голод увеличился, здоровье уменьшилось.);
-      checkGameOver();
-      updateUI();
-    }
-
-    // Продажа находок
-    function sellItems() {
-      if (itemsFound > 0) {
-        const earned = itemsFound * 10;
-        money += earned;
-        itemsFound = 0;
-        addLog(День ${day}: Вы продали находки за ${earned} ₽. Теперь у вас ${money} ₽.);
-      } else {
-        addLog(День ${day}: У вас нет предметов для продажи.);
-      }
-      updateUI();
-    }
-
-    // Покупка еды
-    function buyFood() {
-      if (money >= 20) {
-        money -= 20;
-        hunger += 30;
-        if (hunger > 100) hunger = 100;
-        addLog(День ${day}: Вы купили еду за 20 ₽. Голод уменьшился.);
-      } else {
-        addLog(День ${day}: Недостаточно денег для покупки еды.);
-      }
-      updateUI();
-    }
-
-    // Отдых
-    function rest() {
-      health += 20;
-      hunger += 10;
-      if (health > 100) health = 100;
-      day++;
-      addLog(День ${day}: Вы отдохнули. Здоровье улучшилось, но голод увеличился.);
-      checkGameOver();
-      updateUI();
-    }
-
-    // Проверка окончания игры
-    function checkGameOver() {
-      if (hunger <= 0 || health <= 0) {
-        addLog(Игра окончена! Вы не смогли выжить на улицах. Продержались ${day} дней.);
-        disableButtons();
-      }
-    }
-
-    // Отключение кнопок при проигрыше
-    function disableButtons() {
-      const buttons = document.querySelectorAll('button');
-      buttons.forEach(button => {
-        button.disabled = true;
-      });
-    }
-
-    // Инициализация игры
-    updateUI();
-  </script>
-</body>        .biz-name { font-weight: bold; color: var(--accent); margin-bottom: 5px; }
-        .biz-stats { font-size: 0.8em; color: #94a3b8; margin-bottom: 10px; }
-
-        button { 
-            padding: 12px; border: none; border-radius: 8px; cursor: pointer; 
-            font-weight: bold; transition: 0.1s; color: white; width: 100%;
-        }
-        button:active { transform: scale(0.98); }
-        button:disabled { background: #475569 !important; opacity: 0.5; cursor: not-allowed; }
-
-        .btn-buy { background: var(--green); }
-        .btn-mgr { background: var(--blue); margin-top: 8px; font-size: 0.8em; }
-
-        #clickBtn { 
-            height: 120px; font-size: 28px; margin-bottom: 20px;
-            background: linear-gradient(135deg, var(--accent), #d97706);
-            border-bottom: 5px solid #713f12; color: #000;
-        }
-
-        .buy-modes { display: flex; gap: 5px; margin-bottom: 10px; }
-        .mode-btn { background: #334155; padding: 8px; font-size: 0.9em; }
-        .mode-btn.active { background: var(--accent); color: #000; }
-
-        #event-toast {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            padding: 12px 25px; border-radius: 30px; font-weight: bold;
-            z-index: 1000; display: none; box-shadow: 0 10px 15px rgba(0,0,0,0.5);
-        }
-
-        .floating { 
-            position: absolute; font-weight: bold; color: var(--accent);
-            pointer-events: none; animation: floatUp 0.6s ease-out forwards;
-        }
-        @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-50px); }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LIFE EMPIRE PRO</title>
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:linear-gradient(135deg,#0f172a,#1e293b);
+    color:white;
+}
+header{
+    background:#111827;
+    padding:10px;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:space-around;
+    font-size:14px;
+}
+section{
+    padding:15px;
+}
+h2{
+    margin-top:25px;
+}
+button{
+    width:95%;
+    max-width:450px;
+    padding:10px;
+    margin:5px;
+    border:none;
+    border-radius:10px;
+    background:linear-gradient(90deg,#06b6d4,#22c55e);
+    color:white;
+    cursor:pointer;
+}
+button:hover{transform:scale(1.03);}
+.panel{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+.gameover{
+    position:fixed;
+    inset:0;
+    background:black;
+    display:none;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    font-size:28px;
+}
+</style>
 </head>
 <body>
 
-<div class="topbar">
-    <div class="stat-box">💰 Баланс<span id="money" class="stat-val">0</span><span id="taxDisp" class="tax-alert"></span></div>
-    <div class="stat-box">📊 Доход/с<span id="income" class="stat-val">0</span></div>
-    <div class="stat-box">🏅 Престиж<span id="prestige" class="stat-val">0</span></div>
-</div>
+<header>
+<div>💰 Деньги: <span id="money"></span></div>
+<div>📈 Доход/сек: <span id="income"></span></div>
+<div>🏦 Долг: <span id="debt"></span></div>
+<div>⭐ Рейтинг: <span id="rating"></span></div>
+<div>🎓 Уровень: <span id="level"></span></div>
+<div>❤️ <span id="health"></span></div>
+<div>🍔 <span id="food"></span></div>
+<div>😊 <span id="mood"></span></div>
+</header>
 
-<div class="tabs">
-    <div class="tab active" onclick="openTab(0)">⚒️ Труд</div>
-    <div class="tab" onclick="openTab(1)">🏙️ Активы</div>
-    <div class="tab" onclick="openTab(2)">⚖️ Управа</div>
-</div>
+<section class="panel">
 
-<div class="panel active" id="tab0">
-    <button id="clickBtn">РАБОТАТЬ 💸</button>
-    <div class="card">
-        <div class="biz-name">Инструменты</div>
-        <div class="biz-stats">Сила клика: <span id="clickPwrDisp">1</span></div>
-        <button class="btn-buy" id="upgradeClickBtn" onclick="buyClickUpgrade()">Улучшить за $50</button>
-    </div>
-</div>
+<h2>💼 Бизнес</h2>
+<button onclick="buyBusiness(500,'Ларёк',5)">Ларёк (500)</button>
+<button onclick="buyBusiness(5000,'Кафе',50)">Кафе (5000)</button>
+<button onclick="buyBusiness(50000,'Автосервис',500)">Автосервис (50000)</button>
+<button onclick="buyBusiness(500000,'Завод',5000)">Завод (500000)</button>
 
-<div class="panel" id="tab1">
-    <div class="buy-modes">
-        <button class="mode-btn active" onclick="setBuyMode(1, this)">x1</button>
-        <button class="mode-btn" onclick="setBuyMode(10, this)">x10</button>
-        <button class="mode-btn" onclick="setBuyMode(50, this)">x50</button>
-    </div>
-    <div id="businessList"></div>
-</div>
+<h2>🏢 Недвижимость</h2>
+<button onclick="buyAsset(10000,10)">Снять квартиру (10000)</button>
+<button onclick="buyAsset(100000,50)">Купить квартиру (100000)</button>
 
-<div class="panel" id="tab2">
-    <div class="card">
-        <h3>Экономика</h3>
-        <p>Текущий налог: <span id="currentTax">0</span>%</p>
-        <button class="btn-buy" onclick="prestigeReset()" style="background:var(--accent); color:black;">РЕИНКАРНАЦИЯ (Престиж)</button>
-    </div>
-    <button onclick="hardReset()" style="margin-top:20px; background:transparent; color:var(--red); border:1px solid var(--red); font-size:0.8em;">СБРОСИТЬ ПРОГРЕСС</button>
-</div>
+<h2>🚗 Транспорт</h2>
+<button onclick="buyAsset(20000,20)">Купить машину (20000)</button>
+<button onclick="buyAsset(200000,100)">Купить спорткар (200000)</button>
 
-<div id="event-toast"></div>
+<h2>🏦 Кредит</h2>
+<button onclick="takeLoan(10000)">Взять 10000</button>
+<button onclick="takeLoan(50000)">Взять 50000</button>
+<button onclick="payLoan()">Погасить долг</button>
 
-<script>
-// Глобальное состояние
-let g = {
-    money: 100, clickPower: 1, prestige: 0, buyMode: 1, eventMult: 1,
-    biz: [
-        { id: 0, name: "Ларёк с шаурмой", baseCost: 20, inc: 1, owned: 0, manager: false },
-        { id: 1, name: "Кофейня", baseCost: 300, inc: 8, owned: 0, manager: false },
-        { id: 2, name: "Барбершоп", baseCost: 2500, inc: 45, owned: 0, manager: false },
-        { id: 3, name: "Ночной клуб", baseCost: 15000, inc: 200, owned: 0, manager: false },
-        { id: 4, name: "Торговый центр", baseCost: 100000, inc: 1100, owned: 0, manager: false }
-    ]
-};
+<h2>🎉 Жизнь</h2>
+<button onclick="eat()">Поесть (200)</button>
+<button onclick="rest()">Отдых (500)</button>
+<button onclick="heal()">Лечение (1000)</button>
 
-const GROWTH = 1.15; // Множитель роста цены
+</section>
 
-// Форматирование чисел
-function f(n) {
-    if (n < 1000) return Math.floor(n);
-    let s = ['k', 'M', 'B', 'T', 'Q'];
-    let e = Math.floor(Math.log10(n) / 3);
-    return (n / Math.pow(1000, e)).toFixed(2) + s[e - 1];
-}
-
-// Расчет налога
-function getTaxRate() {
-    if (g.money > 1e9) return 0.40;
-    if (g.money > 1e6) return 0.20;
-    return 0;
-}
-
-// Расчет суммарного дохода
-function getTotalIncome() {
-    let raw = g.biz.reduce((sum, b) => {
-        let bInc = b.owned * b.inc * (1 + g.prestige) * g.eventMult;
-        if (b.manager) bInc *= 1.5;
-        return sum + bInc;
-    }, 0);
-    return raw * (1 - getTaxRate());
-}
-
-// Расчет стоимости N построек (Сумма геометрической прогрессии)
-function getCost(baseCost, owned, count) {
-    return baseCost * (Math.pow(GROWTH, owned) * (Math.pow(GROWTH, count) - 1)) / (GROWTH - 1);
-}
-
-function updateUI() {
-    document.getElementById('money').innerText = f(g.money);
-    document.getElementById('income').innerText = f(getTotalIncome());
-    document.getElementById('prestige').innerText = f(g.prestige);
-    document.getElementById('clickPwrDisp').innerText = f(g.clickPower * (1 + g.prestige));
-    
-    let tax = getTaxRate();
-    document.getElementById('currentTax').innerText = (tax * 100).toFixed(0);
-    document.getElementById('taxDisp').innerText = tax > 0 ? `(-${(tax*100).toFixed(0)}%)` : "";
-    
-    let clickCost = 50 * Math.pow(2.5, g.clickPower - 1);
-    let upgBtn = document.getElementById('upgradeClickBtn');
-    upgBtn.innerText = `Улучшить за $${f(clickCost)}`;
-    upgBtn.disabled = g.money < clickCost;
-}
-
-document.getElementById('clickBtn').onclick = (e) => {
-    let pwr = g.clickPower * (1 + g.prestige) * g.eventMult;
-    g.money += pwr;
-    showFloating(e, `+$${f(pwr)}`);
-    updateUI();
-};
-
-function buyClickUpgrade() {
-    let cost = 50 * Math.pow(2.5, g.clickPower - 1);
-    if (g.money >= cost) {
-        g.money -= cost;
-        g.clickPower++;
-        updateUI();
-    }
-}
-
-function buyBiz(id) {
-    let b = g.biz[id];
-    let cost = getCost(b.baseCost, b.owned, g.buyMode);
-    if (g.money >= cost) {
-        g.money -= cost;
-        b.owned += g.buyMode;
-        renderBusinesses();
-        updateUI();
-    }
-}
-
-function hireManager(id) {
-    let b = g.biz[id];
-    let cost = b.baseCost * 50;
-    if (g.money >= cost && !b.manager) {
-        g.money -= cost;
-        b.manager = true;
-        renderBusinesses();
-        updateUI();
-    }
-}
-
-function renderBusinesses() {
-    let html = '';
-    g.biz.forEach(b => {
-        let cost = getCost(b.baseCost, b.owned, g.buyMode);
-        html += `
-            <div class="card">
-                <div class="biz-name">${b.name} <small>(ур. ${b.owned})</small></div>
-                <div class="biz-stats">Доход: $${f(b.owned * b.inc * (1+g.prestige))}/с</div>
-                <button class="btn-buy" onclick="buyBiz(${b.id})" ${g.money < cost ? 'disabled' : ''}>
-                    Купить x${g.buyMode} ($${f(cost)})
-                </button>
-                <button class="btn-mgr" onclick="hireManager(${b.id})" ${b.manager ? 'disabled' : ''}>
-                    ${b.manager ? '✅ Автоматизировано' : '👔 Менеджер ($' + f(b.baseCost*50) + ')'}
-                </button>
-            </div>`;
-    });
-    document.getElementById('businessList').innerHTML = html;
-}
-
-function setBuyMode(m, btn) {
-    g.buyMode = m;
-    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    renderBusinesses();
-}
-
-function openTab(i) {
-    document.querySelectorAll('.tab, .panel').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.tab')[i].classList.add('active');
-    document.querySelectorAll('.panel')[i].classList.add('active');
-    if(i === 1) renderBusinesses();
-}
-
-function showFloating(e, text) {
-    let div = document.createElement('div');
-    div.className = 'floating';
-    div.innerText = text;
-    div.style.left = e.pageX + 'px'; div.style.top = e.pageY + 'px';
-    document.body.appendChild(div);
-    setTimeout(() => div.remove(), 600);
-}
-
-function prestigeReset() {
-    if(g.money < 1000000) return alert("Нужно $1M для престижа!");
-    let bonus = Math.floor(Math.sqrt(g.money / 100000));
-    if(confirm(`Сбросить всё и получить +${bonus} престижа?`)) {
-        g.prestige += bonus;
-        g.money = 100; g.clickPower = 1;
-        g.biz.forEach(b => { b.owned = 0; b.manager = false; });
-        renderBusinesses();
-        updateUI();
-    }
-}
-
-function hardReset() { if(confirm("Удалить всё?")) { localStorage.clear(); location.reload(); } }
-
-// Цикл дохода (10 раз в секунду)
-setInterval(() => { 
-    g.money += getTotalIncome() / 10; 
-    updateUI(); 
-}, 100);
-
-window.onload = () => { renderBusinesses(); updateUI(); };
-</script>
-</body>
-</html>
-        .tag { font-size: 0.7em; background: var(--accent); color: black; padding: 2px 6px; border-radius: 4px; float: right; }
-
-        button { 
-            padding: 12px; border: none; border-radius: 8px; cursor: pointer; 
-            font-weight: bold; transition: 0.2s; color: white; width: 100%; margin-top: 10px;
-        }
-        .btn-buy { background: var(--green); }
-        .btn-upg { background: var(--blue); }
-        button:disabled { background: #475569 !important; opacity: 0.5; }
-
-        #clickBtn { 
-            height: 100px; font-size: 30px; margin-bottom: 20px;
-            background: linear-gradient(45deg, #fbbf24, #d97706); border-radius: 20px;
-        }
-
-        .desc { font-size: 0.85em; color: #94a3b8; margin: 5px 0; }
-    </style>
-</head>
-<body>
-
-<div class="topbar">
-    <div class="stat-box">💰 Баланс<span id="money" class="stat-val">0</span></div>
-    <div class="stat-box">📊 Доход/сек<span id="income" class="stat-val">0</span></div>
-</div>
-
-<div class="tabs">
-    <div class="tab active" onclick="openTab(0)">⚒️ Труд</div>
-    <div class="tab" onclick="openTab(1)">🏪 Бизнес</div>
-    <div class="tab" onclick="openTab(2)">🚀 Технологии</div>
-</div>
-
-<div class="panel active" id="tab0">
-    <button id="clickBtn">РАБОТАТЬ 💸</button>
-    <div class="card">
-        <strong>Улучшение инструментов</strong>
-        <p class="desc">Увеличивает силу клика за счет новых технологий.</p>
-        <button class="btn-upg" onclick="buyClickUpgrade()">Улучшить за $<span id="clickCostDisp">50</span></button>
-    </div>
-</div>
-
-<div class="panel" id="tab1">
-    <div id="businessList"></div>
-</div>
-
-<div class="panel" id="tab2">
-    <div id="upgradesList"></div>
+<div class="gameover" id="gameover">
+<div>💀 БАНКРОТСТВО</div>
+<button onclick="resetGame()">Начать заново</button>
 </div>
 
 <script>
-let g = {
-    money: 50, clickPower: 1, prestige: 1,
-    costMult: 1, // Скидка на покупки
-    biz: [
-        { id: 0, name: "Ларёк с шаурмой", cost: 20, inc: 1, owned: 0 },
-        { id: 1, name: "Кофейня", cost: 250, inc: 10, owned: 0 },
-        { id: 2, name: "Барбершоп", cost: 2000, inc: 50, owned: 0 },
-        { id: 3, name: "Автомойка", cost: 15000, inc: 250, owned: 0 },
-        { id: 4, name: "ТЦ «Галерея»", cost: 100000, inc: 1200, owned: 0 },
-        { id: 5, name: "Завод электроники", cost: 800000, inc: 6000, owned: 0 },
-        { id: 6, name: "Авиакомпания", cost: 10000000, inc: 50000, owned: 0 },
-        { id: 7, name: "Космодром", cost: 100000000, inc: 400000, owned: 0 }
-    ],
-    upgrades: [
-        { id: 0, name: "Агрессивный маркетинг", cost: 5000, desc: "Все здания дешевле на 15%", bought: false, action: () => { g.costMult *= 0.85; } },
-        { id: 1, name: "Офшоры", cost: 50000, desc: "Увеличивает весь доход на 25%", bought: false, action: () => { g.prestige *= 1.25; } },
-        { id: 2, name: "Искусственный интеллект", cost: 500000, desc: "Здания приносят доход на 50% больше", bought: false, action: () => { g.prestige *= 1.5; } },
-        { id: 3, name: "Монополия", cost: 5000000, desc: "Скидка на здания еще 20%", bought: false, action: () => { g.costMult *= 0.8; } }
-    ]
+let game = JSON.parse(localStorage.getItem("lifeEmpire")) || {
+    money:2000,
+    income:0,
+    debt:0,
+    rating:0,
+    level:1,
+    xp:0,
+    health:80,
+    food:70,
+    mood:70
 };
 
-function f(n) {
-    if (n < 1000) return Math.floor(n);
-    let s = ['k', 'M', 'B', 'T'];
-    let e = Math.floor(Math.log10(n) / 3);
-    return (n / Math.pow(1000, e)).toFixed(2) + s[e - 1];
+function save(){
+    localStorage.setItem("lifeEmpire",JSON.stringify(game));
 }
 
-function updateUI() {
-    document.getElementById('money').innerText = f(g.money);
-    document.getElementById('income').innerText = f(getTotalIncome());
-    document.getElementById('clickCostDisp').innerText = f(50 * Math.pow(3, g.clickPower - 1));
-    renderBusiness();
-    renderUpgrades();
+function update(){
+    document.getElementById("money").innerText=Math.floor(game.money);
+    document.getElementById("income").innerText=game.income;
+    document.getElementById("debt").innerText=Math.floor(game.debt);
+    document.getElementById("rating").innerText=game.rating;
+    document.getElementById("level").innerText=game.level;
+    document.getElementById("health").innerText=game.health;
+    document.getElementById("food").innerText=game.food;
+    document.getElementById("mood").innerText=game.mood;
+
+    if(game.money < -100000 || game.health<=0){
+        document.getElementById("gameover").style.display="flex";
+    }
+    save();
 }
 
-function getTotalIncome() {
-    return g.biz.reduce((sum, b) => sum + (b.owned * b.inc * g.prestige), 0);
-}
-
-document.getElementById('clickBtn').onclick = () => {
-    g.money += g.clickPower * g.prestige;
-    updateUI();
-};
-
-function buyClickUpgrade() {
-    let cost = 50 * Math.pow(3, g.clickPower - 1);
-    if (g.money >= cost) {
-        g.money -= cost;
-        g.clickPower++;
-        updateUI();
+function addXP(amount){
+    game.xp+=amount;
+    if(game.xp>=100){
+        game.xp=0;
+        game.level++;
+        game.income*=1.2;
     }
 }
 
-function renderBusiness() {
-    let html = '';
-    g.biz.forEach(b => {
-        let isVisible = g.money >= b.cost * 0.4 || b.owned > 0;
-        let actualCost = b.cost * g.costMult;
-        
-        if (isVisible) {
-            html += `
-                <div class="card">
-                    <span class="tag">Ур. ${b.owned}</span>
-                    <strong>${b.name}</strong>
-                    <p class="desc">Доход: $${f(b.inc * g.prestige)}/с</p>
-                    <button class="btn-buy" onclick="buyBiz(${b.id})" ${g.money < actualCost ? 'disabled' : ''}>
-                        Купить ($${f(actualCost)})
-                    </button>
-                </div>`;
-        } else {
-            html += `<div class="card locked">??? Заблокировано ???</div>`;
-        }
-    });
-    document.getElementById('businessList').innerHTML = html;
-}
-
-function buyBiz(id) {
-    let b = g.biz[id];
-    let actualCost = b.cost * g.costMult;
-    if (g.money >= actualCost) {
-        g.money -= actualCost;
-        b.owned++;
-        b.cost *= 1.25;
-        updateUI();
+function buyBusiness(cost,name,inc){
+    if(game.money>=cost){
+        game.money-=cost;
+        game.income+=inc;
+        game.rating+=10;
+        addXP(20);
+        update();
     }
 }
 
-function renderUpgrades() {
-    let html = '';
-    g.upgrades.forEach(u => {
-        if (!u.bought) {
-            html += `
-                <div class="card" style="border-left: 4px solid var(--purple);">
-                    <strong>${u.name}</strong>
-                    <p class="desc">${u.desc}</p>
-                    <button class="btn-upg" onclick="buySpecialUpgrade(${u.id})" ${g.money < u.cost ? 'disabled' : ''}>
-                        Исследовать ($${f(u.cost)})
-                    </button>
-                </div>`;
-        }
-    });
-    if (html === '') html = '<p style="text-align:center">Все технологии изучены!</p>';
-    document.getElementById('upgradesList').innerHTML = html;
-}
-
-function buySpecialUpgrade(id) {
-    let u = g.upgrades[id];
-    if (g.money >= u.cost) {
-        g.money -= u.cost;
-        u.bought = true;
-        u.action();
-        updateUI();
+function buyAsset(cost,rate){
+    if(game.money>=cost){
+        game.money-=cost;
+        game.rating+=rate;
+        addXP(10);
+        update();
     }
 }
 
-function openTab(i) {
-    document.querySelectorAll('.tab, .panel').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.tab')[i].classList.add('active');
-    document.querySelectorAll('.panel')[i].classList.add('active');
+function takeLoan(amount){
+    if(game.debt===0){
+        game.money+=amount;
+        game.debt=amount;
+        update();
+    }
 }
 
-setInterval(() => {
-    g.money += getTotalIncome() / 10;
-    updateUI();
-}, 100);
+function payLoan(){
+    if(game.money>=game.debt){
+        game.money-=game.debt;
+        game.debt=0;
+        update();
+    }
+}
 
-window.onload = updateUI;
+function eat(){
+    if(game.money>=200){
+        game.money-=200;
+        game.food+=20;
+        if(game.food>100) game.food=100;
+        update();
+    }
+}
+
+function rest(){
+    if(game.money>=500){
+        game.money-=500;
+        game.mood+=20;
+        if(game.mood>100) game.mood=100;
+        update();
+    }
+}
+
+function heal(){
+    if(game.money>=1000){
+        game.money-=1000;
+        game.health+=30;
+        if(game.health>100) game.health=100;
+        update();
+    }
+}
+
+setInterval(()=>{
+    game.money+=game.income;
+    if(game.debt>0){
+        game.debt*=1.01;
+    }
+    game.food-=1;
+    game.mood-=1;
+    if(game.food<=0){
+        game.health-=2;
+    }
+    update();
+},1000);
+
+function resetGame(){
+    localStorage.removeItem("lifeEmpire");
+    location.reload();
+}
+
+update();
 </script>
+
 </body>
 </html>
-            border: 1px solid #1e293b; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-        }
-        .biz-name { font-weight: bold; font-size: 1.1em; color: var(--accent); }
-        .biz-stats { font-size: 0.85em; color: #94a3b8; margin: 5px 0; }
-
-        button { 
-            padding: 12px; border: none; border-radius: 6px; cursor: pointer; 
-            font-weight: bold; transition: 0.2s; color: white; width: 100%;
-        }
-        button:active { transform: scale(0.97); }
-        button:disabled { background: #334155 !important; opacity: 0.5; cursor: not-allowed; }
-
-        .btn-buy { background: var(--green); margin-top: 10px; }
-        .btn-mgr { background: #6366f1; margin-top: 5px; font-size: 0.8em; }
-        
-        #clickBtn { 
-            height: 90px; font-size: 24px; margin-bottom: 20px;
-            background: linear-gradient(to bottom, #facc15, #a16207);
-            border-bottom: 4px solid #713f12; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        }
-
-        .buy-modes { display: flex; gap: 5px; margin-bottom: 15px; }
-        .mode-btn { background: #1e293b; flex: 1; padding: 8px; }
-        .mode-btn.active { background: var(--accent); color: black; }
-
-        #event-toast {
-            position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
-            padding: 10px 20px; border-radius: 8px; font-weight: bold;
-            z-index: 1000; display: none; text-align: center; width: 80%;
-        }
-
-        .floating { 
-            position: absolute; font-weight: bold; pointer-events: none; 
-            animation: floatUp 0.8s ease-out forwards; z-index: 1000;
-        }
-        @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-60px); }
-        }
-    </style>
-</head>
-<body>
-
-<div class="topbar">
-    <div class="stat-box">💰 Деньги<span id="money" class="stat-val">0</span><span id="taxDisp" class="tax-alert"></span></div>
-    <div class="stat-box">📊 Чистый $/с<span id="income" class="stat-val">0</span></div>
-    <div class="stat-box">🏅 Престиж<span id="prestige" class="stat-val">0</span></div>
-</div>
-
-<div class="tabs">
-    <div class="tab active" onclick="openTab(0)">⚒️ Труд</div>
-    <div class="tab" onclick="openTab(1)">🏙️ Активы</div>
-    <div class="tab" onclick="openTab(2)">⚖️ Управление</div>
-</div>
-
-<div class="panel active" id="tab0">
-    <button id="clickBtn">РАБОТАТЬ 💸</button>
-    <div class="card">
-        <div class="biz-name">Ручной труд</div>
-        <div class="biz-stats">Сила клика: <span id="clickPwrDisp">1</span></div>
-        <button class="btn-buy" id="upgradeClickBtn">Улучшить инструменты ($50)</button>
-    </div>
-</div>
-
-<div class="panel" id="tab1">
-    <div class="buy-modes">
-        <button class="mode-btn active" onclick="setBuyMode(1, this)">x1</button>
-        <button class="mode-btn" onclick="setBuyMode(10, this)">x10</button>
-        <button class="mode-btn" onclick="setBuyMode(50, this)">x50</button>
-    </div>
-    <div id="businessList"></div>
-</div>
-
-<div class="panel" id="tab2">
-    <div class="card">
-        <h3>Экономика</h3>
-        <p>Ваш налог: <span id="currentTax">0</span>%</p>
-        <p style="font-size: 0.8em; color:#64748b">Налоги растут вместе с вашим капиталом. Тратьте деньги в активы, чтобы не кормить государство!</p>
-    </div>
-    <button class="btn-buy" onclick="prestigeReset()" style="background:var(--accent); color:black;">РЕИНКАРНАЦИЯ (Престиж)</button>
-    <button onclick="hardReset()" style="margin-top:50px; background:transparent; color:var(--red); border:1px solid var(--red); font-size: 0.7em;">УДАЛИТЬ СОХРАНЕНИЯ</button>
-</div>
-
-<div id="event-toast"></div>
-
-<script>
-let g = {
-    money: 50, clickPower: 1, prestige: 0, buyMode: 1, eventMult: 1,
-    biz: [
-        { id: 0, name: "Ларёк с шаурмой", cost: 20, inc: 0.5, owned: 0, manager: false },
-        { id: 1, name: "Кофейня", cost: 300, inc: 3, owned: 0, manager: false },
-        { id: 2, name: "Барбершоп", cost: 2500, inc: 12, owned: 0, manager: false },
-        { id: 3, name: "Ночной клуб", cost: 18000, inc: 60, owned: 0, manager: false },
-        { id: 4, name: "Торговый центр", cost: 120000, inc: 350, owned: 0, manager: false },
-        { id: 5, name: "Фитнес-империя", cost: 600000, inc: 1200, owned: 0, manager: false },
-        { id: 6, name: "Нефтяная вышка", cost: 6000000, inc: 7000, owned: 0, manager: false },
-        { id: 7, name: "Авиалинии", cost: 70000000, inc: 35000, owned: 0, manager: false },
-        { id: 8, name: "Атомная станция", cost: 500000000, inc: 180000, owned: 0, manager: false },
-        { id: 9, name: "IT Корпорация", cost: 3000000000, inc: 800000, owned: 0, manager: false },
-        { id: 10, name: "Космодром", cost: 60000000000, inc: 9000000, owned: 0, manager: false },
-        { id: 11, name: "Марс-Сити", cost: 800000000000, inc: 70000000, owned: 0, manager: false }
-    ]
-};
-
-function f(n) {
-    if (n < 1000) return Math.floor(n);
-    let s = ['k', 'M', 'B', 'T', 'Q'];
-    let e = Math.floor(Math.log10(n) / 3);
-    return (n / Math.pow(1000, e)).toFixed(2) + s[e - 1];
-}
-
-function getTaxRate() {
-    if (g.money > 1e9) return 0.35;
-    if (g.money > 1e6) return 0.20;
-    if (g.money > 1e5) return 0.10;
-    return 0;
-}
-
-function getTotalIncome() {
-    let raw = 0;
-    g.biz.forEach(b => {
-        let bInc = b.owned * b.inc * (1 + g.prestige) * g.eventMult;
-        if(b.manager) bInc *= 1.7; // Менеджер чуть слабее
-        bInc *= Math.pow(2, Math.floor(b.owned / 50)); // Милестоун каждые 50
-        raw += bInc;
-    });
-    return raw * (1 - getTaxRate());
-}
-
-function updateUI() {
-    document.getElementById('money').innerText = f(g.money);
-    document.getElementById('income').innerText = f(getTotalIncome());
-    document.getElementById('prestige').innerText = f(g.prestige);
-    document.getElementById('clickPwrDisp').innerText = f(g.clickPower * (1 + g.prestige));
-    document.getElementById('currentTax').innerText = (getTaxRate() * 100).toFixed(0);
-    document.getElementById('taxDisp').innerText = getTaxRate() > 0 ? ` (Налог ${ (getTaxRate()*100).toFixed(0) }%)` : "";
-    document.getElementById('upgradeClickBtn').innerText = `Улучшить клик ($${f(50 * Math.pow(2.4, g.clickPower-1))})`;
-}
-
-document.getElementById('clickBtn').onclick = (e) => {
-    let pwr = g.clickPower * (1 + g.prestige) * g.eventMult;
-    g.money += pwr;
-    showFloating(e, `+$${f(pwr)}`);
-    updateUI();
-};
-
-function setBuyMode(m, btn) {
-    g.buyMode = m;
-    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    renderBusinesses();
-}
-
-function buyBiz(id) {
-    let b = g.biz[id];
-    let count = g.buyMode;
-    let totalCost = 0;
-    for(let i=0; i<count; i++) totalCost += b.cost * Math.pow(1.25, i);
-
-    if (g.money >= totalCost) {
-        g.money -= totalCost;
-        b.owned += count;
-        b.cost *= Math.pow(1.25, count);
-        renderBusinesses();
-        updateUI();
-    }
-}
-
-function hireManager(id) {
-    let b = g.biz[id];
-    let price = b.cost * 20; 
-    if (g.money >= price && !b.manager) {
-        g.money -= price;
-        b.manager = true;
-        renderBusinesses();
-    }
-}
-
-function renderBusinesses() {
-    let html = '';
-    g.biz.forEach(b => {
-        let price = 0;
-        for(let i=0; i<g.buyMode; i++) price += b.cost * Math.pow(1.25, i);
-        
-        html += `
-            <div class="card">
-                <div class="biz-name">${b.name} <small>[lvl ${b.owned}]</small></div>
-                <div class="biz-stats">База: $${f(b.inc)}/с | Доход: $${f(b.owned * b.inc * (1+g.prestige))}/с</div>
-                <button class="btn-buy" onclick="buyBiz(${b.id})" ${g.money < price ? 'disabled' : ''}>
-                    Купить x${g.buyMode} ($${f(price)})
-                </button>
-                <button class="btn-mgr" onclick="hireManager(${b.id})" ${b.manager || g.money < b.cost*20 ? 'disabled' : ''}>
-                    ${b.manager ? '✅ Автоматизировано' : '👔 Нанять менеджера ($' + f(b.cost*20) + ')'}
-                </button>
-            </div>
-        `;
-    });
-    document.getElementById('businessList').innerHTML = html;
-}
-
-function randomEvent() {
-    if (Math.random() > 0.25) return;
-    let events = [
-        { t: "ИНФЛЯЦИЯ", d: "Доходы упали на 40%!", m: 0.6, c: "#ef4444" },
-        { t: "БУМ ПРОДАЖ", d: "Доходы x2 на 15 секунд!", m: 2, c: "#22c55e" },
-        { t: "КРИПТО-ХАЙП", d: "Клики x5 на 10 секунд!", m: 5, c: "#3b82f6" }
-    ];
-    let ev = events[Math.floor(Math.random()*events.length)];
-    g.eventMult = ev.m;
-    let toast = document.getElementById('event-toast');
-    toast.style.display = 'block'; toast.style.background = ev.c;
-    toast.innerText = ev.t + ": " + ev.d;
-    setTimeout(() => { g.eventMult = 1; toast.style.display = 'none'; updateUI(); }, 15000);
-}
-
-document.getElementById('upgradeClickBtn').onclick = function() {
-    let cost = 50 * Math.pow(2.4, g.clickPower-1);
-    if(g.money >= cost) {
-        g.money -= cost;
-        g.clickPower++;
-        updateUI();
-    }
-};
-
-function openTab(i) {
-    document.querySelectorAll('.tab, .panel').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.tab')[i].classList.add('active');
-    document.querySelectorAll('.panel')[i].classList.add('active');
-    if(i === 1) renderBusinesses();
-}
-
-function prestigeReset() {
-    if(g.money < 1e6) return alert("Нужно хотя бы $1,000,000 чистого капитала!");
-    if(confirm("Вы потеряете все деньги и бизнесы, но получите постоянный бонус к доходу. Начать заново?")) {
-        g.prestige += Math.floor(Math.sqrt(g.money / 1e5));
-        g.money = 100; g.clickPower = 1;
-        g.biz.forEach(b => { b.owned = 0; b.manager = false; b.cost = b.cost / 2; }); 
-        save(); location.reload();
-    }
-}
-
-function showFloating(e, text) {
-    let div = document.createElement('div');
-    div.className = 'floating';
-    div.innerText = text;
-    div.style.left = e.pageX + 'px'; div.style.top = e.pageY + 'px';
-    document.body.appendChild(div);
-    setTimeout(() => div.remove(), 800);
-}
-
-function save() { localStorage.setItem('hardcore_tycoon_save', JSON.stringify(g)); }
-function load() { 
-    let s = localStorage.getItem('hardcore_tycoon_save');
-    if(s) { let d = JSON.parse(s); Object.assign(g, d); }
-}
-function hardReset() { if(confirm("Сбросить ВООБЩЕ всё?")) { localStorage.clear(); location.reload(); } }
-
-setInterval(() => { g.money += getTotalIncome() / 10; updateUI(); }, 100);
-setInterval(randomEvent, 60000); 
-setInterval(save, 15000);
-
-window.onload = () => { load(); renderBusinesses(); updateUI(); };
-</script>
-</body>
-</html>
-
-
-
-
