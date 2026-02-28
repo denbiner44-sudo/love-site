@@ -1,88 +1,134 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <title>Абсурдный Тест</title>
-  <style>
-    body { font-family: sans-serif; padding: 30px; background: #fafafa; }
-    h1 { font-size: 32px; }
-    .q { margin: 20px 0; }
-    button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
-    #result { margin-top: 30px; font-size: 24px; font-weight: bold; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ВНИМАНИЕ: ТЕСТ НА ПИДОРА</title>
+    <style>
+        body {
+            background: #000;
+            color: #0f0;
+            font-family: "Comic Sans MS", cursive;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: 3rem;
+            text-shadow: 5px 5px #ff00ff;
+            text-align: center;
+            animation: shake 0.1s infinite;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(2px, 1px) rotate(0deg); }
+            50% { transform: translate(-1px, -2px) rotate(-1deg); }
+            100% { transform: translate(1px, 2px) rotate(1deg); }
+        }
+
+        .btn-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+        }
+
+        button {
+            padding: 20px 40px;
+            font-size: 25px;
+            font-weight: bold;
+            border: 5px solid;
+            cursor: pointer;
+            border-radius: 50px;
+        }
+
+        #yesBtn {
+            background: #ff0000;
+            color: #fff;
+            border-color: #900;
+            position: absolute;
+            left: 30%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #noBtn {
+            background: #00ff00;
+            color: #000;
+            border-color: #008000;
+            position: absolute;
+            transition: 0.1s;
+            z-index: 999;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 0, 0, 0.9);
+            color: white;
+            font-size: 100px;
+            font-weight: 900;
+            text-align: center;
+            padding-top: 20%;
+            z-index: 10000;
+        }
+    </style>
 </head>
 <body>
 
-  <h1>Абсурдный тест</h1>
-  <p>Ответь честно. Или нечестно. Тут всё равно абсурд.</p>
+    <h1>Слышь, чепушила, отвечай быстро:<br>ТЫ ПИДОР?</h1>
 
-  <div class="q">
-    <p>1. Что делает картошка, если на неё кричать?</p>
-    <input type="radio" name="q1" value="1"> Становится смелее<br>
-    <input type="radio" name="q1" value="2"> Плачет глазурью<br>
-    <input type="radio" name="q1" value="3"> Телепортируется на соседний стул<br>
-  </div>
+    <div class="btn-container">
+        <button id="yesBtn">ДА, Я ПЕТУШАРА</button>
+        <button id="noBtn">НЕ, Я РОВНЫЙ</button>
+    </div>
 
-  <div class="q">
-    <p>2. Как правильно здороваться с холодильником?</p>
-    <input type="radio" name="q2" value="1"> Наклониться и прошептать «я всё видел»<br>
-    <input type="radio" name="q2" value="2"> Подписать договор о дружбе<br>
-    <input type="radio" name="q2" value="3"> Не рекомендуется, он злопамятный<br>
-  </div>
+    <div id="result" class="overlay">
+        ЕБАТЬ ТЫ ПЕТУХ ГАМБУРГСКИЙ! 🐓
+    </div>
 
-  <div class="q">
-    <p>3. Что произойдёт, если долго смотреть на чайник?</p>
-    <input type="radio" name="q3" value="1"> Он начнёт смотреть в ответ<br>
-    <input type="radio" name="q3" value="2"> Он закипит от неловкости<br>
-    <input type="radio" name="q3" value="3"> Он признается в чувствах<br>
-  </div>
+    <script>
+        const noBtn = document.getElementById('noBtn');
+        const yesBtn = document.getElementById('yesBtn');
+        const result = document.getElementById('result');
 
-  <div class="q">
-    <p>4. Как правильно разговаривать с дверью?</p>
-    <input type="radio" name="q4" value="1"> Сквозь зубы, чтобы она открылась<br>
-    <input type="radio" name="q4" value="2"> Постучать морзянкой “я свой”<br>
-    <input type="radio" name="q4" value="3"> Двери не разговаривают. Это вы разговариваете<br>
-  </div>
+        // Кнопка "Нет" съебывает со скоростью света
+        const runAway = () => {
+            const maxX = window.innerWidth - noBtn.offsetWidth;
+            const maxY = window.innerHeight - noBtn.offsetHeight;
+            
+            const randomX = Math.floor(Math.random() * maxX);
+            const randomY = Math.floor(Math.random() * maxY);
+            
+            noBtn.style.left = randomX + 'px';
+            noBtn.style.top = randomY + 'px';
+            
+            // Добавляем эффект безумия
+            document.body.style.backgroundColor = `rgb(${Math.random()*255}, ${Math.random()*255}, ${Math.random()*255})`;
+        };
 
-  <div class="q">
-    <p>5. Что делает кот, когда никто не видит?</p>
-    <input type="radio" name="q5" value="1"> Примеряет вашу обувь<br>
-    <input type="radio" name="q5" value="2"> Читает инструкции к бытовой технике<br>
-    <input type="radio" name="q5" value="3"> Ведёт ночные эфиры на скрытой частоте<br>
-  </div>
+        noBtn.addEventListener('mouseover', runAway);
+        noBtn.addEventListener('touchstart', (e) => { e.preventDefault(); runAway(); });
 
-  <div class="q">
-    <p>6. Почему Интернет иногда тормозит?</p>
-    <input type="radio" name="q6" value="1"> Электронные хомяки устали крутить колёсико<br>
-    <input type="radio" name="q6" value="2"> Пакеты данных ушли на обед<br>
-    <input type="radio" name="q6" value="3"> Провайдер решил поиграть в сломанный телефон<br>
-  </div>
+        // Если все-таки нажал "Да"
+        yesBtn.addEventListener('click', () => {
+            result.style.display = 'block';
+            setInterval(() => {
+                result.style.backgroundColor = result.style.backgroundColor === 'red' ? 'blue' : 'red';
+            }, 50);
+            alert('ХА-ХА, СУКА, ПОПАЛСЯ! ТЕПЕРЬ ВСЕ ЗНАЮТ!');
+        });
 
-  <div class="q">
-    <p>7. Как определить, что стул замышляет что‑то?</p>
-    <input type="radio" name="q7" value="1"> Он слегка поворачивается, когда вы моргаете<br>
-    <input type="radio" name="q7" value="2"> Скрипит на подозрительной частоте<br>
-    <input type="radio" name="q7" value="3"> Ничего не делает. И это самое страшное<br>
-  </div>
-
-  <button onclick="finish()">Узнать судьбу</button>
-
-  <div id="result"></div>
-
-<script>
-function finish() {
-  const absurd = [
-    "Вы — человек‑лампа. Светите там, где не просят.",
-    "Вы — дипломат для муравьёв. Вас никто не понимает, но вы стараетесь.",
-    "Вы — одуванчик, но только морально.",
-    "Вы — легенда районного уровня. Район маленький, но легенда настоящая.",
-    "Вы — генеральный директор собственных фантазий."
-  ];
-
-  const pick = absurd[Math.floor(Math.random() * absurd.length)];
-  document.getElementById('result').textContent = pick;
-}
-</script>
-
+        // На случай если юзер - хакер и поймал кнопку "Нет"
+        noBtn.addEventListener('click', () => {
+            alert('Хули ты тыкаешь, пёс? От судьбы не уйдешь!');
+        });
+    </script>
 </body>
 </html>
