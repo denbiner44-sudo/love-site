@@ -2,206 +2,206 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Mario Style Web Game</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mario Style Game</title>
+
 <style>
-body{
-    margin:0;
-    overflow:hidden;
-    background:#87CEEB;
-    font-family:Arial, sans-serif;
+body {
+  margin: 0;
+  overflow: hidden;
+  background: #87CEEB;
+  font-family: Arial;
 }
-canvas{
-    display:block;
+
+canvas {
+  display: block;
 }
-#ui{
-    position:fixed;
-    top:10px;
-    left:10px;
-    font-weight:bold;
-    color:#000;
+
+.controls {
+  position: fixed;
+  bottom: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 30px;
+}
+
+button {
+  width: 70px;
+  height: 70px;
+  font-size: 28px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,0.4);
+  color: white;
 }
 </style>
 </head>
+
 <body>
 
-<div id="ui">Счёт: <span id="score">0</span></div>
 <canvas id="game"></canvas>
+
+<div class="controls">
+  <button id="left">◀</button>
+  <button id="jump">▲</button>
+  <button id="right">▶</button>
+</div>
 
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
+
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const gravity = 0.6;
+let gravity = 0.6;
+
+const player = {
+  x: 100,
+  y: 100,
+  width: 40,
+  height: 40,
+  vx: 0,
+  vy: 0,
+  speed: 4,
+  jump: -12,
+  onGround: false
+};
+
 let cameraX = 0;
 let score = 0;
 
-const player = {
-    x:100,
-    y:0,
-    w:40,
-    h:50,
-    vx:0,
-    vy:0,
-    speed:5,
-    jump:-12,
-    onGround:false
-};
-
-const keys = {};
-document.addEventListener("keydown",e=>keys[e.code]=true);
-document.addEventListener("keyup",e=>keys[e.code]=false);
-
 const platforms = [
-    {x:0,y:500,w:3000,h:40},
-    {x:300,y:420,w:200,h:20},
-    {x:650,y:350,w:200,h:20},
-    {x:1000,y:300,w:200,h:20},
-    {x:1400,y:400,w:200,h:20},
-    {x:1800,y:320,w:200,h:20}
+  {x:0, y:400, w:2000, h:40},
+  {x:300, y:320, w:150, h:20},
+  {x:550, y:260, w:150, h:20},
+  {x:800, y:200, w:150, h:20}
 ];
 
 const coins = [
-    {x:350,y:380,collected:false},
-    {x:700,y:310,collected:false},
-    {x:1050,y:260,collected:false},
-    {x:1450,y:360,collected:false},
-    {x:1850,y:280,collected:false}
+  {x:350, y:280, r:10, taken:false},
+  {x:600, y:220, r:10, taken:false},
+  {x:850, y:160, r:10, taken:false}
 ];
 
-const enemies = [
-    {x:600,y:460,w:40,h:40,dir:1},
-    {x:1200,y:460,w:40,h:40,dir:1},
-    {x:1700,y:460,w:40,h:40,dir:1}
-];
+const keys = {
+  left:false,
+  right:false
+};
 
-function update(){
+function update() {
+  player.vx = 0;
 
-    // движение
-    player.vx = 0;
-    if(keys["ArrowLeft"]) player.vx = -player.speed;
-    if(keys["ArrowRight"]) player.vx = player.speed;
+  if (keys.left) player.vx = -player.speed;
+  if (keys.right) player.vx = player.speed;
 
-    if(keys["Space"] && player.onGround){
-        player.vy = player.jump;
-        player.onGround = false;
+  player.vy += gravity;
+  player.x += player.vx;
+  player.y += player.vy;
+
+  player.onGround = false;
+
+  platforms.forEach(p => {
+    if (
+      player.x < p.x + p.w &&
+      player.x + player.width > p.x &&
+      player.y < p.y + p.h &&
+      player.y + player.height > p.y
+    ) {
+      if (player.vy > 0) {
+        player.y = p.y - player.height;
+        player.vy = 0;
+        player.onGround = true;
+      }
     }
+  });
 
-    player.vy += gravity;
-
-    player.x += player.vx;
-    player.y += player.vy;
-
-    player.onGround = false;
-
-    // платформы
-    for(let p of platforms){
-        if(
-            player.x < p.x + p.w &&
-            player.x + player.w > p.x &&
-            player.y < p.y + p.h &&
-            player.y + player.h > p.y
-        ){
-            if(player.vy > 0){
-                player.y = p.y - player.h;
-                player.vy = 0;
-                player.onGround = true;
-            }
-        }
+  coins.forEach(c => {
+    if (!c.taken) {
+      let dx = player.x + player.width/2 - c.x;
+      let dy = player.y + player.height/2 - c.y;
+      let dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < 30) {
+        c.taken = true;
+        score++;
+      }
     }
+  });
 
-    // монеты
-    for(let coin of coins){
-        if(!coin.collected &&
-            player.x < coin.x + 20 &&
-            player.x + player.w > coin.x &&
-            player.y < coin.y + 20 &&
-            player.y + player.h > coin.y
-        ){
-            coin.collected = true;
-            score += 10;
-            document.getElementById("score").textContent = score;
-        }
-    }
-
-    // враги
-    for(let e of enemies){
-        e.x += 2 * e.dir;
-        if(e.x < 0 || e.x > 2800) e.dir *= -1;
-
-        if(
-            player.x < e.x + e.w &&
-            player.x + player.w > e.x &&
-            player.y < e.y + e.h &&
-            player.y + player.h > e.y
-        ){
-            // прыжок на врага
-            if(player.vy > 0){
-                e.x = -1000;
-                player.vy = -8;
-                score += 20;
-                document.getElementById("score").textContent = score;
-            } else {
-                // проигрыш
-                alert("Ты проиграл!");
-                location.reload();
-            }
-        }
-    }
-
-    // камера
-    cameraX = player.x - canvas.width/3;
-
+  cameraX = player.x - canvas.width / 2;
 }
 
-function draw(){
+function draw() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.save();
+  ctx.translate(-cameraX,0);
 
-    ctx.save();
-    ctx.translate(-cameraX,0);
+  // платформы
+  ctx.fillStyle = "#5c3a1e";
+  platforms.forEach(p=>{
+    ctx.fillRect(p.x,p.y,p.w,p.h);
+  });
 
-    // платформы
-    ctx.fillStyle="#654321";
-    for(let p of platforms){
-        ctx.fillRect(p.x,p.y,p.w,p.h);
+  // монеты
+  coins.forEach(c=>{
+    if(!c.taken){
+      ctx.beginPath();
+      ctx.arc(c.x,c.y,c.r,0,Math.PI*2);
+      ctx.fillStyle="gold";
+      ctx.fill();
     }
+  });
 
-    // монеты
-    ctx.fillStyle="gold";
-    for(let coin of coins){
-        if(!coin.collected){
-            ctx.beginPath();
-            ctx.arc(coin.x+10,coin.y+10,10,0,Math.PI*2);
-            ctx.fill();
-        }
-    }
+  // игрок
+  ctx.fillStyle = "red";
+  ctx.fillRect(player.x,player.y,player.width,player.height);
 
-    // враги
-    ctx.fillStyle="green";
-    for(let e of enemies){
-        ctx.fillRect(e.x,e.y,e.w,e.h);
-    }
+  ctx.restore();
 
-    // игрок
-    ctx.fillStyle="red";
-    ctx.fillRect(player.x,player.y,player.w,player.h);
-
-    ctx.restore();
-
-    // финиш
-    ctx.fillStyle="black";
-    ctx.fillRect(2900 - cameraX,450,20,50);
+  // счет
+  ctx.fillStyle = "black";
+  ctx.font = "20px Arial";
+  ctx.fillText("Счет: " + score, 20, 30);
 }
 
 function gameLoop(){
-    update();
-    draw();
-    requestAnimationFrame(gameLoop);
+  update();
+  draw();
+  requestAnimationFrame(gameLoop);
 }
 
 gameLoop();
+
+// кнопки телефона
+const leftBtn = document.getElementById("left");
+const rightBtn = document.getElementById("right");
+const jumpBtn = document.getElementById("jump");
+
+leftBtn.addEventListener("touchstart", ()=> keys.left = true);
+leftBtn.addEventListener("touchend", ()=> keys.left = false);
+
+rightBtn.addEventListener("touchstart", ()=> keys.right = true);
+rightBtn.addEventListener("touchend", ()=> keys.right = false);
+
+jumpBtn.addEventListener("touchstart", ()=>{
+  if(player.onGround){
+    player.vy = player.jump;
+  }
+});
+
+// клавиатура (для ПК)
+document.addEventListener("keydown", e=>{
+  if(e.key==="ArrowLeft") keys.left = true;
+  if(e.key==="ArrowRight") keys.right = true;
+  if(e.key===" " && player.onGround) player.vy = player.jump;
+});
+
+document.addEventListener("keyup", e=>{
+  if(e.key==="ArrowLeft") keys.left = false;
+  if(e.key==="ArrowRight") keys.right = false;
+});
 </script>
 
 </body>
