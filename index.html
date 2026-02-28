@@ -33,45 +33,63 @@
             color: white;
             position: absolute;
         }
+        #reportBtn {
+            background-color: #5768ff;
+            color: white;
+        }
     </style>
 </head>
 <body>
 
-    <h1>Ты пидор?</h1>
+    <h1>Контрольный вопрос</h1>
 
     <div class="buttons">
         <button id="yesBtn">Да</button>
         <button id="noBtn">Нет</button>
+        <button id="reportBtn">Пожаловаться</button>
     </div>
 
     <script>
         const yesBtn = document.getElementById('yesBtn');
         const noBtn = document.getElementById('noBtn');
+        const reportBtn = document.getElementById('reportBtn');
 
-        // Логика для кнопки "Да"
         yesBtn.addEventListener('click', () => {
-            alert('ебать ты петух');
+            alert('Ответ принят.');
         });
 
-        // Функция убегания кнопки "Нет"
         const moveButton = () => {
             const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
             const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
-            
             noBtn.style.left = `${x}px`;
             noBtn.style.top = `${y}px`;
         };
 
-        // Убегает при наведении (ПК) и при касании (телефон)
         noBtn.addEventListener('mouseover', moveButton);
         noBtn.addEventListener('touchstart', (e) => {
             e.preventDefault();
             moveButton();
         });
 
-        // На всякий случай, если нажать всё-таки удалось
         noBtn.addEventListener('click', () => {
-            alert('Как ты это сделал, читер?');
+            alert('Невероятно, вам удалось нажать!');
+        });
+
+        // ВСЕ 6 СТИЛЕЙ СЮДА
+        const messages = [
+            "Абсурд‑юмор:\nВы обвиняетесь в превышении нормы бестолковости по ГОСТ 2288‑Кринж.",
+            "Судебное дело:\nДело №404: вы официально признаны подозрительно мягким элементом.",
+            "Windows‑ошибка:\nОшибка 0xDEAD00F: обнаружен пользователь с уровнем решительности ниже минимума.",
+            "RPG‑штраф:\nВы получили дебафф «Сомневашка I». −40 к решительности, −20 к смелости.",
+            "Космический пафос:\nГалактический Совет признал вас существом пониженной волевой тяги.",
+            "Мемный троллинг:\nВаш ранг обновлён: «мягусенький ультра‑лузер lite edition PRO MAX»."
+        ];
+
+        let index = 0;
+
+        reportBtn.addEventListener('click', () => {
+            alert(messages[index]);
+            index = (index + 1) % messages.length;
         });
     </script>
 </body>
