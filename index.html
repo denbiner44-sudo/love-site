@@ -1,148 +1,182 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Mobile Game</title>
+    <meta charset="UTF-8">
+    <title>TERMINAL | DEEP WEB NODE</title>
+    <style>
+        body {
+            background-color: #050505;
+            color: #00ff41;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
 
-<style>
-body{
-  margin:0;
-  overflow:hidden;
-  background:#87CEEB;
-  touch-action:none;
-}
+        /* Окно авторизации */
+        #login-box {
+            border: 1px solid #00ff41;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 0 20px #00ff4133;
+        }
 
-canvas{
-  display:block;
-}
+        input {
+            background: transparent;
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            padding: 10px;
+            outline: none;
+            text-align: center;
+        }
 
-.controls{
-  position:fixed;
-  bottom:20px;
-  width:100%;
-  display:flex;
-  justify-content:space-between;
-  padding:0 30px;
-}
+        button {
+            background: #00ff41;
+            color: black;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
 
-button{
-  width:90px;
-  height:90px;
-  font-size:30px;
-  border:none;
-  border-radius:50%;
-  background:#0008;
-  color:white;
-}
-</style>
+        /* Главный интерфейс (скрыт по умолчанию) */
+        #main-ui {
+            display: none;
+            width: 80vw;
+            height: 80vh;
+            border: 1px solid #00ff41;
+            flex-direction: column;
+        }
+
+        /* Навигация (Вкладки) */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #00ff41;
+            background: #0a0a0a;
+        }
+
+        .tab-link {
+            padding: 15px 25px;
+            cursor: pointer;
+            border-right: 1px solid #00ff41;
+            transition: 0.3s;
+        }
+
+        .tab-link:hover { background: #00ff4133; }
+        .tab-link.active { background: #00ff41; color: black; }
+
+        /* Контент вкладок */
+        .tab-content {
+            display: none;
+            padding: 20px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .tab-content.active { display: block; }
+
+        .hidden { display: none; }
+        .error { color: #ff0000; display: block; margin-top: 10px; font-size: 12px; }
+        
+        pre { color: #008f11; font-size: 12px; }
+    </style>
 </head>
-
 <body>
 
-<canvas id="game"></canvas>
+    <!-- ЭКРАН ЛОГИНА -->
+    <div id="login-box">
+        <h2 style="letter-spacing: 5px;">PROTECTED NODE</h2>
+        <input type="password" id="passInput" placeholder="PASSWORD">
+        <br>
+        <button onclick="login()">DECRYPT</button>
+        <span id="errorMsg" class="error"></span>
+    </div>
 
-<div class="controls">
-  <button id="left">◀</button>
-  <button id="jump">▲</button>
-  <button id="right">▶</button>
-</div>
+    <!-- ОСНОВНОЙ ИНТЕРФЕЙС -->
+    <div id="main-ui">
+        <div class="tabs">
+            <div class="tab-link active" onclick="openTab(event, 'status')">STATUS</div>
+            <div class="tab-link" onclick="openTab(event, 'messages')">MESSAGES</div>
+            <div class="tab-link" onclick="openTab(event, 'database')">DATABASE</div>
+            <div class="tab-link" style="margin-left: auto; color: red;" onclick="location.reload()">LOGOUT</div>
+        </div>
 
-<script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+        <div id="status" class="tab-content active">
+            <h3>> SYSTEM STATUS</h3>
+            <p>IP: [ENCRYPTED]</p>
+            <p>LOCATION: UNDISCLOSED</p>
+            <p>CONNECTION: SECURE (TOR NETWORK)</p>
+            <pre>
+  _____  _____   ____  _______ ______ _____ _______ ______ _____  
 
-canvas.width = innerWidth;
-canvas.height = innerHeight;
+ |  __ \|  __ \ / __ \|__   __|  ____/ ____|__   __|  ____|  __ \ 
+ | |__) | |__) | |  | |  | |  | |__ | |       | |  | |__  | |  | |
+ |  ___/|  _  /| |  | |  | |  |  __|| |       | |  |  __| | |  | |
+ | |    | | \ \| |__| |  | |  | |___| |____   | |  | |____| |__| |
+ |_|    |_|  \_\\____/   |_|  |______\_____|  |_|  |______|_____/ 
+            </pre>
+        </div>
 
-let gravity = 0.7;
+        <div id="messages" class="tab-content">
+            <h3>> INCRYPTED MAIL</h3>
+            <p><strong>Admin:</strong> Узел 03042000 подтвержден. Ждем дальнейших указаний.</p>
+            <hr style="border-color: #00ff41;">
+            <p><strong>Unknown:</strong> Пакет доставлен в точку "Б".</p>
+        </div>
 
-const player = {
-  x:100,
-  y:0,
-  w:40,
-  h:50,
-  vx:0,
-  vy:0,
-  speed:5,
-  jump:-15,
-  onGround:false
-};
+        <div id="database" class="tab-content">
+            <h3>> FILES & DATABASE</h3>
+            <ul>
+                <li>target_list.onion</li>
+                <li>proxy_logs_2024.enc</li>
+                <li>private_keys.txt</li>
+            </ul>
+            <button onclick="alert('Скачивание заблокировано: Недостаточно прав')">DOWNLOAD ALL</button>
+        </div>
+    </div>
 
-const ground = {
-  x:0,
-  y:450,
-  w:3000,
-  h:50
-};
+    <script>
+        // Логика входа
+        function login() {
+            const pass = document.getElementById('passInput').value;
+            if (pass === "03042000") {
+                document.getElementById('login-box').style.display = 'none';
+                document.getElementById('main-ui').style.display = 'flex';
+            } else {
+                document.getElementById('errorMsg').innerText = "ACCESS DENIED";
+                document.getElementById('passInput').value = "";
+            }
+        }
 
-let moveLeft = false;
-let moveRight = false;
-let cameraX = 0;
+        // Логика переключения вкладок
+        function openTab(evt, tabName) {
+            let i, tabContent, tabLinks;
+            
+            // Скрываем весь контент
+            tabContent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabContent.length; i++) {
+                tabContent[i].classList.remove("active");
+            }
 
-function update(){
+            // Убираем класс active у кнопок
+            tabLinks = document.getElementsByClassName("tab-link");
+            for (i = 0; i < tabLinks.length; i++) {
+                tabLinks[i].classList.remove("active");
+            }
 
-  player.vx = 0;
-  if(moveLeft) player.vx = -player.speed;
-  if(moveRight) player.vx = player.speed;
+            // Показываем нужную вкладку и подсвечиваем кнопку
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
 
-  player.vy += gravity;
-
-  player.x += player.vx;
-  player.y += player.vy;
-
-  if(player.y + player.h > ground.y){
-    player.y = ground.y - player.h;
-    player.vy = 0;
-    player.onGround = true;
-  } else {
-    player.onGround = false;
-  }
-
-  cameraX = player.x - canvas.width/2;
-}
-
-function draw(){
-
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  ctx.save();
-  ctx.translate(-cameraX,0);
-
-  ctx.fillStyle="#654321";
-  ctx.fillRect(ground.x,ground.y,ground.w,ground.h);
-
-  ctx.fillStyle="red";
-  ctx.fillRect(player.x,player.y,player.w,player.h);
-
-  ctx.restore();
-}
-
-function loop(){
-  update();
-  draw();
-  requestAnimationFrame(loop);
-}
-
-loop();
-
-/* Управление */
-const leftBtn = document.getElementById("left");
-const rightBtn = document.getElementById("right");
-const jumpBtn = document.getElementById("jump");
-
-leftBtn.addEventListener("touchstart", ()=> moveLeft = true);
-leftBtn.addEventListener("touchend", ()=> moveLeft = false);
-
-rightBtn.addEventListener("touchstart", ()=> moveRight = true);
-rightBtn.addEventListener("touchend", ()=> moveRight = false);
-
-jumpBtn.addEventListener("touchstart", ()=>{
-  if(player.onGround){
-    player.vy = player.jump;
-  }
-});
-</script>
-
+        // Вход по Enter
+        document.getElementById('passInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') login();
+        });
+    </script>
 </body>
 </html>
