@@ -1,182 +1,72 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>TERMINAL | DEEP WEB NODE</title>
-    <style>
-        body {
-            background-color: #050505;
-            color: #00ff41;
-            font-family: 'Courier New', Courier, monospace;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Работа</title>
 
-        /* Окно авторизации */
-        #login-box {
-            border: 1px solid #00ff41;
-            padding: 40px;
-            text-align: center;
-            box-shadow: 0 0 20px #00ff4133;
-        }
+<style>
+body{
+    margin:0;
+    font-family: Arial, sans-serif;
+    background-image:url("https://upload.wikimedia.org/wikipedia/commons/4/4d/US_%24100_obverse.jpg");
+    background-size:cover;
+    background-position:center;
+    height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
 
-        input {
-            background: transparent;
-            border: 1px solid #00ff41;
-            color: #00ff41;
-            padding: 10px;
-            outline: none;
-            text-align: center;
-        }
+.overlay{
+    background: rgba(0,0,0,0.65);
+    padding:40px;
+    border-radius:15px;
+    text-align:center;
+    color:white;
+    max-width:500px;
+}
 
-        button {
-            background: #00ff41;
-            color: black;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-top: 10px;
-        }
+h1{
+    margin-bottom:20px;
+}
 
-        /* Главный интерфейс (скрыт по умолчанию) */
-        #main-ui {
-            display: none;
-            width: 80vw;
-            height: 80vh;
-            border: 1px solid #00ff41;
-            flex-direction: column;
-        }
+.button{
+    display:inline-block;
+    margin-top:20px;
+    padding:12px 25px;
+    background:#2ecc71;
+    color:white;
+    text-decoration:none;
+    border-radius:8px;
+    font-size:18px;
+}
 
-        /* Навигация (Вкладки) */
-        .tabs {
-            display: flex;
-            border-bottom: 1px solid #00ff41;
-            background: #0a0a0a;
-        }
+.button:hover{
+    background:#27ae60;
+}
+</style>
 
-        .tab-link {
-            padding: 15px 25px;
-            cursor: pointer;
-            border-right: 1px solid #00ff41;
-            transition: 0.3s;
-        }
-
-        .tab-link:hover { background: #00ff4133; }
-        .tab-link.active { background: #00ff41; color: black; }
-
-        /* Контент вкладок */
-        .tab-content {
-            display: none;
-            padding: 20px;
-            overflow-y: auto;
-            flex-grow: 1;
-        }
-
-        .tab-content.active { display: block; }
-
-        .hidden { display: none; }
-        .error { color: #ff0000; display: block; margin-top: 10px; font-size: 12px; }
-        
-        pre { color: #008f11; font-size: 12px; }
-    </style>
 </head>
+
 <body>
 
-    <!-- ЭКРАН ЛОГИНА -->
-    <div id="login-box">
-        <h2 style="letter-spacing: 5px;">PROTECTED NODE</h2>
-        <input type="password" id="passInput" placeholder="PASSWORD">
-        <br>
-        <button onclick="login()">DECRYPT</button>
-        <span id="errorMsg" class="error"></span>
-    </div>
+<div class="overlay">
+<h1>Приглашение на работу</h1>
 
-    <!-- ОСНОВНОЙ ИНТЕРФЕЙС -->
-    <div id="main-ui">
-        <div class="tabs">
-            <div class="tab-link active" onclick="openTab(event, 'status')">STATUS</div>
-            <div class="tab-link" onclick="openTab(event, 'messages')">MESSAGES</div>
-            <div class="tab-link" onclick="openTab(event, 'database')">DATABASE</div>
-            <div class="tab-link" style="margin-left: auto; color: red;" onclick="location.reload()">LOGOUT</div>
-        </div>
+<p>
+Приглашаю всех желающих на работу с возможностью карьерного развития
+</p>
 
-        <div id="status" class="tab-content active">
-            <h3>> SYSTEM STATUS</h3>
-            <p>IP: [ENCRYPTED]</p>
-            <p>LOCATION: UNDISCLOSED</p>
-            <p>CONNECTION: SECURE (TOR NETWORK)</p>
-            <pre>
-  _____  _____   ____  _______ ______ _____ _______ ______ _____  
+<p>
+По всем вопросам в ЛС
+</p>
 
- |  __ \|  __ \ / __ \|__   __|  ____/ ____|__   __|  ____|  __ \ 
- | |__) | |__) | |  | |  | |  | |__ | |       | |  | |__  | |  | |
- |  ___/|  _  /| |  | |  | |  |  __|| |       | |  |  __| | |  | |
- | |    | | \ \| |__| |  | |  | |___| |____   | |  | |____| |__| |
- |_|    |_|  \_\\____/   |_|  |______\_____|  |_|  |______|_____/ 
-            </pre>
-        </div>
+<a class="button" href="https://t.me/Caelum_Vox">
+Написать в Telegram
+</a>
 
-        <div id="messages" class="tab-content">
-            <h3>> INCRYPTED MAIL</h3>
-            <p><strong>Admin:</strong> Узел 03042000 подтвержден. Ждем дальнейших указаний.</p>
-            <hr style="border-color: #00ff41;">
-            <p><strong>Unknown:</strong> Пакет доставлен в точку "Б".</p>
-        </div>
+</div>
 
-        <div id="database" class="tab-content">
-            <h3>> FILES & DATABASE</h3>
-            <ul>
-                <li>target_list.onion</li>
-                <li>proxy_logs_2024.enc</li>
-                <li>private_keys.txt</li>
-            </ul>
-            <button onclick="alert('Скачивание заблокировано: Недостаточно прав')">DOWNLOAD ALL</button>
-        </div>
-    </div>
-
-    <script>
-        // Логика входа
-        function login() {
-            const pass = document.getElementById('passInput').value;
-            if (pass === "03042000") {
-                document.getElementById('login-box').style.display = 'none';
-                document.getElementById('main-ui').style.display = 'flex';
-            } else {
-                document.getElementById('errorMsg').innerText = "ACCESS DENIED";
-                document.getElementById('passInput').value = "";
-            }
-        }
-
-        // Логика переключения вкладок
-        function openTab(evt, tabName) {
-            let i, tabContent, tabLinks;
-            
-            // Скрываем весь контент
-            tabContent = document.getElementsByClassName("tab-content");
-            for (i = 0; i < tabContent.length; i++) {
-                tabContent[i].classList.remove("active");
-            }
-
-            // Убираем класс active у кнопок
-            tabLinks = document.getElementsByClassName("tab-link");
-            for (i = 0; i < tabLinks.length; i++) {
-                tabLinks[i].classList.remove("active");
-            }
-
-            // Показываем нужную вкладку и подсвечиваем кнопку
-            document.getElementById(tabName).classList.add("active");
-            evt.currentTarget.classList.add("active");
-        }
-
-        // Вход по Enter
-        document.getElementById('passInput').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') login();
-        });
-    </script>
 </body>
 </html>
