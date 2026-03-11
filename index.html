@@ -3,69 +3,77 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Работа</title>
-
+<title>Вакансия</title>
 <style>
-body{
-    margin:0;
+  body {
+    margin: 0;
+    padding: 0;
     font-family: Arial, sans-serif;
-    background-image:url("https://upload.wikimedia.org/wikipedia/commons/4/4d/US_%24100_obverse.jpg");
-    background-size:cover;
-    background-position:center;
-    height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
+    background: url('85e611c8-fa0a-4249-abdf-38a3113679b2.png') no-repeat center center fixed;
+    background-size: cover;
+    color: #fff;
+  }
 
-.overlay{
-    background: rgba(0,0,0,0.65);
-    padding:40px;
-    border-radius:15px;
-    text-align:center;
-    color:white;
-    max-width:500px;
-}
+  .container {
+    text-align: center;
+    padding: 50px 20px;
+    background-color: rgba(0, 0, 0, 0.6); /* затемнённая подложка для читаемости */
+    max-width: 600px;
+    margin: 100px auto;
+    border-radius: 15px;
+  }
 
-h1{
-    margin-bottom:20px;
-}
+  h2 {
+    color: #ffd700;
+    font-size: 28px;
+    margin-bottom: 20px;
+  }
 
-.button{
-    display:inline-block;
-    margin-top:20px;
-    padding:12px 25px;
-    background:#2ecc71;
-    color:white;
-    text-decoration:none;
-    border-radius:8px;
-    font-size:18px;
-}
+  p {
+    font-size: 18px;
+    line-height: 1.6;
+  }
 
-.button:hover{
-    background:#27ae60;
-}
+  .telegram-btn {
+    display: inline-block;
+    padding: 15px 30px;
+    margin-top: 25px;
+    font-size: 18px;
+    color: #fff;
+    background-color: #0088cc;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s, transform 0.3s;
+  }
+
+  .telegram-btn:hover {
+    background-color: #00aaff;
+    transform: scale(1.05);
+  }
+
+  @media(max-width: 600px) {
+    .container {
+      margin: 50px 20px;
+    }
+  }
 </style>
-
 </head>
-
 <body>
 
-<div class="overlay">
-<h1>Приглашение на работу</h1>
-
-<p>
-Приглашаю всех желающих на работу с возможностью карьерного развития
-</p>
-
-<p>
-По всем вопросам в ЛС
-</p>
-
-<a class="button" href="https://t.me/Caelum_Vox">
-Написать в Telegram
-</a>
-
+<div class="container">
+  <h2>🌟 Ищем таланты в нашу команду! 🌟</h2>
+  <p>
+    Хотите работать в динамичной и дружелюбной команде?<br>
+    У нас открыты вакансии для амбициозных и ответственных людей!<br><br>
+    ✅ Интересная работа<br>
+    ✅ Достойная оплата<br>
+    ✅ Возможность роста и развития
+  </p>
+  <a href="https://t.me/Caelum_Vox" target="_blank" class="telegram-btn">Написать в Telegram</a>
+  <p style="margin-top:15px; color:#ddd; font-size:14px;">
+    По всем вопросам пишите в лс.
+  </p>
 </div>
 
 </body>
