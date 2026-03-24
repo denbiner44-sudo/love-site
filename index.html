@@ -1,63 +1,142 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Юрист Комитета Банковского Надзора - Белов Дмитрий Викторович</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            margin: 0;
-            padding: 0;
-            color: #333;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Юрист Комитета Банковского Надзора - Белов Дмитрий Викторович</title>
+<style>
+    body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #eef2f5;
+        color: #1b1b1b;
+    }
+
+    header {
+        background-color: #003366;
+        color: #fff;
+        text-align: center;
+        padding: 50px 20px 30px 20px;
+    }
+    header h1 {
+        margin: 0;
+        font-size: 32px;
+    }
+    header p {
+        margin: 10px 0 0 0;
+        font-size: 20px;
+    }
+
+    nav {
+        background-color: #002244;
+        display: flex;
+        justify-content: center;
+        padding: 10px 0;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+    nav a {
+        color: #ffffff;
+        text-decoration: none;
+        margin: 0 25px;
+        font-weight: 600;
+    }
+    nav a:hover {
+        text-decoration: underline;
+    }
+
+    .container {
+        max-width: 1000px;
+        margin: 40px auto;
+        background-color: #ffffff;
+        padding: 35px;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+        color: #003366;
+        font-size: 26px;
+        border-bottom: 2px solid #003366;
+        padding-bottom: 5px;
+        margin-top: 35px;
+    }
+
+    a {
+        color: #003366;
+        text-decoration: none;
+        font-weight: bold;
+    }
+    a:hover {
+        text-decoration: underline;
+    }
+
+    ul, ol {
+        margin-left: 25px;
+        line-height: 1.7;
+    }
+
+    /* Закрепленные контакты справа */
+    .contact-fixed {
+        position: fixed;
+        right: 20px;
+        top: 180px;
+        background-color: #ffffff;
+        border: 2px solid #003366;
+        padding: 15px 20px;
+        border-radius: 6px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        max-width: 220px;
+    }
+    .contact-fixed h3 {
+        margin: 0 0 10px 0;
+        font-size: 16px;
+        color: #003366;
+    }
+    .contact-fixed a {
+        display: block;
+        margin: 5px 0;
+    }
+    .contact-fixed .btn {
+        display: inline-block;
+        background-color: #003366;
+        color: #fff;
+        text-align: center;
+        padding: 8px 12px;
+        margin-top: 10px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    .contact-fixed .btn:hover {
+        background-color: #002244;
+    }
+
+    footer {
+        text-align: center;
+        padding: 20px;
+        background-color: #f1f1f1;
+        color: #555555;
+        font-size: 14px;
+        margin-top: 40px;
+    }
+
+    @media (max-width: 900px) {
+        .contact-fixed {
+            position: static;
+            margin: 20px auto;
+            max-width: 95%;
         }
-        header {
-            background-color: #004080;
-            color: #fff;
-            padding: 20px;
-            text-align: center;
+        nav {
+            flex-direction: column;
         }
-        header h1 {
-            margin: 0;
-            font-size: 28px;
+        nav a {
+            margin: 5px 0;
         }
-        .container {
-            max-width: 900px;
-            margin: 30px auto;
-            background: #fff;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        h2 {
-            color: #004080;
-        }
-        .contact a {
-            display: inline-block;
-            margin: 10px 0;
-            color: #004080;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        .contact a:hover {
-            text-decoration: underline;
-        }
-        ul.rules {
-            list-style: decimal inside;
-            padding-left: 0;
-        }
-        ul.rules li {
-            margin-bottom: 12px;
-        }
-        footer {
-            text-align: center;
-            padding: 15px;
-            font-size: 14px;
-            color: #666;
-            margin-top: 30px;
-        }
-    </style>
+    }
+</style>
 </head>
 <body>
 
@@ -66,20 +145,28 @@
     <p>Белов Дмитрий Викторович</p>
 </header>
 
+<nav>
+    <a href="#contact">Связь</a>
+    <a href="#rules">Правила</a>
+    <a href="#online">Обратиться онлайн</a>
+</nav>
+
 <div class="container">
-    <section class="contact">
+    <section id="contact">
         <h2>Связь с юристом</h2>
         <p>Вы можете обратиться через Telegram или по телефону:</p>
-        <p><a href="https://t.me/Belov_Dmitriy235" target="_blank">Telegram: @Belov_Dmitriy235</a></p>
-        <p>Телефон: <a href="tel:+79197353380">+7 919 735 33 80</a></p>
+        <ul>
+            <li>Telegram: <a href="https://t.me/Belov_Dmitriy235" target="_blank">@Belov_Dmitriy235</a></li>
+            <li>Телефон: <a href="tel:+79197353380">+7 919 735 33 80</a></li>
+        </ul>
     </section>
 
-    <section class="rules">
+    <section id="rules">
         <h2>Правила сотрудничества с юристом</h2>
-        <ul class="rules">
-            <li>Соблюдение <strong>ст. 310 УК РФ</strong> о неразглашении данных предварительного расследования.</li>
+        <ol>
+            <li>Соблюдение ст. 310 УК РФ о неразглашении данных предварительного расследования.</li>
             <li>Конфиденциальность информации: все сведения о клиентах, делах и документах строго не разглашаются третьим лицам.</li>
-            <li>Юрист действует только в рамках закона и регулирующих норм, соблюдая <strong>Гражданский и Уголовный кодексы РФ</strong>.</li>
+            <li>Юрист действует только в рамках закона и регулирующих норм, соблюдая Гражданский и Уголовный кодексы РФ.</li>
             <li>Клиент предоставляет достоверную и полную информацию для эффективной юридической помощи.</li>
             <li>Любые консультации являются официальными и фиксируются в документации, при необходимости — с подписанием соглашений.</li>
             <li>Юрист не несет ответственность за незаконные действия, предпринятые клиентом без согласования.</li>
@@ -87,8 +174,23 @@
             <li>Оплата услуг производится по согласованной тарифной схеме до начала работы, если иное не оговорено.</li>
             <li>Запрещено использовать юридические консультации для совершения противоправных действий.</li>
             <li>Сотрудничество может быть прекращено в случае нарушения правил или законов обеими сторонами.</li>
-        </ul>
+        </ol>
     </section>
+
+    <section id="online">
+        <h2>Обратиться онлайн</h2>
+        <p>Для отправки обращения используется отдельный сервер, который обрабатывает SMS/сообщения.  
+        Нажмите на кнопку ниже, чтобы перейти к форме отправки:</p>
+        <a href="https://ваш-сервер-для-sms" class="btn" target="_blank">Обратиться онлайн</a>
+    </section>
+</div>
+
+<!-- Закрепленные контакты -->
+<div class="contact-fixed">
+    <h3>Контакты</h3>
+    <a href="https://t.me/Belov_Dmitriy235" target="_blank">Telegram: @Belov_Dmitriy235</a>
+    <a href="tel:+79197353380">Телефон: +7 919 735 33 80</a>
+    <a href="https://ваш-сервер-для-sms" class="btn" target="_blank">Обратиться онлайн</a>
 </div>
 
 <footer>
@@ -97,4 +199,3 @@
 
 </body>
 </html>
-
