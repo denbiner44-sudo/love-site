@@ -1,123 +1,100 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Профиль юриста</title>
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f4f4f4;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        padding: 40px 0;
-        margin: 0;
-    }
-
-    .container {
-        background-color: #fff;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        max-width: 650px;
-        padding: 30px;
-    }
-
-    .profile {
-        display: flex;
-        align-items: center;
-        margin-bottom: 30px;
-    }
-
-    .profile img {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        object-fit: cover;
-        margin-right: 20px;
-        border: 2px solid #0073e6;
-    }
-
-    .profile-info h2 {
-        margin: 0 0 10px 0;
-        font-size: 22px;
-        color: #333;
-    }
-
-    .profile-info p {
-        margin: 0 0 15px 0;
-        font-size: 16px;
-        color: #666;
-    }
-
-    .tg-button {
-        display: inline-block;
-        padding: 10px 20px;
-        background-color: #0088cc;
-        color: #fff;
-        text-decoration: none;
-        border-radius: 6px;
-        font-weight: bold;
-        transition: background-color 0.3s, transform 0.2s;
-    }
-
-    .tg-button:hover {
-        background-color: #006699;
-        transform: scale(1.05);
-    }
-
-    .rules {
-        font-size: 15px;
-        color: #333;
-    }
-
-    .rules h3 {
-        margin-top: 0;
-        margin-bottom: 15px;
-        color: #0073e6;
-    }
-
-    .rules ul {
-        padding-left: 20px;
-    }
-
-    .rules li {
-        margin-bottom: 12px;
-    }
-
-    .rules li span.article {
-        color: #555;
-        font-style: italic;
-    }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Юрист Комитета Банковского Надзора - Белов Дмитрий Викторович</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        header {
+            background-color: #004080;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            background: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #004080;
+        }
+        .contact a {
+            display: inline-block;
+            margin: 10px 0;
+            color: #004080;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .contact a:hover {
+            text-decoration: underline;
+        }
+        ul.rules {
+            list-style: decimal inside;
+            padding-left: 0;
+        }
+        ul.rules li {
+            margin-bottom: 12px;
+        }
+        footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 14px;
+            color: #666;
+            margin-top: 30px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Профиль -->
-        <div class="profile">
-            <img src="865b761a-8073-4386-bf97-7ebd2fb87ef3.png" alt="Юрист Белов Дмитрий Викторович">
-            <div class="profile-info">
-                <h2>Юрист Белов Дмитрий Викторович</h2>
-                <p>Эксперт в банковском праве и финансовом надзоре</p>
-                <a href="https://t.me/Belov_Dmitriy235" target="_blank" class="tg-button">Связь через Telegram</a>
-            </div>
-        </div>
 
-        <!-- Правила сотрудничества -->
-        <div class="rules">
-            <h3>Правила сотрудничества с юристом</h3>
-            <ul>
-                <li>1. Все услуги оказываются на основании договора. <span class="article">(ст. 310 ГК РФ – договорная ответственность, ст. 421 ГК РФ – свобода договора)</span></li>
-                <li>2. Юрист обязан качественно выполнять свои профессиональные обязанности. <span class="article">(ст. 309 ГК РФ – обязанность сторон соблюдать обязательства)</span></li>
-                <li>3. Клиент обязан предоставлять достоверную информацию, необходимую для оказания юридической помощи. <span class="article">(ст. 313 ГК РФ – предоставление информации для исполнения обязательств)</span></li>
-                <li>4. Стоимость услуг и порядок оплаты фиксируются в договоре. <span class="article">(ст. 424 ГК РФ – форма и условия договора, ст. 310 ГК РФ)</span></li>
-                <li>5. Конфиденциальность: сведения о клиенте являются тайной. <span class="article">(ст. 10 ФЗ «О адвокатской деятельности», ст. 23 ГПК РФ – адвокатская тайна)</span></li>
-                <li>6. Ответственность за нарушение договора: <span class="article">(ст. 310 ГК РФ – ответственность за неисполнение или ненадлежащее исполнение обязательств)</span></li>
-                <li>7. Нарушение закона может повлечь уголовную ответственность. <span class="article">(ст. 159 УК РФ – мошенничество, ст. 201 УК РФ – злоупотребление полномочиями, ст. 183 УК РФ – разглашение охраняемой законом тайны)</span></li>
-                <li>8. Прекращение сотрудничества возможно по соглашению сторон или в случаях, предусмотренных законом. <span class="article">(ст. 310, 421 ГК РФ)</span></li>
-                <li>9. Все споры решаются путем переговоров, а при невозможности – в судебном порядке. <span class="article">(ст. 11 ГПК РФ, ст. 310 ГК РФ)</span></li>
-            </ul>
-        </div>
-    </div>
+<header>
+    <h1>Юрист Комитета Банковского Надзора</h1>
+    <p>Белов Дмитрий Викторович</p>
+</header>
+
+<div class="container">
+    <section class="contact">
+        <h2>Связь с юристом</h2>
+        <p>Вы можете обратиться через Telegram или по телефону:</p>
+        <p><a href="https://t.me/Belov_Dmitriy235" target="_blank">Telegram: @Belov_Dmitriy235</a></p>
+        <p>Телефон: <a href="tel:+79197353380">+7 919 735 33 80</a></p>
+    </section>
+
+    <section class="rules">
+        <h2>Правила сотрудничества с юристом</h2>
+        <ul class="rules">
+            <li>Соблюдение <strong>ст. 310 УК РФ</strong> о неразглашении данных предварительного расследования.</li>
+            <li>Конфиденциальность информации: все сведения о клиентах, делах и документах строго не разглашаются третьим лицам.</li>
+            <li>Юрист действует только в рамках закона и регулирующих норм, соблюдая <strong>Гражданский и Уголовный кодексы РФ</strong>.</li>
+            <li>Клиент предоставляет достоверную и полную информацию для эффективной юридической помощи.</li>
+            <li>Любые консультации являются официальными и фиксируются в документации, при необходимости — с подписанием соглашений.</li>
+            <li>Юрист не несет ответственность за незаконные действия, предпринятые клиентом без согласования.</li>
+            <li>Все взаимодействия проходят через официальные каналы связи: Telegram, телефон, электронная почта.</li>
+            <li>Оплата услуг производится по согласованной тарифной схеме до начала работы, если иное не оговорено.</li>
+            <li>Запрещено использовать юридические консультации для совершения противоправных действий.</li>
+            <li>Сотрудничество может быть прекращено в случае нарушения правил или законов обеими сторонами.</li>
+        </ul>
+    </section>
+</div>
+
+<footer>
+    © 2026 Белов Дмитрий Викторович. Все права защищены.
+</footer>
+
 </body>
 </html>
+
