@@ -3,78 +3,119 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Вакансия</title>
+<title>Профиль юриста</title>
 <style>
-  body {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-    background: url('85e611c8-fa0a-4249-abdf-38a3113679b2.png') no-repeat center center fixed;
-    background-size: cover;
-    color: #fff;
-  }
-
-  .container {
-    text-align: center;
-    padding: 50px 20px;
-    background-color: rgba(0, 0, 0, 0.6); /* затемнённая подложка для читаемости */
-    max-width: 600px;
-    margin: 100px auto;
-    border-radius: 15px;
-  }
-
-  h2 {
-    color: #ffd700;
-    font-size: 28px;
-    margin-bottom: 20px;
-  }
-
-  p {
-    font-size: 18px;
-    line-height: 1.6;
-  }
-
-  .telegram-btn {
-    display: inline-block;
-    padding: 15px 30px;
-    margin-top: 25px;
-    font-size: 18px;
-    color: #fff;
-    background-color: #0088cc;
-    border-radius: 10px;
-    text-decoration: none;
-    font-weight: bold;
-    transition: background-color 0.3s, transform 0.3s;
-  }
-
-  .telegram-btn:hover {
-    background-color: #00aaff;
-    transform: scale(1.05);
-  }
-
-  @media(max-width: 600px) {
-    .container {
-      margin: 50px 20px;
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 40px 0;
+        margin: 0;
     }
-  }
+
+    .container {
+        background-color: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        max-width: 600px;
+        padding: 30px;
+    }
+
+    .profile {
+        display: flex;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .profile img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 20px;
+        border: 2px solid #0073e6;
+    }
+
+    .profile-info h2 {
+        margin: 0 0 10px 0;
+        font-size: 22px;
+        color: #333;
+    }
+
+    .profile-info p {
+        margin: 0 0 15px 0;
+        font-size: 16px;
+        color: #666;
+    }
+
+    .tg-button {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #0088cc;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: bold;
+        transition: background-color 0.3s, transform 0.2s;
+    }
+
+    .tg-button:hover {
+        background-color: #006699;
+        transform: scale(1.05);
+    }
+
+    .rules {
+        font-size: 15px;
+        color: #333;
+    }
+
+    .rules h3 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        color: #0073e6;
+    }
+
+    .rules ul {
+        padding-left: 20px;
+    }
+
+    .rules li {
+        margin-bottom: 10px;
+    }
+
+    .rules li span.article {
+        color: #555;
+        font-style: italic;
+    }
 </style>
 </head>
 <body>
+    <div class="container">
+        <!-- Профиль -->
+        <div class="profile">
+            <img src="a7ed8155-3f01-436d-9b28-ac21060d3fe6.png" alt="Юрист Белов Дмитрий Викторович">
+            <div class="profile-info">
+                <h2>Юрист Белов Дмитрий Викторович</h2>
+                <p>Эксперт в банковском праве и финансовом надзоре</p>
+                <a href="https://t.me/Belov_Dmitriy235" target="_blank" class="tg-button">Связь через Telegram</a>
+            </div>
+        </div>
 
-<div class="container">
-  <h2>🌟 Ищем таланты в нашу команду! 🌟</h2>
-  <p>
-    Хотите работать в динамичной и дружелюбной команде?<br>
-    У нас открыты вакансии для амбициозных и ответственных людей!<br><br>
-    ✅ Интересная работа<br>
-    ✅ Достойная оплата<br>
-    ✅ Возможность роста и развития
-  </p>
-  <a href="https://t.me/Caelum_Vox" target="_blank" class="telegram-btn">Написать в Telegram</a>
-  <p style="margin-top:15px; color:#ddd; font-size:14px;">
-    По всем вопросам пишите в лс.
-  </p>
-</div>
-
+        <!-- Правила сотрудничества -->
+        <div class="rules">
+            <h3>Правила сотрудничества с юристом</h3>
+            <ul>
+                <li>1. Все услуги оказываются на основании письменного или электронного договора. <span class="article">(ст. 310 ГК РФ)</span></li>
+                <li>2. Юрист несет ответственность за качественное выполнение своих обязанностей, соблюдая нормы закона. <span class="article">(ст. 309, 310 ГК РФ)</span></li>
+                <li>3. Клиент обязан предоставлять достоверную информацию, необходимую для оказания юридической помощи. <span class="article">(ст. 313 ГК РФ)</span></li>
+                <li>4. Стоимость услуг и порядок оплаты фиксируются в договоре, оплата производится до или после оказания услуг в зависимости от условий договора. <span class="article">(ст. 309, 424 ГК РФ)</span></li>
+                <li>5. Конфиденциальность: все сведения о клиенте и его делах являются юридической тайной. <span class="article">(ст. 10 ФЗ «О адвокатской деятельности и адвокатуре», ст. 23 ГПК РФ)</span></li>
+                <li>6. Прекращение сотрудничества возможно по соглашению сторон или в случаях, предусмотренных законом. <span class="article">(ст. 310, 421 ГК РФ)</span></li>
+                <li>7. Все споры, возникающие в процессе сотрудничества, решаются путем переговоров, а при невозможности – в судебном порядке. <span class="article">(ст. 1, 11 ГПК РФ, ст. 310 ГК РФ)</span></li>
+            </ul>
+        </div>
+    </div>
 </body>
 </html>
