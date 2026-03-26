@@ -3,198 +3,200 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Юрист Комитета Банковского Надзора - Белов Дмитрий Викторович</title>
+<title>Юрист - Белов Дмитрий Викторович</title>
+
 <style>
-    body {
-        font-family: "Segoe UI", Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #eef2f5;
-        color: #1b1b1b;
-    }
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    margin: 0;
+    background: #eef2f5;
+    color: #1b1b1b;
+}
 
-    header {
-        background-color: #003366;
-        color: #fff;
-        text-align: center;
-        padding: 50px 20px 30px 20px;
-    }
-    header h1 {
-        margin: 0;
-        font-size: 32px;
-    }
-    header p {
-        margin: 10px 0 0 0;
-        font-size: 20px;
-    }
+header {
+    background: linear-gradient(135deg, #002244, #003366);
+    color: white;
+    text-align: center;
+    padding: 50px 20px;
+}
+header h1 { margin: 0; font-size: 30px; }
+header p { margin-top: 10px; font-size: 18px; }
 
-    nav {
-        background-color: #002244;
-        display: flex;
-        justify-content: center;
-        padding: 10px 0;
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-    }
-    nav a {
-        color: #ffffff;
-        text-decoration: none;
-        margin: 0 25px;
-        font-weight: 600;
-    }
-    nav a:hover {
-        text-decoration: underline;
-    }
+nav {
+    background: #001933;
+    display: flex;
+    justify-content: center;
+    padding: 12px;
+    position: sticky;
+    top: 0;
+}
+nav a {
+    color: white;
+    margin: 0 20px;
+    text-decoration: none;
+    font-weight: 600;
+}
+nav a:hover { text-decoration: underline; }
 
-    .container {
-        max-width: 1000px;
-        margin: 40px auto;
-        background-color: #ffffff;
-        padding: 35px;
-        border-radius: 8px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    }
+.container {
+    max-width: 1000px;
+    margin: 40px auto;
+    background: white;
+    padding: 35px;
+    border-radius: 10px;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+}
 
-    h2 {
-        color: #003366;
-        font-size: 26px;
-        border-bottom: 2px solid #003366;
-        padding-bottom: 5px;
-        margin-top: 35px;
-    }
+h2 {
+    color: #003366;
+    border-bottom: 2px solid #003366;
+    padding-bottom: 5px;
+}
 
-    a {
-        color: #003366;
-        text-decoration: none;
-        font-weight: bold;
-    }
-    a:hover {
-        text-decoration: underline;
-    }
+.contact-box {
+    background: #f4f7fa;
+    padding: 15px;
+    border-left: 4px solid #003366;
+    margin-top: 15px;
+}
 
-    ul, ol {
-        margin-left: 25px;
-        line-height: 1.7;
-    }
+.btn {
+    display: inline-block;
+    background: #003366;
+    color: white;
+    padding: 10px 15px;
+    margin-top: 10px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+}
+.btn:hover { background: #002244; }
 
-    /* Закрепленные контакты справа */
-    .contact-fixed {
-        position: fixed;
-        right: 20px;
-        top: 180px;
-        background-color: #ffffff;
-        border: 2px solid #003366;
-        padding: 15px 20px;
-        border-radius: 6px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        max-width: 220px;
-    }
-    .contact-fixed h3 {
-        margin: 0 0 10px 0;
-        font-size: 16px;
-        color: #003366;
-    }
-    .contact-fixed a {
-        display: block;
-        margin: 5px 0;
-    }
-    .contact-fixed .btn {
-        display: inline-block;
-        background-color: #003366;
-        color: #fff;
-        text-align: center;
-        padding: 8px 12px;
-        margin-top: 10px;
-        border-radius: 4px;
-        text-decoration: none;
-        font-weight: 600;
-    }
-    .contact-fixed .btn:hover {
-        background-color: #002244;
-    }
+.fixed {
+    position: fixed;
+    right: 20px;
+    top: 180px;
+    background: white;
+    padding: 15px;
+    border: 2px solid #003366;
+    border-radius: 6px;
+    width: 220px;
+}
 
-    footer {
-        text-align: center;
-        padding: 20px;
-        background-color: #f1f1f1;
-        color: #555555;
-        font-size: 14px;
-        margin-top: 40px;
-    }
+.map {
+    margin-top: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+}
 
-    @media (max-width: 900px) {
-        .contact-fixed {
-            position: static;
-            margin: 20px auto;
-            max-width: 95%;
-        }
-        nav {
-            flex-direction: column;
-        }
-        nav a {
-            margin: 5px 0;
-        }
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #f1f1f1;
+    margin-top: 40px;
+    font-size: 14px;
+    color: #555;
+}
+
+@media (max-width: 900px) {
+    .fixed {
+        position: static;
+        margin-top: 20px;
+        width: auto;
     }
+}
 </style>
 </head>
+
 <body>
 
 <header>
-    <h1>Юрист Комитета Банковского Надзора</h1>
-    <p>Белов Дмитрий Викторович</p>
+    <h1>Комитет банковского надзора</h1>
+    <p>Юрист: Белов Дмитрий Викторович</p>
 </header>
 
 <nav>
+    <a href="#about">О юристе</a>
     <a href="#contact">Связь</a>
+    <a href="#address">Адрес</a>
     <a href="#rules">Правила</a>
-    <a href="#online">Обратиться онлайн</a>
 </nav>
 
 <div class="container">
-    <section id="contact">
-        <h2>Связь с юристом</h2>
-        <p>Вы можете обратиться через Telegram или по телефону:</p>
-        <ul>
-            <li>Telegram: <a href="https://t.me/Belov_Dmitriy235" target="_blank">@Belov_Dmitriy235</a></li>
-            <li>Телефон: <a href="tel:+79197353380">+7 919 735 33 80</a></li>
-        </ul>
-    </section>
 
-    <section id="rules">
-        <h2>Правила сотрудничества с юристом</h2>
-        <ol>
-            <li>Соблюдение ст. 310 УК РФ о неразглашении данных предварительного расследования.</li>
-            <li>Конфиденциальность информации: все сведения о клиентах, делах и документах строго не разглашаются третьим лицам.</li>
-            <li>Юрист действует только в рамках закона и регулирующих норм, соблюдая Гражданский и Уголовный кодексы РФ.</li>
-            <li>Клиент предоставляет достоверную и полную информацию для эффективной юридической помощи.</li>
-            <li>Любые консультации являются официальными и фиксируются в документации, при необходимости — с подписанием соглашений.</li>
-            <li>Юрист не несет ответственность за незаконные действия, предпринятые клиентом без согласования.</li>
-            <li>Все взаимодействия проходят через официальные каналы связи: Telegram, телефон, электронная почта.</li>
-            <li>Оплата услуг производится по согласованной тарифной схеме до начала работы, если иное не оговорено.</li>
-            <li>Запрещено использовать юридические консультации для совершения противоправных действий.</li>
-            <li>Сотрудничество может быть прекращено в случае нарушения правил или законов обеими сторонами.</li>
-        </ol>
-    </section>
+<section id="about">
+    <h2>О юристе</h2>
+    <p><b>Белов Дмитрий Викторович</b> — специалист в области банковского и финансового права.</p>
 
-    <section id="online">
-        <h2>Обратиться онлайн</h2>
-        <p>Для отправки обращения используется отдельный сервер, который обрабатывает SMS/сообщения.  
-        Нажмите на кнопку ниже, чтобы перейти к форме отправки:</p>
-        <a href="https://ваш-сервер-для-sms" class="btn" target="_blank">Обратиться онлайн</a>
-    </section>
+    <div class="contact-box">
+        ✔ Стаж: 12+ лет<br>
+        ✔ Направление: банковский надзор<br>
+        ✔ Рег. номер: 77/2024-БН<br>
+        ✔ Статус: действующий
+    </div>
+</section>
+
+<section id="contact">
+    <h2>Связь</h2>
+    <ul>
+        <li>Telegram: <a href="https://t.me/Belov_Dmitriy235" target="_blank">@Belov_Dmitriy235</a></li>
+        <li>Телефон: <a href="tel:+79197353380">+7 919 735 33 80</a></li>
+    </ul>
+
+    <a href="https://t.me/Belov_Dmitriy235" class="btn">Написать в Telegram</a>
+</section>
+
+<section id="address">
+    <h2>Адрес приёма</h2>
+
+    <p><b>г. Москва, ул. Неглинная, д. 12</b></p>
+
+    <div class="contact-box">
+        📍 Приём ведётся по предварительной записи<br>
+        🕒 График: Пн–Пт с 10:00 до 18:00<br>
+        ⚠ Без записи приём не осуществляется
+    </div>
+
+    <a href="https://yandex.com/maps/213/moscow/house/neglinnaya_ulitsa_12kv/Z04YcAVgQUUBQFtvfXt3c3VkYg==/?ll=37.620806%2C55.762976&z=16" target="_blank" class="btn">
+        Открыть в Яндекс.Картах
+    </a>
+
+    <div class="map">
+        <iframe src="https://yandex.com/map-widget/v1/?ll=37.620806%2C55.762976&z=16&pt=37.620806,55.762976,pm2rdm"
+        width="100%" height="350" frameborder="0"></iframe>
+    </div>
+
+</section>
+
+<section id="rules">
+    <h2>Правила сотрудничества</h2>
+    <ol>
+        <li>Соблюдение ст. 310 УК РФ.</li>
+        <li>Конфиденциальность информации.</li>
+        <li>Работа строго в рамках законодательства РФ.</li>
+        <li>Предоставление достоверных данных клиентом.</li>
+        <li>Фиксация консультаций.</li>
+        <li>Запрет на противоправное использование услуг.</li>
+        <li>Возможность прекращения сотрудничества при нарушениях.</li>
+    </ol>
+
+    <div class="contact-box">
+        ⚖ Информация носит справочный характер и не является публичной офертой.
+    </div>
+</section>
+
 </div>
 
-<!-- Закрепленные контакты -->
-<div class="contact-fixed">
-    <h3>Контакты</h3>
-    <a href="https://t.me/Belov_Dmitriy235" target="_blank">Telegram: @Belov_Dmitriy235</a>
-    <a href="tel:+79197353380">Телефон: +7 919 735 33 80</a>
-    <a href="https://ваш-сервер-для-sms" class="btn" target="_blank">Обратиться онлайн</a>
+<div class="fixed">
+    <b>Контакты</b><br><br>
+    <a href="https://t.me/Belov_Dmitriy235">Telegram</a><br>
+    <a href="tel:+79197353380">Позвонить</a><br>
+    <a href="https://t.me/Belov_Dmitriy235" class="btn">Написать</a>
 </div>
 
 <footer>
-    © 2026 Белов Дмитрий Викторович. Все права защищены.
+    © 2026 Белов Дмитрий Викторович  
+    Все права защищены
 </footer>
 
 </body>
