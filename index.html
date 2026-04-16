@@ -2,226 +2,157 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Юрист - Белов Дмитрий Викторович</title>
-
-<meta name="description" content="Юрист по банковским вопросам и кибер-мошенничеству. Помощь при списании средств, возврат денег, сопровождение дел.">
-<meta name="keywords" content="юрист, мошенничество, возврат средств, банковский надзор, кибербезопасность">
-<meta name="robots" content="index, follow">
+<title>Молочная ферма</title>
 
 <style>
 body {
-    font-family: "Segoe UI", Arial, sans-serif;
+    font-family: Arial, sans-serif;
     margin: 0;
-    background: #eef2f5;
-    color: #1b1b1b;
+    background: #f9f9f9;
 }
 
 header {
-    background: linear-gradient(135deg, #002244, #003366);
+    background: #4CAF50;
     color: white;
+    padding: 15px;
     text-align: center;
-    padding: 50px 20px;
 }
-header h1 { margin: 0; font-size: 30px; }
-header p { margin-top: 10px; font-size: 18px; }
 
-nav {
-    background: #001933;
-    display: flex;
-    justify-content: center;
-    padding: 12px;
-    position: sticky;
-    top: 0;
-}
 nav a {
     color: white;
-    margin: 0 20px;
+    margin: 0 10px;
     text-decoration: none;
-    font-weight: 600;
 }
 
-.container {
-    max-width: 1000px;
-    margin: 40px auto;
+.hero {
+    background: #e8f5e9;
+    text-align: center;
+    padding: 40px;
+}
+
+.products {
+    padding: 20px;
+    text-align: center;
+}
+
+.product-list {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.product {
     background: white;
-    padding: 35px;
-    border-radius: 10px;
-    box-shadow: 0 5px 25px rgba(0,0,0,0.1);
-}
-
-section { margin-bottom: 40px; }
-
-h2 {
-    color: #003366;
-    border-bottom: 2px solid #003366;
-    padding-bottom: 5px;
-    margin-top: 0;
-}
-
-ul li, ol li { margin-bottom: 8px; }
-
-.contact-box {
-    background: #f4f7fa;
     padding: 15px;
-    border-left: 4px solid #003366;
-    margin-top: 15px;
+    border-radius: 10px;
+    width: 200px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
-.btn {
-    display: inline-block;
-    background: #003366;
+.product img {
+    width: 100%;
+    border-radius: 10px;
+}
+
+button {
+    background: #4CAF50;
     color: white;
-    padding: 10px 15px;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
     margin-top: 10px;
-    border-radius: 5px;
-    text-decoration: none;
-    font-weight: bold;
 }
 
-.fixed {
-    position: fixed;
-    right: 20px;
-    top: 180px;
-    background: white;
-    padding: 15px;
-    border: 2px solid #003366;
-    border-radius: 6px;
-    width: 220px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-}
-
-.map {
-    margin-top: 20px;
-    border-radius: 10px;
-    overflow: hidden;
+button:hover {
+    background: #45a049;
 }
 
 footer {
+    background: #333;
+    color: white;
     text-align: center;
-    padding: 20px;
-    background: #f1f1f1;
-    margin-top: 40px;
-    font-size: 14px;
-    color: #555;
+    padding: 10px;
 }
 
-@media (max-width: 900px) {
-    .fixed { position: static; margin-top: 20px; width: auto; }
+.cart {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
 }
 </style>
-</head>
 
+</head>
 <body>
 
 <header>
-<h1>Комитет банковского надзора</h1>
-<p>Юрист: Белов Дмитрий Викторович</p>
+    <h1>🥛 Молочная ферма</h1>
+    <nav>
+        <a href="#">Главная</a>
+        <a href="#">Каталог</a>
+        <a href="#">Контакты</a>
+    </nav>
 </header>
 
-<div style="background:#8B0000; color:white; text-align:center; padding:12px; font-weight:bold;">
-⚠ Срочная помощь при мошенничестве — действуйте немедленно  
-<a href="https://t.me/Belov_Dmitriy235" style="color:#fff;">Связаться</a>
+<div class="cart">
+    🛒 Товаров: <span id="cart-count">0</span>
 </div>
 
-<nav>
-<a href="#about">О юристе</a>
-<a href="#services">Услуги</a>
-<a href="#cases">Кейсы</a>
-<a href="#process">Порядок</a>
-<a href="#contact">Связь</a>
-</nav>
-
-<div class="container">
-
-<div style="background:#fff3f3; border:1px solid #ffcccc; padding:20px; border-radius:10px;">
-<h2 style="color:#8B0000;">Вы могли стать жертвой мошенников, если:</h2>
-<ul>
-<li>Назвали код из SMS</li>
-<li>Произошло списание средств</li>
-<li>Вам звонили «Ростелеком или Администрация»</li>
-<li>Переходили по ссылкам</li>
-</ul>
-<b style="color:#8B0000;">Первые часы критичны</b>
-</div>
-
-<section id="about">
-<h2>О юристе</h2>
-<p>
-<b>Белов Дмитрий Викторович</b> — юрист по банковскому праву и кибер-мошенничеству.
-Специализируется на возврате денежных средств и защите клиентов.
-</p>
-
-<div class="contact-box">
-✔ Стаж: 12+ лет<br>
-✔ Направление: банковский надзор, кибербезопасность<br>
-✔ Статус: действующий
-</div>
+<section class="hero">
+    <h2>Свежие молочные продукты каждый день</h2>
+    <p>Молоко, сыр, йогурты — прямо с фермы</p>
 </section>
 
-<section id="services">
-<h2>Услуги</h2>
-<ul>
-<li>Разблокировка счетов</li>
-<li>Возврат средств</li>
-<li>Защита от мошенничества</li>
-<li>Работа с банками</li>
-</ul>
+<section class="products">
+    <h2>Наши товары</h2>
+    <div class="product-list">
+
+        <div class="product">
+            <img src="https://via.placeholder.com/150" alt="Молоко">
+            <h3>Молоко</h3>
+            <p>Свежие фермерское молоко</p>
+            <span>€1.50</span><br>
+            <button onclick="addToCart()">Купить</button>
+        </div>
+
+        <div class="product">
+            <img src="https://via.placeholder.com/150" alt="Сыр">
+            <h3>Сыр</h3>
+            <p>Натуральный твердый сыр</p>
+            <span>€4.00</span><br>
+            <button onclick="addToCart()">Купить</button>
+        </div>
+
+        <div class="product">
+            <img src="https://via.placeholder.com/150" alt="Йогурт">
+            <h3>Йогурт</h3>
+            <p>Домашний йогурт</p>
+            <span>€2.00</span><br>
+            <button onclick="addToCart()">Купить</button>
+        </div>
+
+    </div>
 </section>
-
-<section id="cases">
-<h2>Практика</h2>
-<div class="contact-box">Возврат 480 000 ₽ клиенту</div>
-<div class="contact-box">Сохранено 220 000 ₽</div>
-</section>
-
-<section id="process">
-<h2>Порядок работы</h2>
-<ol>
-<li>Анализ ситуации</li>
-<li>Сбор доказательств</li>
-<li>Работа с банком</li>
-<li>Юридические действия</li>
-</ol>
-</section>
-
-<section>
-<h2>Правовая база</h2>
-<ul>
-<li>ст. 159 УК РФ</li>
-<li>ст. 272 УК РФ</li>
-<li>152-ФЗ</li>
-</ul>
-</section>
-
-<section id="contact">
-<h2>Связь</h2>
-<a href="https://t.me/Belov_Dmitriy235" class="btn">Написать</a>
-</section>
-
-</div>
-
-<div class="fixed">
-<b>Срочная связь</b><br><br>
-<a href="https://t.me/Belov_Dmitriy235">Telegram</a><br>
-<a href="tel:+79340920331">Позвонить</a>
-</div>
 
 <footer>
-© 2026 Белов Дмитрий Викторович<br>
-Юридическая помощь
+    <p>© 2026 Молочная ферма</p>
 </footer>
 
 <script>
-document.querySelectorAll('nav a').forEach(link => {
-  link.addEventListener('click', e => {
-    e.preventDefault();
-    document.querySelector(link.getAttribute('href')).scrollIntoView({
-      behavior: 'smooth'
-    });
-  });
-});
+let count = 0;
+
+function addToCart() {
+    count++;
+    document.getElementById("cart-count").innerText = count;
+}
+</script>
+
+</body>
+</html>
 </script>
 
 </body>
