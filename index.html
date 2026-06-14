@@ -1,231 +1,128 @@
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Молочная ферма</title>
+<title>Администратор Oxide - Kiler</title>
 
 <style>
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    background: #f4f7f5;
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
 }
 
-header {
-    background: #2e7d32;
-    color: white;
-    padding: 15px;
-    text-align: center;
+body{
+    font-family:Arial,sans-serif;
+    background:#111;
+    color:white;
 }
 
-header p {
-    margin: 5px 0 0;
-    font-size: 14px;
+header{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    background:linear-gradient(rgba(0,0,0,.7),rgba(0,0,0,.7)),
+               url('https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1920');
+    background-size:cover;
+    background-position:center;
 }
 
-.hero {
-    background: linear-gradient(135deg, #a5d6a7, #e8f5e9);
-    text-align: center;
-    padding: 30px 15px;
+.hero h1{
+    font-size:70px;
+    color:#ff9800;
+    text-transform:uppercase;
 }
 
-.hero h2 {
-    margin-bottom: 10px;
+.hero p{
+    font-size:24px;
+    margin-top:15px;
 }
 
-.products {
-    padding: 15px;
+.badge{
+    display:inline-block;
+    margin-top:20px;
+    background:#ff9800;
+    color:black;
+    padding:10px 25px;
+    border-radius:30px;
+    font-weight:bold;
 }
 
-.product-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 15px;
+section{
+    max-width:1000px;
+    margin:auto;
+    padding:80px 20px;
 }
 
-.product {
-    background: white;
-    padding: 12px;
-    border-radius: 12px;
-    text-align: center;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+.card{
+    background:#1e1e1e;
+    padding:30px;
+    border-radius:15px;
+    margin-top:20px;
 }
 
-.product img {
-    width: 100%;
-    border-radius: 10px;
+h2{
+    color:#ff9800;
+    margin-bottom:15px;
 }
 
-.product h3 {
-    margin: 10px 0 5px;
-    font-size: 16px;
-}
-
-.product p {
-    font-size: 13px;
-    color: #555;
-}
-
-.price {
-    font-weight: bold;
-    color: #2e7d32;
-    margin: 5px 0;
-}
-
-button {
-    background: #43a047;
-    color: white;
-    border: none;
-    padding: 8px;
-    border-radius: 8px;
-    width: 100%;
-    cursor: pointer;
-}
-
-button:hover {
-    background: #388e3c;
-}
-
-.cart {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    background: white;
-    padding: 8px 12px;
-    border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    font-size: 14px;
-}
-
-.contact {
-    background: #ffffff;
-    padding: 20px;
-    text-align: center;
-    margin-top: 20px;
-}
-
-.contact a {
-    display: inline-block;
-    margin-top: 10px;
-    background: #2e7d32;
-    color: white;
-    padding: 10px 15px;
-    border-radius: 8px;
-    text-decoration: none;
-}
-
-footer {
-    background: #1b5e20;
-    color: white;
-    text-align: center;
-    padding: 10px;
-    margin-top: 20px;
-}
-
-/* 📱 адаптация */
-@media (max-width: 600px) {
-    .hero {
-        padding: 20px 10px;
-    }
-
-    .product h3 {
-        font-size: 14px;
-    }
+footer{
+    text-align:center;
+    padding:30px;
+    background:#0a0a0a;
+    color:#777;
 }
 </style>
-
 </head>
+
 <body>
 
 <header>
-    <h1>🥛 Молочная ферма</h1>
-    <p>📞 Заказ по телефону: 0963767277</p>
+    <div class="hero">
+        <h1>KILER</h1>
+        <p>Администратор игрового сервера Oxide</p>
+        <div class="badge">ADMINISTRATOR</div>
+    </div>
 </header>
 
-<div class="cart">
-    🛒 <span id="cart-count">0</span>
-</div>
+<section>
 
-<section class="hero">
-    <h2>Свежие продукты прямо с фермы</h2>
-    <p>Натурально • Вкусно • Полезно</p>
-</section>
-
-<section class="products">
-    <div class="product-list">
-
-        <div class="product">
-            <img src="https://via.placeholder.com/150">
-            <h3>Молоко</h3>
-            <p>1 литр</p>
-            <div class="price">55 грн</div>
-            <button onclick="add()">Купить</button>
-        </div>
-
-        <div class="product">
-            <img src="https://via.placeholder.com/150">
-            <h3>Сыр твердый</h3>
-            <p>Домашний</p>
-            <div class="price">180 грн</div>
-            <button onclick="add()">Купить</button>
-        </div>
-
-        <div class="product">
-            <img src="https://via.placeholder.com/150">
-            <h3>Йогурт</h3>
-            <p>Натуральный</p>
-            <div class="price">70 грн</div>
-            <button onclick="add()">Купить</button>
-        </div>
-
-        <div class="product">
-            <img src="https://via.placeholder.com/150">
-            <h3>Сметана</h3>
-            <p>Домашняя</p>
-            <div class="price">90 грн</div>
-            <button onclick="add()">Купить</button>
-        </div>
-
-        <div class="product">
-            <img src="https://via.placeholder.com/150">
-            <h3>Творог</h3>
-            <p>Свежий</p>
-            <div class="price">110 грн</div>
-            <button onclick="add()">Купить</button>
-        </div>
-
-        <div class="product">
-            <img src="https://via.placeholder.com/150">
-            <h3>Масло</h3>
-            <p>Сливочное</p>
-            <div class="price">120 грн</div>
-            <button onclick="add()">Купить</button>
-        </div>
-
+    <div class="card">
+        <h2>Информация</h2>
+        <p>
+            Данная страница содержит информацию об игровом
+            администраторе с никнеймом <b>Kiler</b>.
+        </p>
     </div>
-</section>
 
-<section class="contact">
-    <h2>Связаться с нами</h2>
-    <p>Звоните или пишите для заказа</p>
-    <a href="tel:0963767277">📞 Позвонить</a>
+    <div class="card">
+        <h2>Полномочия</h2>
+        <p>
+            • Контроль соблюдения правил сервера<br>
+            • Рассмотрение жалоб игроков<br>
+            • Проведение игровых мероприятий<br>
+            • Поддержание порядка на сервере
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>Связь</h2>
+        <p>
+            Никнейм: <b>Kiler</b><br>
+            Сервер: <b>Oxide</b>
+        </p>
+    </div>
+
 </section>
 
 <footer>
-    © 2026 Молочная ферма
+    © 2026 | Профиль игрового администратора Kiler
 </footer>
 
-<script>
-let c = 0;
-function add() {
-    c++;
-    document.getElementById("cart-count").innerText = c;
-}
-</script>
-
 </body>
 </html>
-
-</body>
-</html>
+```
