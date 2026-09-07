@@ -1,128 +1,930 @@
-```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Администратор Oxide - Kiler</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NOVA TRADE</title>
 
-<style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-body{
-    font-family:Arial,sans-serif;
-    background:#111;
-    color:white;
-}
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-header{
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    text-align:center;
-    background:linear-gradient(rgba(0,0,0,.7),rgba(0,0,0,.7)),
-               url('https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1920');
-    background-size:cover;
-    background-position:center;
-}
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #07090d;
+      color: white;
+    }
 
-.hero h1{
-    font-size:70px;
-    color:#ff9800;
-    text-transform:uppercase;
-}
+    button {
+      cursor: pointer;
+    }
 
-.hero p{
-    font-size:24px;
-    margin-top:15px;
-}
+    .hidden {
+      display: none !important;
+    }
 
-.badge{
-    display:inline-block;
-    margin-top:20px;
-    background:#ff9800;
-    color:black;
-    padding:10px 25px;
-    border-radius:30px;
-    font-weight:bold;
-}
+    .login-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
 
-section{
-    max-width:1000px;
-    margin:auto;
-    padding:80px 20px;
-}
+    .login-card {
+      width: 420px;
+      background: #0d1117;
+      border: 1px solid #222832;
+      border-radius: 18px;
+      padding: 40px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,.4);
+    }
 
-.card{
-    background:#1e1e1e;
-    padding:30px;
-    border-radius:15px;
-    margin-top:20px;
-}
+    .logo {
+      color: #f0b90b;
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
 
-h2{
-    color:#ff9800;
-    margin-bottom:15px;
-}
+    .login-card h1 {
+      margin-top: 30px;
+      margin-bottom: 10px;
+    }
 
-footer{
-    text-align:center;
-    padding:30px;
-    background:#0a0a0a;
-    color:#777;
-}
-</style>
+    .login-card p {
+      color: #8d98a5;
+      line-height: 1.6;
+    }
+
+    .bonus {
+      color: #f0b90b;
+      font-weight: bold;
+    }
+
+    .google-btn {
+      margin-top: 20px;
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      background: white;
+      color: #111;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    header {
+      height: 70px;
+      display: flex;
+      align-items: center;
+      padding: 0 25px;
+      border-bottom: 1px solid #202630;
+      gap: 35px;
+    }
+
+    nav {
+      display: flex;
+      gap: 25px;
+      color: #9ba6b2;
+    }
+
+    .header-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .balance-small {
+      text-align: right;
+    }
+
+    .balance-small span {
+      display: block;
+      color: #8d98a5;
+      font-size: 12px;
+    }
+
+    .logout {
+      background: #1c222c;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 8px;
+    }
+
+    .ticker {
+      padding: 20px 25px;
+      border-bottom: 1px solid #202630;
+      display: flex;
+      gap: 50px;
+      flex-wrap: wrap;
+    }
+
+    .ticker-item span {
+      display: block;
+      color: #8d98a5;
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+
+    .price {
+      font-size: 23px;
+      font-weight: bold;
+    }
+
+    .green {
+      color: #0ecb81;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .card {
+      background: #0d1117;
+      border: 1px solid #202630;
+      border-radius: 14px;
+    }
+
+    .chart-card {
+      padding: 20px;
+      min-height: 520px;
+    }
+
+    .chart-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+
+    .chart-top h2 {
+      margin: 0;
+    }
+
+    .time-buttons button {
+      background: #171c24;
+      color: #9ba6b2;
+      border: none;
+      border-radius: 6px;
+      padding: 7px 10px;
+      margin-left: 5px;
+    }
+
+    .trade-card {
+      padding: 20px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 25px;
+    }
+
+    .tabs button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    .buy-tab {
+      background: #0ecb81;
+    }
+
+    .sell-tab {
+      background: #f6465d;
+      color: white;
+    }
+
+    label {
+      display: block;
+      margin-top: 16px;
+      margin-bottom: 7px;
+      color: #8d98a5;
+      font-size: 13px;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      border-radius: 8px;
+      border: 1px solid #2a323f;
+      background: #151a22;
+      color: white;
+      outline: none;
+    }
+
+    .trade-button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 9px;
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    .buy-button {
+      background: #0ecb81;
+    }
+
+    .sell-button {
+      background: #f6465d;
+      color: white;
+    }
+
+    .wallet {
+      margin: 0 20px 20px;
+      padding: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 30px;
+    }
+
+    .wallet h2 {
+      font-size: 32px;
+      margin: 7px 0;
+    }
+
+    .wallet p {
+      color: #8d98a5;
+      margin: 0;
+    }
+
+    .wallet-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .wallet-actions input {
+      width: 180px;
+    }
+
+    .wallet-actions button {
+      padding: 13px 18px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    .deposit {
+      background: #f0b90b;
+    }
+
+    .withdraw {
+      background: #1d2430;
+      color: white;
+    }
+
+    .portfolio {
+      margin: 0 20px 30px;
+      padding: 25px;
+    }
+
+    .portfolio-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 13px 0;
+      border-bottom: 1px solid #202630;
+    }
+
+    .portfolio-row:last-child {
+      border-bottom: none;
+    }
+
+    canvas {
+      width: 100% !important;
+      height: 430px !important;
+    }
+
+    @media (max-width: 900px) {
+      nav {
+        display: none;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .wallet {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .wallet-actions {
+        flex-wrap: wrap;
+      }
+
+      .wallet-actions input {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<header>
-    <div class="hero">
-        <h1>KILER</h1>
-        <p>Администратор игрового сервера Oxide</p>
-        <div class="badge">ADMINISTRATOR</div>
+  <div id="loginPage" class="login-page">
+    <div class="login-card">
+      <div class="logo">NOVA TRADE</div>
+
+      <h1>Trading Platform</h1>
+
+      <p>
+        Войдите через Google и получите
+        <span class="bonus">20 USDT</span>
+        демо-бонуса.
+      </p>
+
+      <button class="google-btn" onclick="googleLogin()">
+        Войти через Google
+      </button>
     </div>
-</header>
+  </div>
 
-<section>
+  <div id="platform" class="hidden">
 
-    <div class="card">
-        <h2>Информация</h2>
-        <p>
-            Данная страница содержит информацию об игровом
-            администраторе с никнеймом <b>Kiler</b>.
-        </p>
-    </div>
+    <header>
+      <div class="logo">NOVA TRADE</div>
 
-    <div class="card">
-        <h2>Полномочия</h2>
-        <p>
-            • Контроль соблюдения правил сервера<br>
-            • Рассмотрение жалоб игроков<br>
-            • Проведение игровых мероприятий<br>
-            • Поддержание порядка на сервере
-        </p>
-    </div>
+      <nav>
+        <span>Торговля</span>
+        <span>Рынки</span>
+        <span>Кошелек</span>
+      </nav>
 
-    <div class="card">
-        <h2>Связь</h2>
-        <p>
-            Никнейм: <b>Kiler</b><br>
-            Сервер: <b>Oxide</b>
-        </p>
-    </div>
+      <div class="header-right">
+        <div class="balance-small">
+          <span>Баланс</span>
+          <strong id="headerBalance">20.00 USDT</strong>
+        </div>
 
-</section>
+        <button class="logout" onclick="logout()">
+          Выйти
+        </button>
+      </div>
+    </header>
 
-<footer>
-    © 2026 | Профиль игрового администратора Kiler
-</footer>
+    <section class="ticker">
+      <div class="ticker-item">
+        <span>Пара</span>
+        <strong>BTC / USDT</strong>
+      </div>
+
+      <div class="ticker-item">
+        <span>Цена</span>
+        <div class="price" id="btcPrice">$62,500</div>
+      </div>
+
+      <div class="ticker-item">
+        <span>24H</span>
+        <strong class="green">+2.41%</strong>
+      </div>
+
+      <div class="ticker-item">
+        <span>24H High</span>
+        <strong>$64,120</strong>
+      </div>
+
+      <div class="ticker-item">
+        <span>24H Low</span>
+        <strong>$60,890</strong>
+      </div>
+    </section>
+
+    <section class="layout">
+
+      <div class="card chart-card">
+
+        <div class="chart-top">
+          <h2>BTC / USDT</h2>
+
+          <div class="time-buttons">
+            <button>1M</button>
+            <button>5M</button>
+            <button>1H</button>
+            <button>1D</button>
+          </div>
+        </div>
+
+        <canvas id="priceChart"></canvas>
+
+      </div>
+
+      <aside class="card trade-card">
+
+        <div class="tabs">
+          <button class="buy-tab">Купить</button>
+          <button class="sell-tab">Продать</button>
+        </div>
+
+        <div>
+          Доступно:
+          <strong id="availableBalance">
+            20.00 USDT
+          </strong>
+        </div>
+
+        <label>Сумма USDT</label>
+
+        <input
+          id="tradeAmount"
+          type="number"
+          placeholder="0.00"
+        />
+
+        <button
+          class="trade-button buy-button"
+          onclick="buyBTC()"
+        >
+          Купить BTC
+        </button>
+
+        <button
+          class="trade-button sell-button"
+          onclick="sellBTC()"
+        >
+          Продать BTC
+        </button>
+
+      </aside>
+
+    </section>
+
+    <section class="card wallet">
+
+      <div>
+        <span>Общий баланс</span>
+
+        <h2 id="mainBalance">
+          20.00 USDT
+        </h2>
+
+        <p>Demo wallet</p>
+      </div>
+
+      <div class="wallet-actions">
+
+        <input
+          id="walletAmount"
+          type="number"
+          placeholder="Сумма USDT"
+        />
+
+        <button
+          class="deposit"
+          onclick="deposit()"
+        >
+          Пополнить
+        </button>
+
+        <button
+          class="withdraw"
+          onclick="withdraw()"
+        >
+          Вывести
+        </button>
+
+      </div>
+
+    </section>
+
+    <section class="card portfolio">
+
+      <h2>Портфель</h2>
+
+      <div class="portfolio-row">
+        <span>USDT</span>
+        <strong id="usdtPortfolio">
+          20.00
+        </strong>
+      </div>
+
+      <div class="portfolio-row">
+        <span>BTC</span>
+        <strong id="btcPortfolio">
+          0.00000000
+        </strong>
+      </div>
+
+    </section>
+
+  </div>
+
+<script>
+
+let balance = Number(localStorage.getItem("balance"));
+
+if (!balance && balance !== 0) {
+  balance = 20;
+}
+
+let btcBalance =
+  Number(localStorage.getItem("btcBalance")) || 0;
+
+let btcPrice = 62500;
+
+let loggedIn =
+  localStorage.getItem("loggedIn") === "true";
+
+
+function googleLogin() {
+
+  localStorage.setItem(
+    "loggedIn",
+    "true"
+  );
+
+  if (
+    localStorage.getItem("registered") !== "true"
+  ) {
+
+    balance = 20;
+
+    localStorage.setItem(
+      "balance",
+      balance
+    );
+
+    localStorage.setItem(
+      "registered",
+      "true"
+    );
+
+    alert(
+      "Добро пожаловать! Начислен бонус 20 USDT."
+    );
+
+  }
+
+  showPlatform();
+
+}
+
+
+function logout() {
+
+  localStorage.setItem(
+    "loggedIn",
+    "false"
+  );
+
+  location.reload();
+
+}
+
+
+function showPlatform() {
+
+  document
+    .getElementById("loginPage")
+    .classList.add("hidden");
+
+  document
+    .getElementById("platform")
+    .classList.remove("hidden");
+
+  updateUI();
+
+}
+
+
+function updateUI() {
+
+  document.getElementById(
+    "headerBalance"
+  ).innerText =
+    balance.toFixed(2) + " USDT";
+
+  document.getElementById(
+    "availableBalance"
+  ).innerText =
+    balance.toFixed(2) + " USDT";
+
+  document.getElementById(
+    "mainBalance"
+  ).innerText =
+    balance.toFixed(2) + " USDT";
+
+  document.getElementById(
+    "usdtPortfolio"
+  ).innerText =
+    balance.toFixed(2);
+
+  document.getElementById(
+    "btcPortfolio"
+  ).innerText =
+    btcBalance.toFixed(8);
+
+  localStorage.setItem(
+    "balance",
+    balance
+  );
+
+  localStorage.setItem(
+    "btcBalance",
+    btcBalance
+  );
+
+}
+
+
+function deposit() {
+
+  const input =
+    document.getElementById("walletAmount");
+
+  const amount = Number(input.value);
+
+  if (amount <= 0) {
+
+    alert("Введите корректную сумму");
+
+    return;
+
+  }
+
+  balance += amount;
+
+  input.value = "";
+
+  updateUI();
+
+  alert(
+    "Демо-пополнение успешно: +" +
+    amount +
+    " USDT"
+  );
+
+}
+
+
+function withdraw() {
+
+  const input =
+    document.getElementById("walletAmount");
+
+  const amount = Number(input.value);
+
+  if (amount <= 0) {
+
+    alert("Введите корректную сумму");
+
+    return;
+
+  }
+
+  if (amount > balance) {
+
+    alert("Недостаточно USDT");
+
+    return;
+
+  }
+
+  balance -= amount;
+
+  input.value = "";
+
+  updateUI();
+
+  alert(
+    "Демо-вывод успешно создан: " +
+    amount +
+    " USDT"
+  );
+
+}
+
+
+function buyBTC() {
+
+  const input =
+    document.getElementById("tradeAmount");
+
+  const amount = Number(input.value);
+
+  if (amount <= 0) {
+
+    alert("Введите сумму");
+
+    return;
+
+  }
+
+  if (amount > balance) {
+
+    alert("Недостаточно USDT");
+
+    return;
+
+  }
+
+  const btc =
+    amount / btcPrice;
+
+  balance -= amount;
+
+  btcBalance += btc;
+
+  input.value = "";
+
+  updateUI();
+
+  alert(
+    "Куплено " +
+    btc.toFixed(8) +
+    " BTC"
+  );
+
+}
+
+
+function sellBTC() {
+
+  const input =
+    document.getElementById("tradeAmount");
+
+  const amountUSDT =
+    Number(input.value);
+
+  if (amountUSDT <= 0) {
+
+    alert("Введите сумму в USDT");
+
+    return;
+
+  }
+
+  const btcToSell =
+    amountUSDT / btcPrice;
+
+  if (btcToSell > btcBalance) {
+
+    alert("Недостаточно BTC");
+
+    return;
+
+  }
+
+  btcBalance -= btcToSell;
+
+  balance += amountUSDT;
+
+  input.value = "";
+
+  updateUI();
+
+  alert(
+    "Продано " +
+    btcToSell.toFixed(8) +
+    " BTC"
+  );
+
+}
+
+
+const ctx =
+  document
+    .getElementById("priceChart")
+    .getContext("2d");
+
+const prices = [
+  61200,
+  61500,
+  61350,
+  61900,
+  62200,
+  61800,
+  62400,
+  62700,
+  62300,
+  62900,
+  63200,
+  62800,
+  63500,
+  63100,
+  63800,
+  63400,
+  63000,
+  62500
+];
+
+const labels =
+  prices.map(
+    (_, index) => index + 1
+  );
+
+new Chart(ctx, {
+
+  type: "line",
+
+  data: {
+
+    labels: labels,
+
+    datasets: [{
+
+      label: "BTC / USDT",
+
+      data: prices,
+
+      borderColor: "#f0b90b",
+
+      backgroundColor:
+        "rgba(240,185,11,0.08)",
+
+      borderWidth: 2,
+
+      tension: 0.25,
+
+      fill: true,
+
+      pointRadius: 0
+
+    }]
+
+  },
+
+  options: {
+
+    responsive: true,
+
+    maintainAspectRatio: false,
+
+    interaction: {
+      intersect: false,
+      mode: "index"
+    },
+
+    plugins: {
+
+      legend: {
+        display: false
+      }
+
+    },
+
+    scales: {
+
+      x: {
+
+        grid: {
+          color: "#171d26"
+        },
+
+        ticks: {
+          color: "#7f8995"
+        }
+
+      },
+
+      y: {
+
+        position: "right",
+
+        grid: {
+          color: "#171d26"
+        },
+
+        ticks: {
+
+          color: "#7f8995",
+
+          callback: function(value) {
+            return "$" + value;
+          }
+
+        }
+
+      }
+
+    }
+
+  }
+
+});
+
+
+if (loggedIn) {
+  showPlatform();
+}
+
+</script>
 
 </body>
 </html>
-```
